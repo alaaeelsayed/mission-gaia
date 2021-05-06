@@ -1,2 +1,3 @@
-# mission-gaia
+# Mission Gaia
 An ambitious final year project.
+Made with OpenGL
