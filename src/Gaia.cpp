@@ -24,17 +24,17 @@ void Gaia::init()
         glEnable(GL_DEPTH_TEST);
         srand((unsigned int)time(NULL));
 
-        m_pTex = wolf::TextureManager::CreateTexture("data/textures/diffuse.png");
-        m_pTex->SetWrapMode(wolf::Texture::WM_Repeat);
+        m_pTex = wolf::TextureManager::CreateTexture("data/textures/gimpy_diffuse.tga");
+        // m_pTex->SetWrapMode(wolf::Texture::WM_Repeat);
 
-        const std::string MATNAME = "ship";
+        const std::string MATNAME = "spitter";
         m_pMat = wolf::MaterialManager::CreateMaterial(MATNAME);
         m_pMat->SetProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
         m_pMat->SetDepthTest(true);
         m_pMat->SetDepthWrite(true);
 
         m_pMat->SetUniform("u_lightDir", glm::vec3(0.0f, 0.0f, 1.0f));
-        m_pMat->SetUniform("u_lightColor", glm::vec3(1.0f, 1.0f, 0.0f));
+        m_pMat->SetUniform("u_lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
         m_pMat->SetUniform("u_ambientLight", glm::vec3(0.3f, 0.1f, 0.1f));
         m_pMat->SetUniform("u_diffuseTex", 0);
         m_pMat->SetUniform("u_specularColor", glm::vec3(1.0f, 1.0f, 1.0f));
@@ -44,9 +44,14 @@ void Gaia::init()
         for (int i = 0; i < 5; i++)
         {
             m_lModels.push_back(new wolf::Model("data/models/low_poly_spitter.fbx", matProvider));
+            m_lModels.push_back(new wolf::Model("data/models/cyborg_weapon.fbx", matProvider));
+
             int x = rand() % 20 - 10;
             int z = rand() % 20 - 10;
 
+            m_lPositions.push_back(glm::vec3(x, 0.0f, z));
+            x = rand() % 20 - 10;
+            z = rand() % 20 - 10;
             m_lPositions.push_back(glm::vec3(x, 0.0f, z));
         }
         m_pWorldProgram = wolf::ProgramManager::CreateProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
@@ -90,8 +95,10 @@ void Gaia::render(int width, int height)
     int i = 0;
     for (wolf::Model *pModel : m_lModels)
     {
+        mWorld = glm::mat4(1.0f);
+        mWorld = glm::translate(mWorld, m_lPositions[i]);
+        pModel->Render(mWorld, mView, mProj);
 
-        pModel->Render(glm::translate(mWorld, m_lPositions[i]), mView, mProj);
         i++;
     }
 }
