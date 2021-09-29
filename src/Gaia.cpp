@@ -9,13 +9,16 @@ Gaia::~Gaia()
     wolf::ProgramManager::DestroyProgram(m_pWorldProgram);
     wolf::MaterialManager::DestroyMaterial(m_pMat);
     wolf::TextureManager::DestroyTexture(m_pTex);
-    delete m_pModel;
+    for (wolf::Model *pModel : m_lModels)
+    {
+        delete pModel;
+    }
 }
 
 void Gaia::init()
 {
     // Only init if not already done
-    if (!m_pWorldProgram && !m_pModel)
+    if (!m_pWorldProgram)
     {
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glEnable(GL_DEPTH_TEST);
@@ -37,17 +40,24 @@ void Gaia::init()
         m_pMat->SetUniform("u_specularColor", glm::vec3(1.0f, 1.0f, 1.0f));
 
         SingleMaterialProvider matProvider(MATNAME);
-        m_pModel = new wolf::Model("data/models/bird.fbx", matProvider);
 
+        for (int i = 0; i < 5; i++)
+        {
+            m_lModels.push_back(new wolf::Model("data/models/low_poly_spitter.fbx", matProvider));
+            int x = rand() % 20 - 10;
+            int z = rand() % 20 - 10;
+
+            m_lPositions.push_back(glm::vec3(x, 0.0f, z));
+        }
         m_pWorldProgram = wolf::ProgramManager::CreateProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
         m_pFreeRoamCamera = new FreeRoamCamera(m_pApp);
-        m_pFreeRoamCamera->setPosition(glm::vec3(100, 1000, 100));
+        m_pFreeRoamCamera->setPosition(glm::vec3(10, 5, 10));
         m_pSkybox = new Skybox(m_pWorldProgram, m_pFreeRoamCamera, m_skyboxPath);
 
         m_pPlane = new Plane(m_pWorldProgram, m_groundTexPath);
 
-        // reduce scale of whole project
-        m_pPlane->setScale(12000.0f);
+        m_pPlane->setScale(30.0f);
+        m_pPlane->setY(-1.5f);
     }
 
     printf("Successfully initialized Gaia\n");
@@ -71,7 +81,23 @@ void Gaia::render(int width, int height)
     m_pWorldProgram->SetUniform("u_lightDir", m_sunDirection);
 
     // Render all objects
+    m_pTex->Bind();
+
     m_pSkybox->render(mProj, mView, width, height);
     m_pPlane->render(mProj, mView, width, height);
-    m_pModel->Render(mWorld, mView, mProj);
+
+    int x = 0, z = 0;
+    int i = 0;
+    for (wolf::Model *pModel : m_lModels)
+    {
+
+        pModel->Render(glm::translate(mWorld, m_lPositions[i]), mView, mProj);
+        i++;
+    }
+}
+
+int Gaia::_randomNum(int lowerBound, int upperBound)
+{
+    // Generates random number in range. Includes lower bound and upper bound
+    return rand() % (upperBound - lowerBound + 1) + lowerBound;
 }
