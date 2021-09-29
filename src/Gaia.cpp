@@ -24,7 +24,7 @@ void Gaia::init()
         glEnable(GL_DEPTH_TEST);
         srand((unsigned int)time(NULL));
 
-        m_pTex = wolf::TextureManager::CreateTexture("data/textures/diffuseGray.png");
+        m_pTex = wolf::TextureManager::CreateTexture("data/textures/diffuse.png");
         m_pTex->SetWrapMode(wolf::Texture::WM_Repeat);
 
         const std::string MATNAME = "ship";
