@@ -1,0 +1,9 @@
+[submodule "wolf"]
+	path = wolf
+	url = https://github.com/HeshamHamshary/wolf.git
+[submodule "samplefw"]
+	path = samplefw
+	url = https://github.com/HeshamHamshary/samplefw.git
+[submodule "thirdparty"]
+	path = thirdparty
+	url = https://github.com/HeshamHamshary/thirdparty.git
