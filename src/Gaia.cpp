@@ -89,7 +89,7 @@ void Gaia::init()
         // wolf::Model::MaterialProvider gimpProvider();
         m_model = new wolf::Model("data/json/model.json", gimpProvider);
     }
-    printf("Successfully initialized World Transform Sample\n");
+    printf("Successfully initialized Gaia\n");
 }
 
 void Gaia::update(float dt)
