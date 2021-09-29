@@ -1,5 +1,0 @@
-out vec4 PixelColor;
-void main()
-{
-    PixelColor = vec4(0,1,0,1);
-}
