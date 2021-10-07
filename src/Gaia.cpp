@@ -25,7 +25,6 @@ void Gaia::init()
         srand((unsigned int)time(NULL));
 
         m_pTex = wolf::TextureManager::CreateTexture("data/textures/gimpy_diffuse.tga");
-        // m_pTex->SetWrapMode(wolf::Texture::WM_Repeat);
 
         const std::string MATNAME = "spitter";
         m_pMat = wolf::MaterialManager::CreateMaterial(MATNAME);
@@ -43,7 +42,7 @@ void Gaia::init()
 
         for (int i = 0; i < 5; i++)
         {
-            m_lModels.push_back(new wolf::Model("data/models/low_poly_spitter.fbx", matProvider));
+            m_lModels.push_back(new wolf::Model("data/models/low_poly_spitter.obj", matProvider));
             m_lModels.push_back(new wolf::Model("data/models/cyborg_weapon.fbx", matProvider));
 
             int x = rand() % 20 - 10;
@@ -86,10 +85,10 @@ void Gaia::render(int width, int height)
     m_pWorldProgram->SetUniform("u_lightDir", m_sunDirection);
 
     // Render all objects
-    m_pTex->Bind();
 
     m_pSkybox->render(mProj, mView, width, height);
     m_pPlane->render(mProj, mView, width, height);
+    m_pTex->Bind();
 
     int x = 0, z = 0;
     int i = 0;
