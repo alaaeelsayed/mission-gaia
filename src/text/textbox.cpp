@@ -25,7 +25,7 @@ TextBox::TextBox(float width, float height) : m_width(width), m_height(height)
     };
 
     // Appreciate wolf for caching all of this
-    m_program = wolf::ProgramManager::CreateProgram("data/shaders/ortho.vsh", "data/shaders/ortho.fsh");
+    m_program = wolf::ProgramManager::CreateProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
 
     m_outlineVB = wolf::BufferManager::CreateVertexBuffer(gs_outlineVertices, sizeof(GLfloat) * 4 * 5);
 
@@ -359,13 +359,13 @@ float TextBox::GetHeight() const
 }
 
 // 1 draw call per texture (aka 1 call per fontsheet)
-void TextBox::Render(int width, int height)
+void TextBox::Render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, int height)
 {
-    glm::mat4 projection = glm::ortho(0.0f, (float)width, (float)height, 0.0f);
     // draw the outline first
     if (m_outlined)
     {
-        m_program->SetUniform("projection", projection);
+        m_program->SetUniform("projection", mProj);
+        m_program->SetUniform("view", mView);
 
         m_program->SetUniform("u_outline", true);
         m_program->SetUniform("u_translation", glm::vec4(m_x, m_y, 0.0f, 0.0f));
@@ -383,7 +383,8 @@ void TextBox::Render(int width, int height)
         const wolf::Texture *texture = it->first;
         wolf::VertexDeclaration *decl = it->second;
 
-        m_program->SetUniform("projection", projection);
+        m_program->SetUniform("projection", mProj);
+        m_program->SetUniform("view", mView);
 
         m_program->SetUniform("u_outline", false);
         m_program->SetUniform("u_translation", glm::vec4(m_x, m_y, 0.0f, 0.0f));

@@ -18,13 +18,12 @@ public:
 
     TextBox(float width, float height);
     ~TextBox();
-    
 
     void _clearLines();
     void _clearVertices();
     void _calculateVertices();
-    void _addText(const Font* font, const std::string& text);
-    void _addVertices(std::vector<float>& vertices, float xStart, float xEnd, float yStart, float yEnd, float uStart, float uEnd, float vStart, float vEnd);
+    void _addText(const Font *font, const std::string &text);
+    void _addVertices(std::vector<float> &vertices, float xStart, float xEnd, float yStart, float yEnd, float uStart, float uEnd, float vStart, float vEnd);
 
     float _getCurrentHeight();
 
@@ -32,8 +31,8 @@ public:
 
     void SetColor(float r, float g, float b, float a);
 
-    void SetText(const Font* font, const char* text, ...);
-    void AddText(const Font* font, const char* text, ...);
+    void SetText(const Font *font, const char *text, ...);
+    void AddText(const Font *font, const char *text, ...);
 
     void SetHorizontalAlignment(Alignment alignment);
     void SetVerticalAlignment(Alignment alignment);
@@ -44,30 +43,30 @@ public:
     float GetWidth() const;
     float GetHeight() const;
 
-    void Render(int width, int height);
-    
+    void Render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, int height);
+
 private:
-    float m_x, m_y;
+    float m_x, m_y, m_z = 10.0f;
     float m_colorR = 1.0f, m_colorG = 0.0f, m_colorB = 0.0f, m_colorA = 1.0f;
     float m_width, m_height;
     bool m_outlined = false;
 
     Alignment m_horizontalAlignment = AL_Left, m_verticalAlignment = AL_Top;
-    
-    std::vector<Line*> m_lines;
+
+    std::vector<Line *> m_lines;
     // Keeps track of the number of vertices per texture/vertexdeclaration
-    std::map<const wolf::Texture*, int> m_verticesCount;
+    std::map<const wolf::Texture *, int> m_verticesCount;
     // asumming map treats pointers as memory addresses (integers) this should be safe?
     // this looks weird to me but seems to be reasonable
-    std::map<const wolf::Texture*, wolf::VertexDeclaration*> m_vertices;
+    std::map<const wolf::Texture *, wolf::VertexDeclaration *> m_vertices;
 
     // used when we need to destroy them
-    std::vector<wolf::VertexBuffer*> m_vbs;
-    std::vector<wolf::VertexDeclaration*> m_decls;
+    std::vector<wolf::VertexBuffer *> m_vbs;
+    std::vector<wolf::VertexDeclaration *> m_decls;
 
     // needed to draw the outline
-    wolf::VertexBuffer* m_outlineVB = 0;
-    wolf::VertexDeclaration* m_outlineDecl = 0;
+    wolf::VertexBuffer *m_outlineVB = 0;
+    wolf::VertexDeclaration *m_outlineDecl = 0;
 
-    wolf::Program* m_program = 0;
+    wolf::Program *m_program = 0;
 };
