@@ -30,7 +30,7 @@ void Gaia::init()
 
 void Gaia::update(float dt)
 {
-    if (m_pApp->isKeyDown('R'))
+    if (m_pApp->isKeyDown('R') && !m_bKeyDown)
     {
         if (m_pStateMachine->GetCurrentState() == eStateGameplay_MainMenu)
         {
@@ -40,7 +40,12 @@ void Gaia::update(float dt)
         {
             m_pStateMachine->GoToState(eStateGameplay_MainMenu);
         }
+        m_bKeyDown = true;
     }
+
+    if (!m_pApp->isKeyDown('R'))
+        m_bKeyDown = false;
+
     m_pFreeRoamCamera->update(dt);
     m_pStateMachine->Update(dt);
 }
