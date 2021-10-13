@@ -5,6 +5,7 @@
 #include "./StateMachine.h"
 #include "./StateGameplay.h"
 #include "./StateMainMenu.h"
+#include "text/textbox.h"
 
 #define ESC 27
 
@@ -22,4 +23,6 @@ private:
     FreeRoamCamera *m_pFreeRoamCamera = 0;
     bool m_bKeyDown = false;
     Common::StateMachine *m_pStateMachine = 0;
+    Font *m_font;
+    TextBox *m_textBox;
 };

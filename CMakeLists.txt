@@ -83,6 +83,14 @@ file(GLOB_RECURSE WOLF_HEADER_FILES
 	${CMAKE_SOURCE_DIR}/wolf/*.h
     ${CMAKE_SOURCE_DIR}/wolf/*.hpp)
 
+file(GLOB_RECURSE TINYXML_SOURCE_FILES 
+	${CMAKE_SOURCE_DIR}/tinyxml2/*.c
+    ${CMAKE_SOURCE_DIR}/tinyxml2/*.cpp)
+
+file(GLOB_RECURSE TINYXML_HEADER_FILES 
+	${CMAKE_SOURCE_DIR}/tinyxml2/*.h
+    ${CMAKE_SOURCE_DIR}/tinyxml2/*.hpp)
+    
 file(GLOB_RECURSE SOURCE_FILES 
 	${CMAKE_SOURCE_DIR}/src/*.c
 	${CMAKE_SOURCE_DIR}/src/*.cpp)
@@ -96,6 +104,8 @@ add_executable(sample
     ${SAMPLEFW_HEADER_FILES}
     ${WOLF_SOURCE_FILES}
     ${WOLF_HEADER_FILES}
+    ${TINYXML_SOURCE_FILES}
+    ${TINYXML_HEADER_FILES}
     ${SOURCE_FILES}
     ${HEADER_FILES}
     )
