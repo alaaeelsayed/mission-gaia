@@ -29,7 +29,7 @@ void Gaia::init()
 
     m_textBox = new TextBox(800.0f, 300.0f);
     m_textBox->SetPos(240.0f, 5.0f);
-    m_textBox->AddText(m_font, "Hey there");
+    m_textBox->AddText(m_font, "Hey Baby");
     m_textBox->SetColor(0.1f, 0.0f, 0.0f, 1.0f);
     m_textBox->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
     m_textBox->SetVerticalAlignment(TextBox::Alignment::AL_Top);
