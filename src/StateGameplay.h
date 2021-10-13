@@ -47,7 +47,7 @@ private:
 	float m_currShininess = 200.0f;
 
 	float m_sunSpeed = 0.01f;
-	glm::vec3 m_sunDirection = glm::vec3(10.0f, 10.0f, 20.0f);
+	glm::vec3 m_sunDirection = glm::vec3(10.0f, 10.0f, 30.0f);
 
 	GLfloat m_sunAngle = -60;
 

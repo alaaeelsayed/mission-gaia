@@ -1,6 +1,7 @@
 {
-    "files.associations": {
-        "xstring": "cpp",
-        "limits": "cpp"
-    }
+  "files.associations": {
+    "xstring": "cpp",
+    "limits": "cpp",
+    "string": "cpp"
+  }
 }
