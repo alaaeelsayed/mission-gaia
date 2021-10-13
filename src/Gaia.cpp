@@ -8,10 +8,11 @@ Gaia::~Gaia()
     delete m_pFreeRoamCamera;
     wolf::ProgramManager::DestroyProgram(m_pWorldProgram);
     wolf::MaterialManager::DestroyMaterial(m_pMat);
-    wolf::TextureManager::DestroyTexture(m_pTex);
-    for (wolf::Model *pModel : m_lModels)
+    wolf::TextureManager::DestroyTexture(m_pCreatureTex);
+    wolf::TextureManager::DestroyTexture(m_pShipTex);
+    for (Model *model : m_lModels)
     {
-        delete pModel;
+        delete model;
     }
 }
 
@@ -24,35 +25,51 @@ void Gaia::init()
         glEnable(GL_DEPTH_TEST);
         srand((unsigned int)time(NULL));
 
-        m_pTex = wolf::TextureManager::CreateTexture("data/textures/gimpy_diffuse.tga");
-
-        const std::string MATNAME = "spitter";
-        m_pMat = wolf::MaterialManager::CreateMaterial(MATNAME);
-        m_pMat->SetProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
-        m_pMat->SetDepthTest(true);
-        m_pMat->SetDepthWrite(true);
-
-        m_pMat->SetUniform("u_lightDir", glm::vec3(0.0f, 0.0f, 1.0f));
-        m_pMat->SetUniform("u_lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-        m_pMat->SetUniform("u_ambientLight", glm::vec3(0.3f, 0.1f, 0.1f));
-        m_pMat->SetUniform("u_diffuseTex", 0);
-        m_pMat->SetUniform("u_specularColor", glm::vec3(1.0f, 1.0f, 1.0f));
-
-        SingleMaterialProvider matProvider(MATNAME);
-
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 4; i++)
         {
-            m_lModels.push_back(new wolf::Model("data/models/low_poly_spitter.obj", matProvider));
-            m_lModels.push_back(new wolf::Model("data/models/cyborg_weapon.fbx", matProvider));
+            Model *m_pCreature = new Model("data/models/low_poly_spitter.obj", "spitter");
+            m_pCreature->setTexture("data/textures/gimpy_diffuse.tga");
+            m_pCreature->setOffset(m_pCreature->getModel()->getAABBMin());
 
-            int x = rand() % 20 - 10;
-            int z = rand() % 20 - 10;
-
-            m_lPositions.push_back(glm::vec3(x, 0.0f, z));
-            x = rand() % 20 - 10;
-            z = rand() % 20 - 10;
-            m_lPositions.push_back(glm::vec3(x, 0.0f, z));
+            int scale = _randomNum(2, 5);
+            float rotation = (float)_randomNum(-60, 60);
+            int x = _randomNum(-5, 15);
+            int z = _randomNum(-5, 15);
+            m_pCreature->setScale(glm::vec3(scale, scale, scale));
+            m_pCreature->translate(glm::vec3(x, 0.0f, z));
+            m_pCreature->rotate(rotation);
+            m_lModels.push_back(m_pCreature);
         }
+
+        for (int i = 0; i < 7; i++)
+        {
+            Model *m_pShrub = new Model("data/models/shrub.fbx", "shrub");
+            m_pShrub->setTexture("data/textures/shrub.png");
+
+            float rotation = (float)_randomNum(-60, 60);
+            int x = _randomNum(-20, 20);
+            int z = _randomNum(-20, 20);
+            m_pShrub->translate(glm::vec3(x, 0.0f, z));
+            m_pShrub->setScale(glm::vec3(0.008, 0.008, 0.008));
+            m_pShrub->rotate(rotation);
+            m_lModels.push_back(m_pShrub);
+        }
+
+        for (int i = 0; i < 8; i++)
+        {
+            Model *m_pWeapon = new Model("data/models/cyborg_weapon.fbx", "weapon");
+            m_pWeapon->setTexture("data/textures/weapons/Weapon_BaseColor.png");
+
+            float rotation = (float)_randomNum(-60, 60);
+            int x = _randomNum(-15, 5);
+            int z = _randomNum(-10, 20);
+            m_pWeapon->setOffset(m_pWeapon->getModel()->getAABBMin());
+            m_pWeapon->setScale(glm::vec3(6.0f, 6.0f, 6.0f));
+            m_pWeapon->translate(glm::vec3(x, 5.0f, z));
+            m_pWeapon->rotate(rotation);
+            m_lModels.push_back(m_pWeapon);
+        }
+
         m_pWorldProgram = wolf::ProgramManager::CreateProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
         m_pFreeRoamCamera = new FreeRoamCamera(m_pApp);
         m_pFreeRoamCamera->setPosition(glm::vec3(10, 5, 10));
@@ -60,8 +77,7 @@ void Gaia::init()
 
         m_pPlane = new Plane(m_pWorldProgram, m_groundTexPath);
 
-        m_pPlane->setScale(30.0f);
-        m_pPlane->setY(-1.5f);
+        m_pPlane->setScale(500.0f);
     }
 
     printf("Successfully initialized Gaia\n");
@@ -84,21 +100,11 @@ void Gaia::render(int width, int height)
 
     m_pWorldProgram->SetUniform("u_lightDir", m_sunDirection);
 
-    // Render all objects
-
     m_pSkybox->render(mProj, mView, width, height);
     m_pPlane->render(mProj, mView, width, height);
-    m_pTex->Bind();
-
-    int x = 0, z = 0;
-    int i = 0;
-    for (wolf::Model *pModel : m_lModels)
+    for (Model *model : m_lModels)
     {
-        mWorld = glm::mat4(1.0f);
-        mWorld = glm::translate(mWorld, m_lPositions[i]);
-        pModel->Render(mWorld, mView, mProj);
-
-        i++;
+        model->render(mProj, mView);
     }
 }
 

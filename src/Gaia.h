@@ -4,7 +4,7 @@
 #include "../samplefw/FreeRoamCamera.h"
 #include "../samplefw/Skybox.h"
 #include "../samplefw/plane.h"
-#include "./singleMaterialProvider.h"
+#include "./Model.h"
 
 class Gaia : public Sample
 {
@@ -23,10 +23,14 @@ private:
     const std::string m_groundTexPath = "data/textures/ground/ground.png";
 
     wolf::Program *m_pWorldProgram = 0;
-    std::vector<wolf::Model *> m_lModels;
+    std::vector<Model *> m_lModels;
     std::vector<glm::vec3> m_lPositions;
     wolf::Material *m_pMat = nullptr;
-    wolf::Texture *m_pTex = nullptr;
+
+    wolf::Texture *m_pCreatureTex = nullptr;
+
+    wolf::Model *m_pShipModel = nullptr;
+    wolf::Texture *m_pShipTex = nullptr;
 
     const int m_gridSize = 20;
 
