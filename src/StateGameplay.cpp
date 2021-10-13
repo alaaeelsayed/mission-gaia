@@ -76,6 +76,33 @@ void StateGameplay::Enter(std::string arg)
 			m_lModels.push_back(m_pWeapon);
 		}
 
+		std::string path = "data/models/rocks/rock1.fbx";
+		Model *m_pRock = new Model(path.c_str(), "rock");
+		m_pRock->setTexture("data/textures/diffuseGray.png");
+
+		float rotation = (float)_randomNum(-60, 60);
+		int x = _randomNum(-15, 5);
+		int z = _randomNum(-10, 20);
+		m_pRock->setOffset(m_pRock->getModel()->getAABBMin());
+
+		m_pRock->setScale(glm::vec3(0.05f, 0.05f, 0.05f));
+		m_pRock->translate(glm::vec3(x, 0.0f, z));
+		m_pRock->rotate(rotation);
+		m_lModels.push_back(m_pRock);
+
+		for (int i = 0; i < 8; i++)
+		{
+			Model *m_pLog = new Model("data/models/log.fbx", "log");
+			m_pLog->setTexture("data/textures/log.png");
+
+			float rotation = (float)_randomNum(-60, 60);
+			int x = _randomNum(-20, 10);
+			int z = _randomNum(-10, 20);
+			m_pLog->translate(glm::vec3(x, 1.5f, z));
+			m_pLog->rotate(rotation);
+			m_lModels.push_back(m_pLog);
+		}
+
 		m_pWorldProgram = wolf::ProgramManager::CreateProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
 
 		m_pPlane = new Plane(m_pWorldProgram, m_groundTexPath);
