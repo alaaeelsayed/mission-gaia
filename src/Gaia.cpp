@@ -64,5 +64,5 @@ void Gaia::render(int width, int height)
     glm::mat4 mProj = m_pFreeRoamCamera->getProjMatrix(width, height);
     glm::mat4 mView = m_pFreeRoamCamera->getViewMatrix();
     m_pStateMachine->Render(mProj, mView, width, height);
-    m_textBox->Render(width, height);
+    m_textBox->Render(mProj, mView, width, height);
 }
