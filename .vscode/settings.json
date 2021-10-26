@@ -2,6 +2,9 @@
   "files.associations": {
     "xstring": "cpp",
     "limits": "cpp",
-    "string": "cpp"
+    "string": "cpp",
+    "vector": "cpp",
+    "deque": "cpp",
+    "list": "cpp"
   }
 }

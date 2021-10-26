@@ -35,6 +35,7 @@ void StateGameplay::Enter(std::string arg)
 		{
 			Model *m_pCreature = new Model("data/models/low_poly_spitter.obj", "spitter");
 			m_pCreature->setTexture("data/textures/gimpy_diffuse.tga");
+			m_pCreature->setNormal("data/textures/gimpy_normal.tga");
 			m_pCreature->setOffset(m_pCreature->getModel()->getAABBMin());
 
 			int scale = _randomNum(2, 5);
@@ -94,6 +95,7 @@ void StateGameplay::Enter(std::string arg)
 		{
 			Model *m_pLog = new Model("data/models/log.fbx", "log");
 			m_pLog->setTexture("data/textures/log.png");
+			m_pLog->setNormal("data/textures/log_normal.png");
 
 			float rotation = (float)_randomNum(-60, 60);
 			int x = _randomNum(-20, 10);
@@ -132,7 +134,7 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 	m_pPlane->render(mProj, mView, width, height);
 	for (Model *model : m_lModels)
 	{
-		model->render(mProj, mView);
+		model->render(mProj, mView, m_pCam->getPosition());
 	}
 }
 
