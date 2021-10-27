@@ -43,7 +43,7 @@ public:
     float GetWidth() const;
     float GetHeight() const;
 
-    void Render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, int height);
+    void Render(int width, int height);
 
 private:
     float m_x, m_y, m_z = 10.0f;

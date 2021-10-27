@@ -156,8 +156,10 @@ void StateGameplay::Update(float p_fDelta)
 	m_pFlashlight->setScale(glm::vec3(0.005f, 0.005f, 0.005f));
 	m_pFlashlight->rotate(-180);
 
-	m_fHunger -= p_fDelta * (rand() % 3 + 2);
-	m_fThirst -= p_fDelta * (rand() % 2 + 1.5);
+	if (m_fHunger != 0)
+		m_fHunger -= p_fDelta * (rand() % 3 + 2);
+	if (m_fThirst != 0)
+		m_fThirst -= p_fDelta * (rand() % 2 + 1);
 
 	std::string hunger = std::to_string((int)m_fHunger);
 	std::string thirst = std::to_string((int)m_fThirst);
