@@ -27,6 +27,7 @@ namespace Common
 		virtual void Update(float p_fDelta) = 0;
 		virtual void Exit() = 0;
 		virtual void Render(const glm::mat4 mProj, const glm::mat4 mView, int width, int height) = 0;
+		void RegisterApp(wolf::App *pApp) { m_pApp = pApp; };
 
 	private:
 		void SetStateMachineMembership(StateMachine *p_pStateMachine)
@@ -36,6 +37,7 @@ namespace Common
 
 	protected:
 		StateMachine *m_pStateMachine;
+		wolf::App *m_pApp;
 	};
 }
 

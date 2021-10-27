@@ -42,6 +42,8 @@ private:
 	wolf::Model *m_pShipModel = nullptr;
 	wolf::Texture *m_pShipTex = nullptr;
 
+	Model *m_pFlashlight = nullptr;
+
 	const int m_gridSize = 20;
 
 	float m_currShininess = 200.0f;
@@ -53,6 +55,9 @@ private:
 
 	Plane *m_pPlane = 0;
 	Skybox *m_pSkybox = 0;
+
+	bool m_bKeyDown = false;
+	bool m_bFlashlightEquipped = false;
 };
 
 #endif

@@ -6,19 +6,23 @@ Model::~Model()
     wolf::MaterialManager::DestroyMaterial(m_pMat);
 }
 
-Model::Model(const char *modelPath, const char *modelName)
+Model::Model(const std::string &modelPath, const std::string &matName)
 {
-
     const glm::vec3 LIGHT_COLOR(0.005f, 0.005f, 0.005f);
+    const glm::vec3 DIM_LIGHT_COLOR(0.0002f, 0.0002f, 0.0002f);
 
-    const std::string MATNAME = modelName;
+    const std::string MATNAME = modelPath + matName;
     m_pMat = wolf::MaterialManager::CreateMaterial(MATNAME);
-    m_pMat->SetProgram("data/shaders/model.vsh", "data/shaders/model.fsh");
+    m_pMat->SetProgram("data/shaders/" + matName + ".vsh", "data/shaders/" + matName + ".fsh");
     m_pMat->SetDepthTest(true);
     m_pMat->SetDepthWrite(true);
 
     m_pMat->SetUniform("u_lightDir", glm::vec3(10.0f, 500.0f, 500.0f));
-    m_pMat->SetUniform("u_lightColor", LIGHT_COLOR);
+    if (matName.compare("dim") == 0)
+        m_pMat->SetUniform("u_lightColor", DIM_LIGHT_COLOR);
+    else
+        m_pMat->SetUniform("u_lightColor", LIGHT_COLOR);
+
     m_pMat->SetUniform("u_ambientLight", glm::vec3(0.5f, 0.5f, 0.5f));
     m_pMat->SetUniform("u_specularColor", glm::vec3(0.3f, 0.3f, 0.3f));
     m_pMat->SetUniform("u_shininess", 0.4f);
@@ -35,6 +39,11 @@ void Model::setTexture(const char *texPath)
     m_pMat->SetTexture("u_diffuseTex", m_pTexture);
 }
 
+wolf::Material *Model::getMaterial()
+{
+    return m_pMat;
+}
+
 void Model::setNormal(const char *texPath)
 {
     m_pNormal = wolf::TextureManager::CreateTexture(texPath);
@@ -46,6 +55,11 @@ void Model::setNormal(const char *texPath)
 void Model::setPosition(const glm::mat4 &mPosition)
 {
     m_mPosition = mPosition;
+}
+
+glm::mat4 Model::getPosition()
+{
+    return m_mPosition;
 }
 
 void Model::setOffset(const glm::vec3 &vOffset)
@@ -73,12 +87,19 @@ void Model::rotate(float fAngle)
 
 void Model::setScale(const glm::vec3 &vScale)
 {
+    m_vScale = vScale;
     m_mPosition = glm::scale(m_mPosition, vScale);
     m_mPosition = glm::translate(m_mPosition, -m_vOffset);
 }
 
+glm::vec3 Model::getScale()
+{
+    return m_vScale;
+}
+
 void Model::render(const glm::mat4 &mProj, const glm::mat4 &mView, const glm::vec3 &mViewPos)
 {
+
     m_pMat->SetUniform("u_viewPos", mViewPos);
     m_pModel->Render(m_mPosition, mView, mProj);
 }

@@ -19,16 +19,6 @@ public:
 
     void update(float dt) override
     {
-        if (isKeyDown(' '))
-        {
-            m_lastDown = true;
-        }
-        else if (m_lastDown)
-        {
-            m_sampleRunner.nextSample();
-            m_lastDown = false;
-        }
-
         m_sampleRunner.update(dt);
     }
 

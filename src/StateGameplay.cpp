@@ -8,11 +8,13 @@ StateGameplay::StateGameplay()
 StateGameplay::~StateGameplay()
 {
 	delete m_pPlane;
+	delete m_pFlashlight;
 	wolf::ProgramManager::DestroyProgram(m_pWorldProgram);
 	wolf::MaterialManager::DestroyMaterial(m_pMat);
 	wolf::TextureManager::DestroyTexture(m_pCreatureTex);
 	wolf::TextureManager::DestroyTexture(m_pShipTex);
 	delete m_pSkybox;
+	delete m_pCam;
 
 	for (Model *model : m_lModels)
 	{
@@ -31,9 +33,13 @@ void StateGameplay::Enter(std::string arg)
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glEnable(GL_DEPTH_TEST);
 
+		m_pFlashlight = new Model("data/models/flashlight.fbx", "dim");
+		m_pFlashlight->setPosition(glm::translate(glm::mat4(1.0f), glm::vec3(11, 9, -22)));
+		m_pFlashlight->setTexture("data/textures/flashlight.png");
+
 		for (int i = 0; i < 4; i++)
 		{
-			Model *m_pCreature = new Model("data/models/low_poly_spitter.obj", "spitter");
+			Model *m_pCreature = new Model("data/models/low_poly_spitter.obj", "skinned");
 			m_pCreature->setTexture("data/textures/gimpy_diffuse.tga");
 			m_pCreature->setNormal("data/textures/gimpy_normal.tga");
 			m_pCreature->setOffset(m_pCreature->getModel()->getAABBMin());
@@ -50,7 +56,7 @@ void StateGameplay::Enter(std::string arg)
 
 		for (int i = 0; i < 7; i++)
 		{
-			Model *m_pShrub = new Model("data/models/shrub.fbx", "shrub");
+			Model *m_pShrub = new Model("data/models/shrub.fbx", "skinned");
 			m_pShrub->setTexture("data/textures/shrub.png");
 
 			float rotation = (float)_randomNum(-60, 60);
@@ -62,48 +68,48 @@ void StateGameplay::Enter(std::string arg)
 			m_lModels.push_back(m_pShrub);
 		}
 
-		for (int i = 0; i < 8; i++)
-		{
-			Model *m_pWeapon = new Model("data/models/cyborg_weapon.fbx", "weapon");
-			m_pWeapon->setTexture("data/textures/weapons/Weapon_BaseColor.png");
+		// for (int i = 0; i < 8; i++)
+		// {
+		// 	Model *m_pWeapon = new Model("data/models/cyborg_weapon.fbx", "skinned");
+		// 	m_pWeapon->setTexture("data/textures/weapons/Weapon_BaseColor.png");
 
-			float rotation = (float)_randomNum(-60, 60);
-			int x = _randomNum(-15, 5);
-			int z = _randomNum(-10, 20);
-			m_pWeapon->setOffset(m_pWeapon->getModel()->getAABBMin());
-			m_pWeapon->setScale(glm::vec3(6.0f, 6.0f, 6.0f));
-			m_pWeapon->translate(glm::vec3(x, 5.0f, z));
-			m_pWeapon->rotate(rotation);
-			m_lModels.push_back(m_pWeapon);
-		}
+		// 	float rotation = (float)_randomNum(-60, 60);
+		// 	int x = _randomNum(-15, 5);
+		// 	int z = _randomNum(-10, 20);
+		// 	m_pWeapon->setOffset(m_pWeapon->getModel()->getAABBMin());
+		// 	m_pWeapon->setScale(glm::vec3(6.0f, 6.0f, 6.0f));
+		// 	m_pWeapon->translate(glm::vec3(x, 5.0f, z));
+		// 	m_pWeapon->rotate(rotation);
+		// 	m_lModels.push_back(m_pWeapon);
+		// }
 
-		std::string path = "data/models/rocks/rock1.fbx";
-		Model *m_pRock = new Model(path.c_str(), "rock");
-		m_pRock->setTexture("data/textures/diffuseGray.png");
+		// std::string path = "data/models/rocks/rock1.fbx";
+		// Model *m_pRock = new Model(path.c_str(), "skinned");
+		// m_pRock->setTexture("data/textures/diffuseGray.png");
 
-		float rotation = (float)_randomNum(-60, 60);
-		int x = _randomNum(-15, 5);
-		int z = _randomNum(-10, 20);
-		m_pRock->setOffset(m_pRock->getModel()->getAABBMin());
+		// float rotation = (float)_randomNum(-60, 60);
+		// int x = _randomNum(-15, 5);
+		// int z = _randomNum(-10, 20);
+		// m_pRock->setOffset(m_pRock->getModel()->getAABBMin());
 
-		m_pRock->setScale(glm::vec3(0.05f, 0.05f, 0.05f));
-		m_pRock->translate(glm::vec3(x, 0.0f, z));
-		m_pRock->rotate(rotation);
-		m_lModels.push_back(m_pRock);
+		// m_pRock->setScale(glm::vec3(0.05f, 0.05f, 0.05f));
+		// m_pRock->translate(glm::vec3(x, 0.0f, z));
+		// m_pRock->rotate(rotation);
+		// m_lModels.push_back(m_pRock);
 
-		for (int i = 0; i < 8; i++)
-		{
-			Model *m_pLog = new Model("data/models/log.fbx", "log");
-			m_pLog->setTexture("data/textures/log.png");
-			m_pLog->setNormal("data/textures/log_normal.png");
+		// for (int i = 0; i < 8; i++)
+		// {
+		// 	Model *m_pLog = new Model("data/models/log.fbx", "skinned");
+		// 	m_pLog->setTexture("data/textures/log.png");
+		// 	m_pLog->setNormal("data/textures/log_normal.png");
 
-			float rotation = (float)_randomNum(-60, 60);
-			int x = _randomNum(-20, 10);
-			int z = _randomNum(-10, 20);
-			m_pLog->translate(glm::vec3(x, 1.5f, z));
-			m_pLog->rotate(rotation);
-			m_lModels.push_back(m_pLog);
-		}
+		// 	float rotation = (float)_randomNum(-60, 60);
+		// 	int x = _randomNum(-20, 10);
+		// 	int z = _randomNum(-10, 20);
+		// 	m_pLog->translate(glm::vec3(x, 1.5f, z));
+		// 	m_pLog->rotate(rotation);
+		// 	m_lModels.push_back(m_pLog);
+		// }
 
 		m_pWorldProgram = wolf::ProgramManager::CreateProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
 
@@ -119,6 +125,12 @@ void StateGameplay::Enter(std::string arg)
 void StateGameplay::Update(float p_fDelta)
 {
 	m_pSkybox->update(p_fDelta);
+
+	glm::mat4 mWorld(1.0f);
+	m_pFlashlight->setPosition(glm::translate(mWorld, m_pCam->getPosition() + glm::vec3(0.23f, -0.25f, -0.9f)));
+	m_pFlashlight->setScale(glm::vec3(0.005f, 0.005f, 0.005f));
+	m_pFlashlight->rotate(-180.0f);
+	// m_pFlashlight->rotate(m_pCam->getViewDirection());
 }
 
 void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int width, int height)
@@ -134,8 +146,32 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 	m_pPlane->render(mProj, mView, width, height);
 	for (Model *model : m_lModels)
 	{
+		if (m_bFlashlightEquipped)
+		{
+			model->getMaterial()->SetUniform("u_lightPosRange", glm::vec4(m_pCam->getPosition(), 100.0f));
+			model->getMaterial()->SetUniform("u_lightSpot", glm::vec4(m_pCam->getPosition().z + glm::vec3(0.0f, 0.0f, -20.0f), 0.0f));
+			model->getMaterial()->SetUniform("u_lightAttenuation", glm::vec3(0.0f, 0.3f, 0.0f));
+		}
+		else
+		{
+			model->getMaterial()->SetUniform("u_lightPosRange", glm::vec4(glm::vec3(0.0f, 0.0f, 0.0f), 0.0f));
+			model->getMaterial()->SetUniform("u_lightSpot", glm::vec4(glm::vec3(0.0f, 0.0f, 0.0f), 0.0f));
+			model->getMaterial()->SetUniform("u_lightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
+		}
 		model->render(mProj, mView, m_pCam->getPosition());
 	}
+
+	if (m_pApp->isKeyDown('F') && !m_bKeyDown)
+	{
+		m_bKeyDown = true;
+		m_bFlashlightEquipped = !m_bFlashlightEquipped;
+	}
+
+	if (!m_pApp->isKeyDown('F'))
+		m_bKeyDown = false;
+
+	if (m_bFlashlightEquipped)
+		m_pFlashlight->render(mProj, mView);
 }
 
 int StateGameplay::_randomNum(int lowerBound, int upperBound)
