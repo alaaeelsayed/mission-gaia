@@ -48,7 +48,8 @@ void Gaia::update(float dt)
     if (!m_pApp->isKeyDown(GLFW_KEY_ESCAPE))
         m_bKeyDown = false;
 
-    m_pFreeRoamCamera->update(dt);
+    if (m_pStateMachine->GetCurrentState() != eStateGameplay_PauseMenu)
+        m_pFreeRoamCamera->update(dt);
     m_pStateMachine->Update(dt);
 }
 

@@ -4,7 +4,6 @@
 #include "./StateBase.h"
 #include "../samplefw/FreeRoamCamera.h"
 #include "../samplefw/Skybox.h"
-#include "../samplefw/plane.h"
 #include "./Model.h"
 #include "../samplefw/Camera.h"
 #include "../samplefw/Skybox.h"
@@ -36,7 +35,6 @@ private:
 	wolf::Program *m_pWorldProgram = 0;
 	glm::vec3 m_sunDirection = glm::vec3(10.0f, 10.0f, 20.0f);
 
-	Plane *m_pPlane = 0;
 	Skybox *m_pSkybox = 0;
 
 	Font *m_font;

@@ -28,6 +28,8 @@ void StateGameplay::Exit()
 
 void StateGameplay::Enter(std::string arg)
 {
+	m_pApp->setInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 	if (!m_pWorldProgram)
 	{
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -124,13 +126,13 @@ void StateGameplay::Enter(std::string arg)
 
 void StateGameplay::Update(float p_fDelta)
 {
-	m_pSkybox->update(p_fDelta);
+	if (m_pCam)
+		m_pSkybox->update(p_fDelta);
 
 	glm::mat4 mWorld(1.0f);
 	m_pFlashlight->setPosition(glm::translate(mWorld, m_pCam->getPosition() + glm::vec3(0.23f, -0.25f, -0.9f)));
 	m_pFlashlight->setScale(glm::vec3(0.005f, 0.005f, 0.005f));
-	m_pFlashlight->rotate(-180.0f);
-	// m_pFlashlight->rotate(m_pCam->getViewDirection());
+	m_pFlashlight->rotate(-180);
 }
 
 void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int width, int height)
