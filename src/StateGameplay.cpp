@@ -15,6 +15,9 @@ StateGameplay::~StateGameplay()
 	wolf::TextureManager::DestroyTexture(m_pShipTex);
 	delete m_pSkybox;
 	delete m_pCam;
+	delete m_font;
+	delete m_hungerText;
+	delete m_thirstText;
 
 	for (Model *model : m_lModels)
 	{
@@ -34,6 +37,25 @@ void StateGameplay::Enter(std::string arg)
 	{
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glEnable(GL_DEPTH_TEST);
+		m_font = new Font("data/fonts/alpha.fnt", "data/textures/fonts/");
+
+		m_hungerText = new TextBox(300.0f, 300.0f);
+		m_hungerText->SetPos(80.0f, 470.0f);
+
+		std::string hunger = std::to_string(m_fHunger) + "%";
+		m_hungerText->SetText(m_font, hunger.c_str());
+		m_hungerText->SetColor(1.0f, 1.0f, 1.0f, 0.6f);
+		m_hungerText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
+		m_hungerText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
+
+		m_thirstText = new TextBox(300.0f, 300.0f);
+		m_thirstText->SetPos(80.0f, 570.0f);
+
+		std::string thirst = std::to_string(m_fThirst) + "%";
+		m_thirstText->SetText(m_font, thirst.c_str());
+		m_thirstText->SetColor(1.0f, 1.0f, 1.0f, 0.6f);
+		m_thirstText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
+		m_thirstText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
 
 		m_pFlashlight = new Model("data/models/flashlight.fbx", "dim");
 		m_pFlashlight->setPosition(glm::translate(glm::mat4(1.0f), glm::vec3(11, 9, -22)));
@@ -133,6 +155,29 @@ void StateGameplay::Update(float p_fDelta)
 	m_pFlashlight->setPosition(glm::translate(mWorld, m_pCam->getPosition() + glm::vec3(0.23f, -0.25f, -0.9f)));
 	m_pFlashlight->setScale(glm::vec3(0.005f, 0.005f, 0.005f));
 	m_pFlashlight->rotate(-180);
+
+	m_fHunger -= p_fDelta * (rand() % 3 + 2);
+	m_fThirst -= p_fDelta * (rand() % 2 + 1.5);
+
+	std::string hunger = std::to_string((int)m_fHunger);
+	std::string thirst = std::to_string((int)m_fThirst);
+
+	m_hungerText->SetText(m_font, hunger.c_str());
+	if (m_fHunger >= 70)
+		m_hungerText->SetColor(0.0f, 1.0f, 0.0f, 0.6f);
+	else if (m_fHunger >= 40)
+		m_hungerText->SetColor(1.0f, 1.0f, 0.0f, 0.6f);
+	else
+		m_hungerText->SetColor(1.0f, 0.0f, 0.0f, 0.6f);
+
+	if (m_fThirst >= 70)
+		m_thirstText->SetColor(0.0f, 1.0f, 0.0f, 0.6f);
+	else if (m_fThirst >= 40)
+		m_thirstText->SetColor(1.0f, 1.0f, 0.0f, 0.6f);
+	else
+		m_thirstText->SetColor(1.0f, 0.0f, 0.0f, 0.6f);
+
+	m_thirstText->SetText(m_font, thirst.c_str());
 }
 
 void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int width, int height)
@@ -174,6 +219,9 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 
 	if (m_bFlashlightEquipped)
 		m_pFlashlight->render(mProj, mView);
+
+	m_hungerText->Render(width, height);
+	m_thirstText->Render(width, height);
 }
 
 int StateGameplay::_randomNum(int lowerBound, int upperBound)

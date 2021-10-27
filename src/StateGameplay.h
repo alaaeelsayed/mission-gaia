@@ -8,6 +8,7 @@
 #include "./Model.h"
 #include "../samplefw/Camera.h"
 #include "../samplefw/Skybox.h"
+#include "text/textbox.h"
 
 class StateGameplay : public Common::StateBase
 {
@@ -58,6 +59,13 @@ private:
 
 	bool m_bKeyDown = false;
 	bool m_bFlashlightEquipped = false;
+
+	Font *m_font;
+	TextBox *m_hungerText;
+	TextBox *m_thirstText;
+
+	float m_fHunger = 100;
+	float m_fThirst = 100;
 };
 
 #endif
