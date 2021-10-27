@@ -8,6 +8,7 @@
 #include "./Model.h"
 #include "../samplefw/Camera.h"
 #include "../samplefw/Skybox.h"
+#include "text/textbox.h"
 
 class StateGameplay : public Common::StateBase
 {
@@ -42,6 +43,8 @@ private:
 	wolf::Model *m_pShipModel = nullptr;
 	wolf::Texture *m_pShipTex = nullptr;
 
+	Model *m_pFlashlight = nullptr;
+
 	const int m_gridSize = 20;
 
 	float m_currShininess = 200.0f;
@@ -53,6 +56,16 @@ private:
 
 	Plane *m_pPlane = 0;
 	Skybox *m_pSkybox = 0;
+
+	bool m_bKeyDown = false;
+	bool m_bFlashlightEquipped = false;
+
+	Font *m_font;
+	TextBox *m_hungerText;
+	TextBox *m_thirstText;
+
+	float m_fHunger = 100;
+	float m_fThirst = 100;
 };
 
 #endif
