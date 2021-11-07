@@ -52,14 +52,17 @@ void Model::setNormal(const char *texPath)
     m_pMat->SetTexture("u_normalMap", m_pNormal);
 }
 
-void Model::setPosition(const glm::mat4 &mPosition)
+void Model::setPosition(const glm::vec3 &vPosition)
 {
-    m_mPosition = mPosition;
+    m_vPosition = vPosition;
+    m_x = vPosition.x;
+    m_y = vPosition.y;
+    m_z = vPosition.z;
 }
 
-glm::mat4 Model::getPosition()
+glm::vec3 Model::getPosition()
 {
-    return m_mPosition;
+    return m_vPosition;
 }
 
 void Model::setOffset(const glm::vec3 &vOffset)
@@ -74,22 +77,22 @@ wolf::Model *Model::getModel()
 
 void Model::translate(const glm::vec3 &vPosition)
 {
-    if (m_vOffset == glm::vec3(0.0f, 0.0f, 0.0f))
-        m_mPosition = glm::translate(m_mPosition, vPosition);
-    else
-        m_mPosition = glm::translate(m_mPosition, vPosition * -m_vOffset);
+    m_vPosition += vPosition;
 }
 
-void Model::rotate(float fAngle)
+void Model::setRotation(float fAngle, const glm::vec3 &vAxis)
 {
-    m_mPosition = glm::rotate(m_mPosition, glm::radians(fAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+    m_vRotation = glm::vec4(vAxis, glm::radians(fAngle));
+}
+
+void Model::rotate(float fAngle, const glm::vec3 &vAxis)
+{
+    m_vRotation = glm::vec4(vAxis, m_vRotation.w + fAngle);
 }
 
 void Model::setScale(const glm::vec3 &vScale)
 {
     m_vScale = vScale;
-    m_mPosition = glm::scale(m_mPosition, vScale);
-    m_mPosition = glm::translate(m_mPosition, -m_vOffset);
 }
 
 glm::vec3 Model::getScale()
@@ -99,7 +102,12 @@ glm::vec3 Model::getScale()
 
 void Model::render(const glm::mat4 &mProj, const glm::mat4 &mView, const glm::vec3 &mViewPos)
 {
+    glm::mat4 mWorld = glm::translate(glm::mat4(1.0f), m_vPosition);
+    mWorld *= glm::rotate(glm::mat4(1.0f), m_vRotation.w, glm::vec3(m_vRotation.x, m_vRotation.y, m_vRotation.z));
+
+    mWorld *= glm::scale(glm::mat4(1.0f), m_vScale);
+    mWorld = glm::translate(mWorld, -m_vOffset);
 
     m_pMat->SetUniform("u_viewPos", mViewPos);
-    m_pModel->Render(m_mPosition, mView, mProj);
+    m_pModel->Render(mWorld, mView, mProj);
 }

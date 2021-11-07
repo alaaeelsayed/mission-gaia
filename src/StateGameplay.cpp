@@ -18,6 +18,7 @@ StateGameplay::~StateGameplay()
 	delete m_font;
 	delete m_hungerText;
 	delete m_thirstText;
+	// delete m_pSoundEngine;
 
 	for (Model *model : m_lModels)
 	{
@@ -39,6 +40,8 @@ void StateGameplay::Enter(std::string arg)
 		glEnable(GL_DEPTH_TEST);
 		m_font = new Font("data/fonts/alpha.fnt", "data/textures/fonts/");
 
+		// m_pSoundEngine = irrklang::createIrrKlangDevice();
+
 		m_hungerText = new TextBox(300.0f, 300.0f);
 		m_hungerText->SetPos(80.0f, 470.0f);
 
@@ -58,7 +61,10 @@ void StateGameplay::Enter(std::string arg)
 		m_thirstText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
 
 		m_pFlashlight = new Model("data/models/flashlight.fbx", "dim");
-		m_pFlashlight->setPosition(glm::translate(glm::mat4(1.0f), glm::vec3(11, 9, -22)));
+		m_pFlashlight->setPosition(glm::vec3(11, 9, -22));
+		m_pFlashlight->setScale(glm::vec3(0.005f, 0.005f, 0.005f));
+		m_pFlashlight->setRotation(180, glm::vec3(0.0f, 1.0f, 0.0f));
+
 		m_pFlashlight->setTexture("data/textures/flashlight.png");
 
 		for (int i = 0; i < 4; i++)
@@ -70,11 +76,11 @@ void StateGameplay::Enter(std::string arg)
 
 			int scale = _randomNum(2, 5);
 			float rotation = (float)_randomNum(-60, 60);
-			int x = _randomNum(-5, 15);
-			int z = _randomNum(-5, 15);
+			int x = _randomNum(-20, 20);
+			int z = _randomNum(-20, 20);
 			m_pCreature->setScale(glm::vec3(scale, scale, scale));
 			m_pCreature->translate(glm::vec3(x, 0.0f, z));
-			m_pCreature->rotate(rotation);
+			m_pCreature->setRotation(rotation, glm::vec3(0.0f, 1.0f, 0.0f));
 			m_lModels.push_back(m_pCreature);
 		}
 
@@ -88,7 +94,7 @@ void StateGameplay::Enter(std::string arg)
 			int z = _randomNum(-20, 20);
 			m_pShrub->translate(glm::vec3(x, 0.0f, z));
 			m_pShrub->setScale(glm::vec3(0.008, 0.008, 0.008));
-			m_pShrub->rotate(rotation);
+			m_pShrub->setRotation(rotation, glm::vec3(0.0f, 1.0f, 0.0f));
 			m_lModels.push_back(m_pShrub);
 		}
 
@@ -103,7 +109,7 @@ void StateGameplay::Enter(std::string arg)
 		// 	m_pWeapon->setOffset(m_pWeapon->getModel()->getAABBMin());
 		// 	m_pWeapon->setScale(glm::vec3(6.0f, 6.0f, 6.0f));
 		// 	m_pWeapon->translate(glm::vec3(x, 5.0f, z));
-		// 	m_pWeapon->rotate(rotation);
+		// 	m_pWeapon->setRotation(rotation, glm::vec3(0.0f, 1.0f, 0.0f));
 		// 	m_lModels.push_back(m_pWeapon);
 		// }
 
@@ -118,7 +124,7 @@ void StateGameplay::Enter(std::string arg)
 
 		// m_pRock->setScale(glm::vec3(0.05f, 0.05f, 0.05f));
 		// m_pRock->translate(glm::vec3(x, 0.0f, z));
-		// m_pRock->rotate(rotation);
+		// m_pRock->setRotation(rotation, glm::vec3(0.0f, 1.0f, 0.0f));
 		// m_lModels.push_back(m_pRock);
 
 		// for (int i = 0; i < 8; i++)
@@ -131,7 +137,7 @@ void StateGameplay::Enter(std::string arg)
 		// 	int x = _randomNum(-20, 10);
 		// 	int z = _randomNum(-10, 20);
 		// 	m_pLog->translate(glm::vec3(x, 1.5f, z));
-		// 	m_pLog->rotate(rotation);
+		// 	m_pLog->setRotation(rotation, glm::vec3(0.0f, 1.0f, 0.0f));
 		// 	m_lModels.push_back(m_pLog);
 		// }
 
@@ -152,9 +158,7 @@ void StateGameplay::Update(float p_fDelta)
 		m_pSkybox->update(p_fDelta);
 
 	glm::mat4 mWorld(1.0f);
-	m_pFlashlight->setPosition(glm::translate(mWorld, m_pCam->getPosition() + glm::vec3(0.23f, -0.25f, -0.9f)));
-	m_pFlashlight->setScale(glm::vec3(0.005f, 0.005f, 0.005f));
-	m_pFlashlight->rotate(-180);
+	m_pFlashlight->setPosition(m_pCam->getPosition() + glm::vec3(0.23f, -0.25f, -0.8f));
 
 	if (m_fHunger != 0)
 		m_fHunger -= p_fDelta * (rand() % 3 + 2);
@@ -189,26 +193,35 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	m_pWorldProgram->SetUniform("u_lightDir", m_sunDirection);
+	m_pWorldProgram->SetUniform("u_viewPos", m_pCam->getViewDirection());
 
-	if (m_pCam)
-		m_pSkybox->render(mProj, mView, width, height);
-	m_pPlane->render(mProj, mView, width, height);
 	for (Model *model : m_lModels)
 	{
 		if (m_bFlashlightEquipped)
 		{
+			m_pWorldProgram->SetUniform("u_lightPosRange", glm::vec4(m_pCam->getPosition(), 100.0f));
+			m_pWorldProgram->SetUniform("u_lightSpot", glm::vec4(m_pCam->getPosition(), 0.2f));
+			m_pWorldProgram->SetUniform("u_lightAttenuation", glm::vec3(0.0f, 0.5f, 0.0f));
 			model->getMaterial()->SetUniform("u_lightPosRange", glm::vec4(m_pCam->getPosition(), 100.0f));
-			model->getMaterial()->SetUniform("u_lightSpot", glm::vec4(m_pCam->getPosition().z + glm::vec3(0.0f, 0.0f, -20.0f), 0.0f));
-			model->getMaterial()->SetUniform("u_lightAttenuation", glm::vec3(0.0f, 0.3f, 0.0f));
+			model->getMaterial()->SetUniform("u_lightSpot", glm::vec4(m_pCam->getPosition(), 0.2f));
+			model->getMaterial()->SetUniform("u_lightAttenuation", glm::vec3(0.0f, 0.5f, 0.0f));
 		}
 		else
 		{
+			m_pWorldProgram->SetUniform("u_lightPosRange", glm::vec4(glm::vec3(0.0f, 0.0f, 0.0f), 0.0f));
+			m_pWorldProgram->SetUniform("u_lightSpot", glm::vec4(glm::vec3(0.0f, 0.0f, 0.0f), 0.0f));
+			m_pWorldProgram->SetUniform("u_lightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
 			model->getMaterial()->SetUniform("u_lightPosRange", glm::vec4(glm::vec3(0.0f, 0.0f, 0.0f), 0.0f));
 			model->getMaterial()->SetUniform("u_lightSpot", glm::vec4(glm::vec3(0.0f, 0.0f, 0.0f), 0.0f));
 			model->getMaterial()->SetUniform("u_lightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
 		}
-		model->render(mProj, mView, m_pCam->getPosition());
+
+		model->render(mProj, mView, m_pCam->getViewDirection());
 	}
+
+	if (m_pCam)
+		m_pSkybox->render(mProj, mView, width, height);
+	m_pPlane->render(mProj, mView, width, height);
 
 	if (m_pApp->isKeyDown('F') && !m_bKeyDown)
 	{

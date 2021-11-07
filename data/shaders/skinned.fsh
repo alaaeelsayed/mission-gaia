@@ -31,22 +31,18 @@ vec3 calc_lighting(vec4 lightPosRange, vec3 lightColor, vec3 lightAttenuation, v
 	{
 		// normalize it
 		lightDir /= distance;
-		// Diffuse
-		vec3 diffuse = diffuseColor * lightColor * max(0.0,dot(n, lightDir));
 		
 		// Calculate spot light falloff
 		float spot = pow(max(dot(-lightDir,spotlight.xyz), 0.0), spotlight.w);
 		// Attenuate the light
 		float att = spot / dot(lightAttenuation, vec3(1.0, distance, distance*distance));
-		diffuse *= att;	
 
-		return diffuse;
+		return vec3(1,1,1) * att;
 	}
 }
 
 void main()
 {
-
     vec3 diffuseMat = texture(u_diffuseTex, v_uv1).rgb;  
 	vec3 diffuseLight = u_lightColor * max(0, dot(v_normal.xyz, u_lightDir));
 

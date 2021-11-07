@@ -10,6 +10,9 @@
 #include "../samplefw/Skybox.h"
 #include "text/textbox.h"
 
+// #include <irrKlang.h>
+// #pragma comment(lib, "irrKlang.lib") // link with irrKlang.dll
+
 class StateGameplay : public Common::StateBase
 {
 public:
@@ -44,6 +47,8 @@ private:
 	wolf::Texture *m_pShipTex = nullptr;
 
 	Model *m_pFlashlight = nullptr;
+
+	// irrklang::ISoundEngine *m_pSoundEngine = nullptr;
 
 	const int m_gridSize = 20;
 
