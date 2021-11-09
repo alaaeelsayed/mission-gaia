@@ -112,7 +112,8 @@ add_executable(sample
     )
 
 target_link_libraries(sample assimp glfw glew ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES})
-
+set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
