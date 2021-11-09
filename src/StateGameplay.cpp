@@ -83,7 +83,7 @@ void StateGameplay::Enter(std::string arg)
 		m_pFlashlight->setTexture("data/textures/flashlight.png");
 		m_lModels.push_back(m_pFlashlight);
 
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < 10; i++)
 		{
 			Model *m_pCreature = new Model("data/models/low_poly_spitter.obj", "skinned");
 			m_pCreature->setTexture("data/textures/gimpy_diffuse.tga");
@@ -182,8 +182,9 @@ void StateGameplay::Update(float p_fDelta)
 	if (m_pCam)
 		m_pSkybox->update(p_fDelta);
 
+	glm::vec3 lightspot = glm::normalize(m_pCam->getViewDirection() - glm::vec3(->vPosRange.x, m_pSpotlight->vPosRange.y, m_pSpotlight->vPosRange.z));
+	m_pSpotlight->vLightSpot = glm::vec4(lightspot, 0.2f);
 	m_pFlashlight->setPosition(m_pCam->getViewDirection() + glm::vec3(0.23f, -0.25f, 0.0f));
-
 	m_fHunger = glm::max(m_fHunger - (p_fDelta * (rand() % 3 + 2)), 0.0f);
 	m_fThirst = glm::max(m_fThirst - p_fDelta * (rand() % 2 + 1), 0.0f);
 
@@ -211,6 +212,7 @@ void StateGameplay::Update(float p_fDelta)
 	{
 		model->update(p_fDelta);
 	}
+	m_vPrevCamRot = m_pCam->getRotation();
 }
 
 void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int width, int height)
@@ -227,13 +229,15 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 
 		std::sort(m_vLights.begin(), m_vLights.end(), [this, model](const Light *lhs, const Light *rhs) -> bool
 				  {
-					if(lhs->bEnabled && !rhs->bEnabled) return false;
-					else if(rhs->bEnabled && !lhs->bEnabled) return true;
+					if(lhs->bEnabled && !rhs->bEnabled) return true;
+					
+					if(!lhs->bEnabled || (!rhs->bEnabled && !lhs->bEnabled)) return false;
 
+					
 					float fLight1Dist = glm::distance(glm::vec3(lhs->vPosRange.x, lhs->vPosRange.y, lhs->vPosRange.z), model->getPosition());
 					float fLight2Dist = glm::distance(glm::vec3(rhs->vPosRange.x, rhs->vPosRange.y, rhs->vPosRange.z), model->getPosition());
 						
-					return !glm::any(glm::lessThan(lhs->vAttenuation, rhs->vAttenuation)) && (fLight1Dist >= fLight2Dist); });
+					return glm::any(glm::lessThan(lhs->vAttenuation, rhs->vAttenuation)) && (fLight1Dist < fLight2Dist); });
 
 		for (int i = 0; i < 4; i++)
 		{

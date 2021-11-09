@@ -89,6 +89,9 @@ private:
 	float m_fHunger = 100;
 	float m_fThirst = 100;
 	int m_iLights = 0;
+
+	// For Flashlight Positioning (should be changed)
+	glm::vec3 m_vPrevCamRot;
 };
 
 #endif
