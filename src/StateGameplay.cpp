@@ -229,28 +229,17 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 
 		std::sort(m_vLights.begin(), m_vLights.end(), [this, model](const Light *lhs, const Light *rhs) -> bool
 				  {
-<<<<<<< HEAD
 					  if (lhs->bEnabled && !rhs->bEnabled)
-						  return false;
-					  else if (rhs->bEnabled && !lhs->bEnabled)
 						  return true;
+
+					  if (!lhs->bEnabled || (!rhs->bEnabled && !lhs->bEnabled))
+						  return false;
 
 					  float fLight1Dist = glm::distance(glm::vec3(lhs->vPosRange.x, lhs->vPosRange.y, lhs->vPosRange.z), model->getPosition());
 					  float fLight2Dist = glm::distance(glm::vec3(rhs->vPosRange.x, rhs->vPosRange.y, rhs->vPosRange.z), model->getPosition());
 
-					  return !glm::any(glm::lessThan(lhs->vAttenuation, rhs->vAttenuation)) && (fLight1Dist >= fLight2Dist);
+					  return glm::any(glm::lessThan(lhs->vAttenuation, rhs->vAttenuation)) && (fLight1Dist < fLight2Dist);
 				  });
-=======
-					if(lhs->bEnabled && !rhs->bEnabled) return true;
-					
-					if(!lhs->bEnabled || (!rhs->bEnabled && !lhs->bEnabled)) return false;
-
-					
-					float fLight1Dist = glm::distance(glm::vec3(lhs->vPosRange.x, lhs->vPosRange.y, lhs->vPosRange.z), model->getPosition());
-					float fLight2Dist = glm::distance(glm::vec3(rhs->vPosRange.x, rhs->vPosRange.y, rhs->vPosRange.z), model->getPosition());
-						
-					return glm::any(glm::lessThan(lhs->vAttenuation, rhs->vAttenuation)) && (fLight1Dist < fLight2Dist); });
->>>>>>> fb6b12b9661ac64d5a6463d19d0c999b0a6ce5ad
 
 		for (int i = 0; i < 4; i++)
 		{
