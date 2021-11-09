@@ -182,7 +182,7 @@ void StateGameplay::Update(float p_fDelta)
 	if (m_pCam)
 		m_pSkybox->update(p_fDelta);
 
-	glm::vec3 lightspot = glm::normalize(m_pCam->getViewDirection() - glm::vec3(->vPosRange.x, m_pSpotlight->vPosRange.y, m_pSpotlight->vPosRange.z));
+	glm::vec3 lightspot = glm::normalize(m_pCam->getViewDirection() - glm::vec3(m_pSpotlight->vPosRange.x, m_pSpotlight->vPosRange.y, m_pSpotlight->vPosRange.z));
 	m_pSpotlight->vLightSpot = glm::vec4(lightspot, 0.2f);
 	m_pFlashlight->setPosition(m_pCam->getViewDirection() + glm::vec3(0.23f, -0.25f, 0.0f));
 	m_fHunger = glm::max(m_fHunger - (p_fDelta * (rand() % 3 + 2)), 0.0f);
