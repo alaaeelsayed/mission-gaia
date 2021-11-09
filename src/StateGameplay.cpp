@@ -1,4 +1,5 @@
 #include "./StateGameplay.h"
+#include "./Model.h"
 #include "States.h"
 
 StateGameplay::StateGameplay()
@@ -9,6 +10,7 @@ StateGameplay::~StateGameplay()
 {
 	delete m_pPlane;
 	delete m_pFlashlight;
+	delete m_pSpotlight;
 	wolf::ProgramManager::DestroyProgram(m_pWorldProgram);
 	wolf::MaterialManager::DestroyMaterial(m_pMat);
 	wolf::TextureManager::DestroyTexture(m_pCreatureTex);
@@ -23,6 +25,11 @@ StateGameplay::~StateGameplay()
 	for (Model *model : m_lModels)
 	{
 		delete model;
+	}
+
+	for (Light *pLight : m_vLights)
+	{
+		delete pLight;
 	}
 }
 
@@ -65,7 +72,16 @@ void StateGameplay::Enter(std::string arg)
 		m_pFlashlight->setScale(glm::vec3(0.005f, 0.005f, 0.005f));
 		m_pFlashlight->setRotation(180, glm::vec3(0.0f, 1.0f, 0.0f));
 
+		m_pSpotlight = new Light();
+		m_pSpotlight->vPosRange = glm::vec4(0.0f, 0.0f, 0.0f, 100.0f);
+		m_pSpotlight->vColor = glm::vec3(0.005f, 0.005f, 0.005f);
+		m_pSpotlight->vAttenuation = glm::vec3(0.0f, 0.5f, 0.0f);
+		m_pSpotlight->vLightSpot = glm::vec4(2.0f, 2.0f, 2.0f, 0.8f);
+		m_pSpotlight->bEnabled = false;
+
+		m_pFlashlight->attachLight(m_pSpotlight);
 		m_pFlashlight->setTexture("data/textures/flashlight.png");
+		m_lModels.push_back(m_pFlashlight);
 
 		for (int i = 0; i < 4; i++)
 		{
@@ -74,6 +90,15 @@ void StateGameplay::Enter(std::string arg)
 			m_pCreature->setNormal("data/textures/gimpy_normal.tga");
 			m_pCreature->setOffset(m_pCreature->getModel()->getAABBMin());
 
+			Light *pPointLight = new Light();
+			float r = _randomFloat(0.0001f, 0.0018f);
+			float g = _randomFloat(0.0001f, 0.0028f);
+			float b = _randomFloat(0.0001f, 0.0038f);
+			pPointLight->vColor = glm::vec3(r, g, b);
+			pPointLight->vAttenuation = glm::vec3(0.9f, 0.9f, 0.9f);
+			pPointLight->vPosRange = glm::vec4(0.0f, 0.0f, 0.0f, 3.0f);
+			m_vLights.push_back(pPointLight);
+			m_pCreature->attachLight(pPointLight);
 			int scale = _randomNum(2, 5);
 			float rotation = (float)_randomNum(-60, 60);
 			int x = _randomNum(-20, 20);
@@ -157,13 +182,10 @@ void StateGameplay::Update(float p_fDelta)
 	if (m_pCam)
 		m_pSkybox->update(p_fDelta);
 
-	glm::mat4 mWorld(1.0f);
-	m_pFlashlight->setPosition(m_pCam->getPosition() + glm::vec3(0.23f, -0.25f, -0.8f));
+	m_pFlashlight->setPosition(m_pCam->getViewDirection() + glm::vec3(0.23f, -0.25f, 0.0f));
 
-	if (m_fHunger != 0)
-		m_fHunger -= p_fDelta * (rand() % 3 + 2);
-	if (m_fThirst != 0)
-		m_fThirst -= p_fDelta * (rand() % 2 + 1);
+	m_fHunger = glm::max(m_fHunger - (p_fDelta * (rand() % 3 + 2)), 0.0f);
+	m_fThirst = glm::max(m_fThirst - p_fDelta * (rand() % 2 + 1), 0.0f);
 
 	std::string hunger = std::to_string((int)m_fHunger);
 	std::string thirst = std::to_string((int)m_fThirst);
@@ -184,6 +206,11 @@ void StateGameplay::Update(float p_fDelta)
 		m_thirstText->SetColor(1.0f, 0.0f, 0.0f, 0.6f);
 
 	m_thirstText->SetText(m_font, thirst.c_str());
+
+	for (Model *model : m_lModels)
+	{
+		model->update(p_fDelta);
+	}
 }
 
 void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int width, int height)
@@ -197,25 +224,55 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 
 	for (Model *model : m_lModels)
 	{
-		if (m_bFlashlightEquipped)
+
+		std::sort(m_vLights.begin(), m_vLights.end(), [this, model](const Light *lhs, const Light *rhs) -> bool
+				  {
+					if(lhs->bEnabled && !rhs->bEnabled) return false;
+					else if(rhs->bEnabled && !lhs->bEnabled) return true;
+
+					float fLight1Dist = glm::distance(glm::vec3(lhs->vPosRange.x, lhs->vPosRange.y, lhs->vPosRange.z), model->getPosition());
+					float fLight2Dist = glm::distance(glm::vec3(rhs->vPosRange.x, rhs->vPosRange.y, rhs->vPosRange.z), model->getPosition());
+						
+					return !glm::any(glm::lessThan(lhs->vAttenuation, rhs->vAttenuation)) && (fLight1Dist >= fLight2Dist); });
+
+		for (int i = 0; i < 4; i++)
 		{
-			m_pWorldProgram->SetUniform("u_lightPosRange", glm::vec4(m_pCam->getPosition(), 100.0f));
-			m_pWorldProgram->SetUniform("u_lightSpot", glm::vec4(m_pCam->getPosition(), 0.2f));
-			m_pWorldProgram->SetUniform("u_lightAttenuation", glm::vec3(0.0f, 0.5f, 0.0f));
-			model->getMaterial()->SetUniform("u_lightPosRange", glm::vec4(m_pCam->getPosition(), 100.0f));
-			model->getMaterial()->SetUniform("u_lightSpot", glm::vec4(m_pCam->getPosition(), 0.2f));
-			model->getMaterial()->SetUniform("u_lightAttenuation", glm::vec3(0.0f, 0.5f, 0.0f));
+			// Point lights
+			Light *pLight = m_vLights[i];
+			if (pLight->bEnabled)
+			{
+				m_pWorldProgram->SetUniform("u_lightPosRange" + std::to_string(i + 1), pLight->vPosRange);
+				m_pWorldProgram->SetUniform("u_lightColor" + std::to_string(i + 1), pLight->vColor);
+				m_pWorldProgram->SetUniform("u_lightAttenuation" + std::to_string(i + 1), pLight->vAttenuation);
+				model->getMaterial()->SetUniform("u_lightPosRange" + std::to_string(i + 1), pLight->vPosRange);
+				model->getMaterial()->SetUniform("u_lightColor" + std::to_string(i + 1), pLight->vColor);
+				model->getMaterial()->SetUniform("u_lightAttenuation" + std::to_string(i + 1), pLight->vAttenuation);
+			}
+		}
+
+		// Spot Light
+		if (m_pSpotlight->bEnabled)
+		{
+			m_pWorldProgram->SetUniform("u_lightPosRange", m_pSpotlight->vPosRange);
+			m_pWorldProgram->SetUniform("u_lightColor", m_pSpotlight->vColor);
+			m_pWorldProgram->SetUniform("u_lightSpot", m_pSpotlight->vLightSpot);
+			m_pWorldProgram->SetUniform("u_lightAttenuation", m_pSpotlight->vAttenuation);
+
+			model->getMaterial()->SetUniform("u_lightPosRange", m_pSpotlight->vPosRange);
+			model->getMaterial()->SetUniform("u_lightColor", m_pSpotlight->vColor);
+			model->getMaterial()->SetUniform("u_lightSpot", m_pSpotlight->vLightSpot);
+			model->getMaterial()->SetUniform("u_lightAttenuation", m_pSpotlight->vAttenuation);
 		}
 		else
 		{
-			m_pWorldProgram->SetUniform("u_lightPosRange", glm::vec4(glm::vec3(0.0f, 0.0f, 0.0f), 0.0f));
-			m_pWorldProgram->SetUniform("u_lightSpot", glm::vec4(glm::vec3(0.0f, 0.0f, 0.0f), 0.0f));
+			m_pWorldProgram->SetUniform("u_lightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+			m_pWorldProgram->SetUniform("u_lightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
 			m_pWorldProgram->SetUniform("u_lightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
-			model->getMaterial()->SetUniform("u_lightPosRange", glm::vec4(glm::vec3(0.0f, 0.0f, 0.0f), 0.0f));
-			model->getMaterial()->SetUniform("u_lightSpot", glm::vec4(glm::vec3(0.0f, 0.0f, 0.0f), 0.0f));
+
+			model->getMaterial()->SetUniform("u_lightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+			model->getMaterial()->SetUniform("u_lightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
 			model->getMaterial()->SetUniform("u_lightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
 		}
-
 		model->render(mProj, mView, m_pCam->getViewDirection());
 	}
 
@@ -227,6 +284,15 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 	{
 		m_bKeyDown = true;
 		m_bFlashlightEquipped = !m_bFlashlightEquipped;
+		m_pSpotlight->bEnabled = !m_pSpotlight->bEnabled;
+		if (!m_pSpotlight->bEnabled)
+		{
+			m_pSpotlight->vAttenuation = glm::vec3(1.0f, 1.0f, 1.0f);
+		}
+		else
+		{
+			m_pSpotlight->vAttenuation = glm::vec3(0.0f, 0.5f, 0.0f);
+		}
 	}
 
 	if (!m_pApp->isKeyDown('F'))
@@ -243,6 +309,35 @@ int StateGameplay::_randomNum(int lowerBound, int upperBound)
 {
 	// Generates random number in range. Includes lower bound and upper bound
 	return rand() % (upperBound - lowerBound + 1) + lowerBound;
+}
+
+float StateGameplay::_randomFloat(float lo, float hi)
+{
+	return lo + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (hi - lo)));
+}
+
+bool StateGameplay::_isEffectiveLight(const Light *pLight1, const Light *pLight2, Model *pModel) const
+{
+
+	if (&pLight1 == &pLight2)
+	{
+		return false;
+	}
+
+	if (!pLight1->bEnabled || !pLight2->bEnabled)
+	{
+		return pLight1->bEnabled;
+	}
+
+	// Testing Attenuation
+	bool result = glm::any(glm::lessThan(pLight1->vAttenuation, pLight2->vAttenuation));
+
+	// Testing Distance
+	float fLight1Dist = glm::distance(glm::vec3(pLight1->vPosRange.x, pLight1->vPosRange.y, pLight1->vPosRange.z), pModel->getPosition());
+	float fLight2Dist = glm::distance(glm::vec3(pLight2->vPosRange.x, pLight2->vPosRange.y, pLight2->vPosRange.z), pModel->getPosition());
+	result = result || (fLight1Dist >= fLight2Dist);
+
+	return result;
 }
 
 void StateGameplay::RegisterCamera(Camera *pCam)

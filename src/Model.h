@@ -2,6 +2,7 @@
 #include "../wolf/wolf.h"
 #include "./singleMaterialProvider.h"
 #include "../../samplefw/Camera.h"
+#include "./StateGameplay.h"
 
 class Model
 {
@@ -19,6 +20,8 @@ public:
     glm::vec3 getScale();
     void setOffset(const glm::vec3 &vOffset);
     wolf::Model *getModel();
+    void attachLight(StateGameplay::Light *pLight);
+    void update(float fDelta);
 
     wolf::Material *getMaterial();
 
@@ -38,6 +41,8 @@ private:
     wolf::Texture *m_pTexture = 0;
     wolf::Texture *m_pNormal = 0;
     wolf::Material *m_pMat = 0;
-    Model *m_pSpotlight = 0;
+    int m_iNumLights = 0;
     glm::vec3 m_vOffset = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    StateGameplay::Light *m_pLight = nullptr;
 };

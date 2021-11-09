@@ -3,13 +3,12 @@
 Model::~Model()
 {
     delete m_pModel;
+    delete m_pLight;
     wolf::MaterialManager::DestroyMaterial(m_pMat);
 }
 
 Model::Model(const std::string &modelPath, const std::string &matName)
 {
-    const glm::vec3 LIGHT_COLOR(0.005f, 0.005f, 0.005f);
-    const glm::vec3 DIM_LIGHT_COLOR(0.0002f, 0.0002f, 0.0002f);
 
     const std::string MATNAME = modelPath + matName;
     m_pMat = wolf::MaterialManager::CreateMaterial(MATNAME);
@@ -18,17 +17,17 @@ Model::Model(const std::string &modelPath, const std::string &matName)
     m_pMat->SetDepthWrite(true);
 
     m_pMat->SetUniform("u_lightDir", glm::vec3(10.0f, 500.0f, 500.0f));
-    if (matName.compare("dim") == 0)
-        m_pMat->SetUniform("u_lightColor", DIM_LIGHT_COLOR);
-    else
-        m_pMat->SetUniform("u_lightColor", LIGHT_COLOR);
-
     m_pMat->SetUniform("u_ambientLight", glm::vec3(0.5f, 0.5f, 0.5f));
     m_pMat->SetUniform("u_specularColor", glm::vec3(0.3f, 0.3f, 0.3f));
     m_pMat->SetUniform("u_shininess", 0.4f);
 
     SingleMaterialProvider matProvider(MATNAME);
     m_pModel = new wolf::Model(modelPath, matProvider);
+}
+
+void Model::attachLight(StateGameplay::Light *pLight)
+{
+    m_pLight = pLight;
 }
 
 void Model::setTexture(const char *texPath)
@@ -98,6 +97,14 @@ void Model::setScale(const glm::vec3 &vScale)
 glm::vec3 Model::getScale()
 {
     return m_vScale;
+}
+
+void Model::update(float fDelta)
+{
+    if (m_pLight)
+    {
+        m_pLight->vPosRange = glm::vec4(m_vPosition.x, m_vPosition.y, m_vPosition.z, m_pLight->vPosRange.w);
+    }
 }
 
 void Model::render(const glm::mat4 &mProj, const glm::mat4 &mView, const glm::vec3 &mViewPos)

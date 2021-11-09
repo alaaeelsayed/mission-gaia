@@ -11,7 +11,7 @@ out vec4 PixelColor;
 void main()
 {
     vec3 n = normalize(v_normal.xyz);
-    vec3 diffuseLight = u_lightColor * max(0, dot(v_normal.xyz, u_lightDir));
+    vec3 diffuseLight = vec3(0.0002f, 0.0002f, 0.0002f) * max(0, dot(v_normal.xyz, u_lightDir));
     vec3 diffuseMat = texture(u_diffuseTex, v_uv1).rgb;
     PixelColor.rgb = diffuseMat * (u_ambientLight + diffuseLight);
     PixelColor.a = 1.0;
