@@ -9,7 +9,7 @@
 #include "../samplefw/Skybox.h"
 #include "text/textbox.h"
 
-// #include <irrKlang.h>
+#include <irrKlang.h>
 // #pragma comment(lib, "irrKlang.lib") // link with irrKlang.dll
 
 class Model;
