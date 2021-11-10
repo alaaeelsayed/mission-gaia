@@ -111,7 +111,7 @@ add_executable(sample
     ${HEADER_FILES}
     )
 
-target_link_libraries(sample assimp glfw glew ${CMAKE_SOURCE_DIR}/irrklang/lib/Winx64-visualStudio/irrKlang.lib ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES})
+target_link_libraries(sample assimp glfw glew ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES})
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

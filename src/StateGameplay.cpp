@@ -45,7 +45,7 @@ void StateGameplay::Enter(std::string arg)
 	{
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glEnable(GL_DEPTH_TEST);
-		m_font = new Font("data/fonts/alpha.fnt", "data/textures/fonts/");
+		m_font = new Font("data/fonts/inconsolata.fnt", "data/textures/fonts/");
 
 		// m_pSoundEngine = irrklang::createIrrKlangDevice();
 
@@ -229,15 +229,17 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 
 		std::sort(m_vLights.begin(), m_vLights.end(), [this, model](const Light *lhs, const Light *rhs) -> bool
 				  {
-					if(lhs->bEnabled && !rhs->bEnabled) return true;
-					
-					if(!lhs->bEnabled || (!rhs->bEnabled && !lhs->bEnabled)) return false;
+					  if (lhs->bEnabled && !rhs->bEnabled)
+						  return true;
 
-					
-					float fLight1Dist = glm::distance(glm::vec3(lhs->vPosRange.x, lhs->vPosRange.y, lhs->vPosRange.z), model->getPosition());
-					float fLight2Dist = glm::distance(glm::vec3(rhs->vPosRange.x, rhs->vPosRange.y, rhs->vPosRange.z), model->getPosition());
-						
-					return glm::any(glm::lessThan(lhs->vAttenuation, rhs->vAttenuation)) && (fLight1Dist < fLight2Dist); });
+					  if (!lhs->bEnabled || (!rhs->bEnabled && !lhs->bEnabled))
+						  return false;
+
+					  float fLight1Dist = glm::distance(glm::vec3(lhs->vPosRange.x, lhs->vPosRange.y, lhs->vPosRange.z), model->getPosition());
+					  float fLight2Dist = glm::distance(glm::vec3(rhs->vPosRange.x, rhs->vPosRange.y, rhs->vPosRange.z), model->getPosition());
+
+					  return glm::any(glm::lessThan(lhs->vAttenuation, rhs->vAttenuation)) && (fLight1Dist < fLight2Dist);
+				  });
 
 		for (int i = 0; i < 4; i++)
 		{
