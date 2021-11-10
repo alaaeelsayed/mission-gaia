@@ -38,7 +38,9 @@ private:
 	Skybox *m_pSkybox = 0;
 
 	Font *m_font;
-	TextBox *m_textBox;
+	TextBox *m_pPauseMenu = nullptr;
+	TextBox *m_pResumeGame = nullptr;
+	TextBox *m_pQuitGame = nullptr;
 };
 
 #endif
