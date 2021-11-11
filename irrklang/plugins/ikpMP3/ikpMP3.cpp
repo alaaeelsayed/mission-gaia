@@ -14,10 +14,10 @@ using namespace irrklang;
 
 #ifdef WIN32
 // Windows version
-__declspec(dllexport) void __stdcall irrKlangPluginInit(ISoundEngine *engine, const char *version)
+__declspec(dllexport) void __stdcall irrKlangPluginInit(ISoundEngine* engine, const char* version)
 #else
 // Linux version
-void irrKlangPluginInit(ISoundEngine *engine, const char *version)
+void irrKlangPluginInit(ISoundEngine* engine, const char* version)
 #endif
 {
 	// do some version security check to be sure that this plugin isn't begin used
@@ -32,9 +32,10 @@ void irrKlangPluginInit(ISoundEngine *engine, const char *version)
 
 	// create and register the loader
 
-	CIrrKlangAudioStreamLoaderMP3 *loader = new CIrrKlangAudioStreamLoaderMP3();
+	CIrrKlangAudioStreamLoaderMP3* loader = new CIrrKlangAudioStreamLoaderMP3();
 	engine->registerAudioStreamLoader(loader);
 	loader->drop();
 
 	// that's it, that's all.
 }
+

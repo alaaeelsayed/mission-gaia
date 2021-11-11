@@ -20,7 +20,8 @@ StateGameplay::~StateGameplay()
 	delete m_font;
 	delete m_hungerText;
 	delete m_thirstText;
-	// delete m_pSoundEngine;
+	m_pSoundEngine->drop();
+	m_pSoundEngine = nullptr;
 
 	for (Model *model : m_lModels)
 	{
@@ -47,7 +48,8 @@ void StateGameplay::Enter(std::string arg)
 		glEnable(GL_DEPTH_TEST);
 		m_font = new Font("data/fonts/inconsolata.fnt", "data/textures/fonts/");
 
-		// m_pSoundEngine = irrklang::createIrrKlangDevice();
+		m_pSoundEngine = irrklang::createIrrKlangDevice();
+		m_pSoundEngine->play2D(m_natureSoundPath.c_str(), true);
 
 		m_hungerText = new TextBox(300.0f, 300.0f);
 		m_hungerText->SetPos(80.0f, 470.0f);
@@ -238,8 +240,7 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 					  float fLight1Dist = glm::distance(glm::vec3(lhs->vPosRange.x, lhs->vPosRange.y, lhs->vPosRange.z), model->getPosition());
 					  float fLight2Dist = glm::distance(glm::vec3(rhs->vPosRange.x, rhs->vPosRange.y, rhs->vPosRange.z), model->getPosition());
 
-					  return glm::any(glm::lessThan(lhs->vAttenuation, rhs->vAttenuation)) && (fLight1Dist < fLight2Dist);
-				  });
+					  return glm::any(glm::lessThan(lhs->vAttenuation, rhs->vAttenuation)) && (fLight1Dist < fLight2Dist); });
 
 		for (int i = 0; i < 4; i++)
 		{
