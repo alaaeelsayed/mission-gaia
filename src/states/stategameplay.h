@@ -9,8 +9,7 @@
 #include "../obj/skybox.h"
 #include "../text/textbox.h"
 
-// #include <irrKlang.h>
-// #pragma comment(lib, "irrKlang.lib") // link with irrKlang.dll
+#include "../irrklang/include/irrKlang.h"
 
 class Model;
 class StateGameplay : public Common::StateBase
@@ -51,6 +50,8 @@ private:
 	const std::string m_groundTexPath = "data/textures/ground/ground.png";
 	const std::string m_skyboxPath = "data/textures/skybox/skybox.png";
 
+	const std::string m_natureSoundPath = "data/sounds/nature.ogg";
+
 	std::vector<Light *> m_vLights;
 	wolf::Program *m_pWorldProgram = 0;
 	std::vector<Model *> m_lModels;
@@ -65,7 +66,7 @@ private:
 	Model *m_pFlashlight = nullptr;
 	Light *m_pSpotlight = nullptr;
 
-	// irrklang::ISoundEngine *m_pSoundEngine = nullptr;
+	irrklang::ISoundEngine *m_pSoundEngine = nullptr;
 
 	const int m_gridSize = 20;
 

@@ -11,7 +11,6 @@
 #include <ik_IFileReader.h>
 #include <vector>
 #include "decoder/mpaudec.h"
-#include <algorithm>
 
 namespace irrklang
 {
@@ -24,7 +23,8 @@ namespace irrklang
 	class CIrrKlangAudioStreamMP3 : public IAudioStream
 	{
 	public:
-		CIrrKlangAudioStreamMP3(IFileReader *file);
+
+		CIrrKlangAudioStreamMP3(IFileReader* file);
 		~CIrrKlangAudioStreamMP3();
 
 		//! returns format of the audio stream
@@ -35,7 +35,7 @@ namespace irrklang
 		specified buffer will be getFormat().getFrameSize()*frameCount big.
 		\param frameCount: amount of frames to be read.
 		\returns Returns amount of frames really read. Should be frameCountToRead in most cases. */
-		virtual ik_s32 readFrames(void *target, ik_s32 frameCountToRead);
+		virtual ik_s32 readFrames(void* target, ik_s32 frameCountToRead);
 
 		//! sets the position of the audio stream.
 		/** For example to let the stream be read from the beginning of the file again,
@@ -47,22 +47,23 @@ namespace irrklang
 		bool isOK() { return File != 0; }
 
 	protected:
-		ik_s32 readFrameForMP3(void *target, ik_s32 frameCountToRead, bool parseOnly = false);
+
+		ik_s32 readFrameForMP3(void* target, ik_s32 frameCountToRead, bool parseOnly=false);
 		bool decodeFrame();
 		void skipID3IfNecessary();
 
-		irrklang::IFileReader *File;
+		irrklang::IFileReader* File;
 		SAudioStreamFormat Format;
 
 		// mpaudec specific
-		MPAuDecContext *TheMPAuDecContext;
+		MPAuDecContext* TheMPAuDecContext;
 
 		ik_u8 InputBuffer[IKP_MP3_INPUT_BUFFER_SIZE];
 
 		int InputPosition;
 		int InputLength;
 		int Position;
-		ik_u8 *DecodeBuffer;
+		ik_u8* DecodeBuffer;
 		ik_s32 FileBegin;
 		ik_u32 CurrentFramePosition;
 
@@ -72,17 +73,19 @@ namespace irrklang
 		// helper class for managing the streaming decoded audio data
 		class QueueBuffer
 		{
-		public:
+		public:	
+
 			QueueBuffer();
 			~QueueBuffer();
 
 			int getSize();
-			void write(const void *buffer, int size);
-			int read(void *buffer, int size);
+			void write(const void* buffer, int size);
+			int read(void* buffer, int size);
 			void clear();
 
 		private:
-			ik_u8 *Buffer;
+
+			ik_u8* Buffer;
 			int Capacity;
 			int Size;
 		};
@@ -96,6 +99,7 @@ namespace irrklang
 		std::vector<SFramePositionData> FramePositionData;
 		QueueBuffer DecodedQueue;
 	};
+
 
 } // end namespace irrklang
 

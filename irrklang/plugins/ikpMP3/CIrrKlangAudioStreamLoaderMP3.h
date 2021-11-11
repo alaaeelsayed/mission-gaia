@@ -13,17 +13,18 @@ namespace irrklang
 	class CIrrKlangAudioStreamLoaderMP3 : public IAudioStreamLoader
 	{
 	public:
+
 		CIrrKlangAudioStreamLoaderMP3();
 
 		//! Returns true if the file maybe is able to be loaded by this class.
 		/** This decision should be based only on the file extension (e.g. ".wav") */
-		virtual bool isALoadableFileExtension(const ik_c8 *fileName);
+		virtual bool isALoadableFileExtension(const ik_c8* fileName);
 
 		//! Creates an audio file input stream from a file
 		/** \return Pointer to the created audio stream. Returns 0 if loading failed.
 		If you no longer need the stream, you should call IAudioFileStream::drop().
 		See IRefCounted::drop() for more information. */
-		virtual IAudioStream *createAudioStream(irrklang::IFileReader *file);
+		virtual IAudioStream* createAudioStream(irrklang::IFileReader* file);
 	};
 
 } // end namespace irrklang

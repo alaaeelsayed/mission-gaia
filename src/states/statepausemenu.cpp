@@ -10,6 +10,9 @@ StatePauseMenu::~StatePauseMenu()
 	wolf::ProgramManager::DestroyProgram(m_pWorldProgram);
 	delete m_pSkybox;
 	delete m_font;
+	delete m_pPauseMenu;
+	delete m_pResumeGame;
+	delete m_pQuitGame;
 }
 
 void StatePauseMenu::Exit()
@@ -36,12 +39,28 @@ void StatePauseMenu::Enter(std::string arg)
 			m_pSkybox = new Skybox(m_pWorldProgram, m_pCam, m_skyboxPath);
 		}
 
-		m_textBox = new TextBox(200.0f, 200.0f);
-		m_textBox->SetPos(0.0f, 0.0f);
-		m_textBox->SetText(m_font, "Pause Menu\n\nResume Game\n\nExit Game");
-		m_textBox->SetColor(0.1f, 0.0f, 0.0f, 1.0f);
-		m_textBox->SetHorizontalAlignment(TextBox::Alignment::AL_Center);
-		m_textBox->SetVerticalAlignment(TextBox::Alignment::AL_Center);
+		// Menu
+
+		m_pPauseMenu = new TextBox(500.0f, 100.0f);
+		m_pPauseMenu->SetPos((m_pApp->getScreenSize().x / 2) - 200.0f, (m_pApp->getScreenSize().y / 2) - 100.0f);
+		m_pPauseMenu->SetText(m_font, "Pause Menu");
+		m_pPauseMenu->SetColor(0.1f, 0.0f, 0.0f, 1.0f);
+		m_pPauseMenu->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
+		m_pPauseMenu->SetVerticalAlignment(TextBox::Alignment::AL_Top);
+
+		m_pResumeGame = new TextBox(500.0f, 100.0f);
+		m_pResumeGame->SetPos((m_pApp->getScreenSize().x / 2) - 200.0f, m_pApp->getScreenSize().y / 2);
+		m_pResumeGame->SetText(m_font, "Resume Game");
+		m_pResumeGame->SetColor(0.1f, 0.0f, 0.0f, 1.0f);
+		m_pResumeGame->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
+		m_pResumeGame->SetVerticalAlignment(TextBox::Alignment::AL_Top);
+
+		m_pQuitGame = new TextBox(500.0f, 100.0f);
+		m_pQuitGame->SetPos((m_pApp->getScreenSize().x / 2) - 200.0f, (m_pApp->getScreenSize().y / 2) + 100.0f);
+		m_pQuitGame->SetText(m_font, "Quit Game");
+		m_pQuitGame->SetColor(0.1f, 0.0f, 0.0f, 1.0f);
+		m_pQuitGame->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
+		m_pQuitGame->SetVerticalAlignment(TextBox::Alignment::AL_Top);
 	}
 }
 
@@ -55,12 +74,12 @@ void StatePauseMenu::Update(float p_fDelta)
 		int x, y = 0;
 		x = m_pApp->getMousePos().x;
 		y = m_pApp->getMousePos().y;
-		if (x > 392 && x < 1005 && y > 284 && y < 369)
+		if (x > m_pResumeGame->GetPos().x && x < m_pResumeGame->GetPos().x + m_pResumeGame->GetWidth() && y > m_pResumeGame->GetPos().y && y < m_pResumeGame->GetPos().y + m_pResumeGame->GetHeight())
 		{
 			// Resume Game
 			m_pStateMachine->GoToState(eStateGameplay_Gameplay);
 		}
-		else if (x > 391 && x < 818 && y > 543 && y < 619)
+		else if (x > m_pQuitGame->GetPos().x && x < m_pQuitGame->GetPos().x + m_pQuitGame->GetWidth() && y > m_pQuitGame->GetPos().y && y < m_pQuitGame->GetPos().y + m_pQuitGame->GetHeight())
 		{
 			// Exit Game
 			m_pApp->exit();
@@ -76,7 +95,9 @@ void StatePauseMenu::Render(const glm::mat4 mProj, const glm::mat4 mView, int wi
 	m_pWorldProgram->SetUniform("u_lightDir", m_sunDirection);
 
 	m_pSkybox->render(mProj, mView, width, height);
-	m_textBox->Render(mProj, mView, width, height);
+	m_pPauseMenu->Render(mProj, mView, width, height);
+	m_pResumeGame->Render(mProj, mView, width, height);
+	m_pQuitGame->Render(mProj, mView, width, height);
 }
 
 int StatePauseMenu::_randomNum(int lowerBound, int upperBound)

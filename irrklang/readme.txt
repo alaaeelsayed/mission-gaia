@@ -51,7 +51,6 @@ The irrKlang SDK version 1.6
   There are Visual Studio as well as CodeBlocks projects for the examples.
 
   Linux users: 
-  
   Just go into the /examples directory and run 'make' for every
   example you want to try out. You can run the examples directly from the
   directory they are created in. Some examples may print some special
@@ -107,7 +106,7 @@ irrKlang.NET4 in bin\dotnet-4-64: (only in the 64 bit irrKlang SDK)
 ==========================================================================
 
 irrKlang's source codes, documentation and binaries contained within the 
-distributed archive are copyright ï¿½ Nikolaus Gebhardt / Ambiera 2001-2018.
+distributed archive are copyright © Nikolaus Gebhardt / Ambiera 2001-2018.
 
 The contents of the irrKlang distribution archive may not be redistributed, 
 reproduced, modified, transmitted, broadcast, published or adapted in any 
