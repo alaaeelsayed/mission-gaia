@@ -2,15 +2,14 @@
 #include <iostream>
 #include <glm/glm.hpp>
 #include "../wolf/wolf.h"
-#include "../samplefw/SampleRunner.h"
-#include "Gaia.h"
+#include "gaia.h"
 
 class ProjectGaia : public wolf::App
 {
 public:
     ProjectGaia() : App("Project Gaia")
     {
-        m_sampleRunner.addSample(new Gaia(this));
+        m_gaia = new Gaia(this);
     }
 
     ~ProjectGaia()
@@ -19,17 +18,16 @@ public:
 
     void update(float dt) override
     {
-        m_sampleRunner.update(dt);
+        m_gaia->update(dt);
     }
 
     void render() override
     {
-        m_sampleRunner.render(m_width, m_height);
+        m_gaia->render(m_width, m_height);
     }
 
 private:
-    SampleRunner m_sampleRunner;
-    bool m_lastDown = false;
+    Gaia *m_gaia;
 };
 
 int main(int, char **)

@@ -1,13 +1,13 @@
 #ifndef STATEGAMEPLAY_H
 #define STATEGAMEPLAY_H
 
-#include "./StateBase.h"
-#include "../samplefw/FreeRoamCamera.h"
-#include "../samplefw/Skybox.h"
-#include "../samplefw/plane.h"
-#include "../samplefw/Camera.h"
-#include "../samplefw/Skybox.h"
-#include "text/textbox.h"
+#include "statebase.h"
+#include "../camera/camera.h"
+#include "../camera/freeroamcamera.h"
+#include "../obj/skybox.h"
+#include "../obj/plane.h"
+#include "../obj/skybox.h"
+#include "../text/textbox.h"
 
 // #include <irrKlang.h>
 // #pragma comment(lib, "irrKlang.lib") // link with irrKlang.dll

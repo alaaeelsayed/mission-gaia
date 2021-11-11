@@ -1,5 +1,5 @@
-#include "./StatePauseMenu.h"
-#include "States.h"
+#include "./statepausemenu.h"
+#include "states.h"
 
 StatePauseMenu::StatePauseMenu()
 {
@@ -36,12 +36,12 @@ void StatePauseMenu::Enter(std::string arg)
 			m_pSkybox = new Skybox(m_pWorldProgram, m_pCam, m_skyboxPath);
 		}
 
-		m_textBox = new TextBox(800.0f, 800.0f);
-		m_textBox->SetPos(380.0f, 5.0f);
+		m_textBox = new TextBox(200.0f, 200.0f);
+		m_textBox->SetPos(0.0f, 0.0f);
 		m_textBox->SetText(m_font, "Pause Menu\n\nResume Game\n\nExit Game");
 		m_textBox->SetColor(0.1f, 0.0f, 0.0f, 1.0f);
-		m_textBox->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
-		m_textBox->SetVerticalAlignment(TextBox::Alignment::AL_Top);
+		m_textBox->SetHorizontalAlignment(TextBox::Alignment::AL_Center);
+		m_textBox->SetVerticalAlignment(TextBox::Alignment::AL_Center);
 	}
 }
 
@@ -76,7 +76,7 @@ void StatePauseMenu::Render(const glm::mat4 mProj, const glm::mat4 mView, int wi
 	m_pWorldProgram->SetUniform("u_lightDir", m_sunDirection);
 
 	m_pSkybox->render(mProj, mView, width, height);
-	m_textBox->Render(width, height);
+	m_textBox->Render(mProj, mView, width, height);
 }
 
 int StatePauseMenu::_randomNum(int lowerBound, int upperBound)

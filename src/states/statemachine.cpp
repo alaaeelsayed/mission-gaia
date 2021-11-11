@@ -1,5 +1,5 @@
-#include "./StateBase.h"
-#include "./StateMachine.h"
+#include "./statebase.h"
+#include "./statemachine.h"
 #include "assert.h"
 
 using namespace Common;
@@ -37,6 +37,7 @@ void StateMachine::GoToState(int p_iState, std::string arg)
 	}
 	assert(pState);
 
+	printf("GOING TO %s", arg);
 	if (m_pCurrentState)
 	{
 		m_pCurrentState->Exit();

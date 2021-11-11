@@ -1,13 +1,13 @@
 #ifndef STATEPAUSEMENU_H
 #define STATEPAUSEMENU_H
 
-#include "./StateBase.h"
-#include "../samplefw/FreeRoamCamera.h"
-#include "../samplefw/Skybox.h"
-#include "./Model.h"
-#include "../samplefw/Camera.h"
-#include "../samplefw/Skybox.h"
-#include "text/textbox.h"
+#include "statebase.h"
+#include "../camera/freeroamcamera.h"
+#include "../camera/camera.h"
+#include "../obj/skybox.h"
+#include "../obj/skybox.h"
+#include "../obj/model.h"
+#include "../text/textbox.h"
 
 class StatePauseMenu : public Common::StateBase
 {

@@ -1,6 +1,6 @@
-#include "./StateGameplay.h"
-#include "./Model.h"
-#include "States.h"
+#include "stategameplay.h"
+#include "../obj/model.h"
+#include "states.h"
 
 StateGameplay::StateGameplay()
 {
@@ -49,8 +49,8 @@ void StateGameplay::Enter(std::string arg)
 
 		// m_pSoundEngine = irrklang::createIrrKlangDevice();
 
-		m_hungerText = new TextBox(300.0f, 300.0f);
-		m_hungerText->SetPos(80.0f, 470.0f);
+		m_hungerText = new TextBox(200.0f, 200.0f);
+		m_hungerText->SetPos(0.0f, 0.0f);
 
 		std::string hunger = std::to_string(m_fHunger) + "%";
 		m_hungerText->SetText(m_font, hunger.c_str());
@@ -58,8 +58,8 @@ void StateGameplay::Enter(std::string arg)
 		m_hungerText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
 		m_hungerText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
 
-		m_thirstText = new TextBox(300.0f, 300.0f);
-		m_thirstText->SetPos(80.0f, 570.0f);
+		m_thirstText = new TextBox(200.0f, 200.0f);
+		m_thirstText->SetPos(0.0f, 100.0f);
 
 		std::string thirst = std::to_string(m_fThirst) + "%";
 		m_thirstText->SetText(m_font, thirst.c_str());
@@ -307,8 +307,8 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 	if (m_bFlashlightEquipped)
 		m_pFlashlight->render(mProj, mView);
 
-	m_hungerText->Render(width, height);
-	m_thirstText->Render(width, height);
+	m_hungerText->Render(mProj, mView, width, height);
+	m_thirstText->Render(mProj, mView, width, height);
 }
 
 int StateGameplay::_randomNum(int lowerBound, int upperBound)

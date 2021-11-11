@@ -1,4 +1,6 @@
 uniform mat4 projection;
+uniform mat4 view;
+uniform mat4 world;
 
 uniform vec4 u_translation;
 
@@ -8,6 +10,6 @@ out vec2 v_uv1;
 
 void main()
 {
-    gl_Position = projection * (a_position + u_translation);
+    gl_Position = projection * view * world * (a_position + u_translation);
 	v_uv1 = a_uv1;
 }

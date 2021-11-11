@@ -10,8 +10,8 @@
 #ifndef STATEBASE_H
 #define STATEBASE_H
 
-#include "../wolf/wolf.h"
-#include "./StateMachine.h"
+#include "../../wolf/wolf.h"
+#include "./statemachine.h"
 #include <string>
 
 namespace Common
