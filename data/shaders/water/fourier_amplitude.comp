@@ -1,11 +1,11 @@
 #define M_PI 3.141592653589793238462643383279502884197169399375105820974944
 
-// - - - - - - - - Use Inverse Fourier Transform to generate displacement map - - - - - - //
+// - - - - - - - - Pre-process Fourier Amplitude textures  - - - - - - //
 // Credit to OREON ENGINE for guiding me: https://www.youtube.com/channel/UC9lXX-YnU_VcDT3VS85skMQ
 
 layout (local_size_x = 16, local_size_y = 16) in;
-layout (binding = 0, rgba32f) uniform image2D tilde_h0k;
-layout (binding = 1, rgba32f) uniform image2D tilde_h0kminusk;
+layout (binding = 0, rgba32f) writeonly uniform image2D tilde_h0k;
+layout (binding = 1, rgba32f) writeonly uniform image2D tilde_h0minusk;
 
 // Noise textures for generating random Gaussian numbers
 uniform sampler2D noise_r0;
@@ -52,18 +52,20 @@ void main(void)
     float L_ = (windspeed * windspeed)/g;
     float magnitude = length(k);
     if (magnitude < 0.0001)
-        magnitude = 0.0001; 
+        magnitude = 0.0001; // Prevent division by zero
     float magnitudeSq = magnitude * magnitude;
 
     // Calculate h0k texture
-    float h0k = clamp(sqrt(A/(magnitudeSq * magnitudeSq)) * pow(dot(normalize(k), normalize(w)), 4.0) * exp(-(1.0/(magnitudeSq * L_ * L_))) * exp(-magnitudeSq * pow(L/2000.0, 2)))/ sqrt(2.0), 0, 1000000);
+    float clampVal = sqrt(A/(magnitudeSq * magnitudeSq)) * pow(dot(normalize(k), normalize(w)), 4.0f) * exp(-(1.0f/(magnitudeSq * L_ * L_))) * exp(-magnitudeSq * pow(L/2000.0f, 2))/ sqrt(2.0f);
+    float h0k = clamp(clampVal, 0, 1000000);
 
     // Calculate h0minusk texture
-    float h0minusk = clamp(sqrt(A/(magnitudeSq * magnitudeSq)) * pow(dot(normalize(-k), normalize(w)), 4.0) * exp(-(1.0/(magnitudeSq * L_ * L_))) * exp(-magnitudeSq * pow(L/2000.0, 2)))/ sqrt(2.0), 0, 1000000);
+    clampVal = sqrt(A/(magnitudeSq * magnitudeSq)) * pow(dot(normalize(-k), normalize(w)), 4.0f) * exp(-(1.0f/(magnitudeSq * L_ * L_))) * exp(-magnitudeSq * pow(L/2000.0f, 2))/ sqrt(2.0f);
+    float h0minusk = clamp(clampVal, 0, 1000000);
 
     vec4 gauss_random = randGauss();
      
     // Store in red and green channels
     imageStore(tilde_h0k, ivec2(gl_GlobalInvocationID.xy), vec4(gauss_random.xy * h0k, 0, 1));
-    imageStore(tilde_h0minusk. ivec2(gl_GlobalInvocationID.xy), vec4(gauss_random.zw * h0minusk, 0, 1));
+    imageStore(tilde_h0minusk, ivec2(gl_GlobalInvocationID.xy), vec4(gauss_random.zw * h0minusk, 0, 1));
 }

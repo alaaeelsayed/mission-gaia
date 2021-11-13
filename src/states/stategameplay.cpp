@@ -169,7 +169,7 @@ void StateGameplay::Enter(std::string arg)
 		// }
 
 		m_pWorldProgram = wolf::ProgramManager::CreateProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
-		// m_pWorldProgram->addShader("data/shaders/water/displacement_map.comp", GL_COMPUTE_SHADER);
+		// m_pWorldProgram->addShader("data/shaders/water/fourier_amplitude_time.comp", GL_COMPUTE_SHADER);
 
 		m_pPlane = new Plane(m_pWorldProgram, m_groundTexPath);
 		m_pPlane->setScale(500.0f);
