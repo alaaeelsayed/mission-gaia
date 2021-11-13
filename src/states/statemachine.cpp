@@ -37,7 +37,6 @@ void StateMachine::GoToState(int p_iState, std::string arg)
 	}
 	assert(pState);
 
-	printf("GOING TO %s", arg);
 	if (m_pCurrentState)
 	{
 		m_pCurrentState->Exit();

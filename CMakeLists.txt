@@ -65,6 +65,7 @@ include_directories(
     thirdparty/glm 
     thirdparty/glew/include 
     thirdparty/assimp/include 
+    irrklang/include
     ${OPENGL_INCLUDE_DIRS})
 
 file(GLOB_RECURSE SAMPLEFW_SOURCE_FILES 
@@ -109,7 +110,6 @@ add_executable(sample
     ${SOURCE_FILES}
     ${HEADER_FILES}
     )
-
 target_link_libraries(sample ${CMAKE_SOURCE_DIR}/irrklang/lib/Winx64-visualStudio/irrKlang.lib)
 target_link_libraries(sample assimp glfw glew ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES})
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
@@ -117,3 +117,10 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
+
+ADD_CUSTOM_COMMAND(
+            TARGET sample POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${CMAKE_SOURCE_DIR}/irrklang/bin/winx64-visualStudio/irrKlang.dll"
+                "$<TARGET_FILE_DIR:sample>"
+)

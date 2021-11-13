@@ -9,7 +9,7 @@
 #include "../obj/skybox.h"
 #include "../text/textbox.h"
 
-#include "../irrklang/include/irrKlang.h"
+#include "../../irrklang/include/irrKlang.h"
 
 class Model;
 class StateGameplay : public Common::StateBase
