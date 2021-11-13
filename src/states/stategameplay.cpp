@@ -169,6 +169,7 @@ void StateGameplay::Enter(std::string arg)
 		// }
 
 		m_pWorldProgram = wolf::ProgramManager::CreateProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
+		// m_pWorldProgram->addShader("data/shaders/water/displacement_map.comp", GL_COMPUTE_SHADER);
 
 		m_pPlane = new Plane(m_pWorldProgram, m_groundTexPath);
 		m_pPlane->setScale(500.0f);
@@ -230,17 +231,7 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 	{
 
 		std::sort(m_vLights.begin(), m_vLights.end(), [this, model](const Light *lhs, const Light *rhs) -> bool
-				  {
-					  if (lhs->bEnabled && !rhs->bEnabled)
-						  return true;
-
-					  if (!lhs->bEnabled || (!rhs->bEnabled && !lhs->bEnabled))
-						  return false;
-
-					  float fLight1Dist = glm::distance(glm::vec3(lhs->vPosRange.x, lhs->vPosRange.y, lhs->vPosRange.z), model->getPosition());
-					  float fLight2Dist = glm::distance(glm::vec3(rhs->vPosRange.x, rhs->vPosRange.y, rhs->vPosRange.z), model->getPosition());
-
-					  return glm::any(glm::lessThan(lhs->vAttenuation, rhs->vAttenuation)) && (fLight1Dist < fLight2Dist); });
+				  { return _isEffectiveLight(lhs, rhs, model); });
 
 		for (int i = 0; i < 4; i++)
 		{
@@ -326,25 +317,16 @@ float StateGameplay::_randomFloat(float lo, float hi)
 bool StateGameplay::_isEffectiveLight(const Light *pLight1, const Light *pLight2, Model *pModel) const
 {
 
-	if (&pLight1 == &pLight2)
-	{
+	if (pLight1->bEnabled && !pLight2->bEnabled)
+		return true;
+
+	if (!pLight1->bEnabled || (!pLight2->bEnabled && !pLight1->bEnabled))
 		return false;
-	}
 
-	if (!pLight1->bEnabled || !pLight2->bEnabled)
-	{
-		return pLight1->bEnabled;
-	}
-
-	// Testing Attenuation
-	bool result = glm::any(glm::lessThan(pLight1->vAttenuation, pLight2->vAttenuation));
-
-	// Testing Distance
 	float fLight1Dist = glm::distance(glm::vec3(pLight1->vPosRange.x, pLight1->vPosRange.y, pLight1->vPosRange.z), pModel->getPosition());
 	float fLight2Dist = glm::distance(glm::vec3(pLight2->vPosRange.x, pLight2->vPosRange.y, pLight2->vPosRange.z), pModel->getPosition());
-	result = result || (fLight1Dist >= fLight2Dist);
 
-	return result;
+	return glm::any(glm::lessThan(pLight1->vAttenuation, pLight2->vAttenuation)) && (fLight1Dist < fLight2Dist);
 }
 
 void StateGameplay::RegisterCamera(Camera *pCam)
