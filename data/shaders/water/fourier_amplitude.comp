@@ -1,11 +1,11 @@
 #define M_PI 3.141592653589793238462643383279502884197169399375105820974944
 
-// - - - - - - - - Use Inverse Fourier Transform to generate displacement map - - - - - - //
+// - - - - - - - - Pre-process Fourier Amplitude textures  - - - - - - //
 // Credit to OREON ENGINE for guiding me: https://www.youtube.com/channel/UC9lXX-YnU_VcDT3VS85skMQ
 
 layout (local_size_x = 16, local_size_y = 16) in;
-layout (binding = 0, rgba32f) uniform image2D tilde_h0k;
-layout (binding = 1, rgba32f) uniform image2D tilde_h0kminusk;
+layout (binding = 0, rgba32f) writeonly uniform image2D tilde_h0k;
+layout (binding = 1, rgba32f) writeonly uniform image2D tilde_h0minusk;
 
 // Noise textures for generating random Gaussian numbers
 uniform sampler2D noise_r0;
@@ -17,7 +17,7 @@ uniform sampler2D noise_i1;
 uniform int N; // FFT Frequency Resolution
 uniform int L; // Horizontal Dimension of Ocean
 uniform float A; // Amplitude 
-uniform vec2 w; // Wind Direction
+uniform vec3 w; // Wind Direction
 uniform float windspeed;
 
 const float g = 9.81; // Gravity
@@ -28,10 +28,10 @@ vec4 randGauss()
 {
     vec2 texCoord = vec2(gl_GlobalInvocationID.xy)/float(N);
 
-    float noise00 = clamp(texture(noise_r0, texCoord).r + 0.00001, 0, 1);
-    float noise01 = clamp(texture(noise_i0, texCoord).r + 0.00001, 0, 1);
-    float noise02 = clamp(texture(noise_r1, texCoord).r + 0.00001, 0, 1);
-    float noise03 = clamp(texture(noise_i1, texCoord).r + 0.00001, 0, 1);
+    float noise00 = clamp(texture(noise_r0, texCoord).r, 0.001, 1.0);
+    float noise01 = clamp(texture(noise_i0, texCoord).r, 0.001, 1.0);
+    float noise02 = clamp(texture(noise_r1, texCoord).r, 0.001, 1.0);
+    float noise03 = clamp(texture(noise_i1, texCoord).r, 0.001, 1.0);
 
     float u0 = 2.0*M_PI*noise00;
     float v0 = sqrt(-2.0 * log(noise01));
@@ -46,24 +46,26 @@ vec4 randGauss()
 void main(void)
 {
     // Calculate Philips Spectrum
-    vec2 x = vec2(gl_GlobalInvocationID.xy);
+    vec2 x = vec2(gl_GlobalInvocationID.xy) - float(N)/2.0;
     vec2 k = vec2(2.0 * M_PI * x.x/L, 2.0 * M_PI * x.y/L);
 
     float L_ = (windspeed * windspeed)/g;
     float magnitude = length(k);
-    if (magnitude < 0.0001)
-        magnitude = 0.0001; 
+    if (magnitude < 0.00001)
+        magnitude = 0.00001; // Prevent division by zero
     float magnitudeSq = magnitude * magnitude;
 
     // Calculate h0k texture
-    float h0k = clamp(sqrt(A/(magnitudeSq * magnitudeSq)) * pow(dot(normalize(k), normalize(w)), 4.0) * exp(-(1.0/(magnitudeSq * L_ * L_))) * exp(-magnitudeSq * pow(L/2000.0, 2)))/ sqrt(2.0), 0, 1000000);
+    float clampVal = sqrt(A/(magnitudeSq * magnitudeSq)) * pow(dot(normalize(k), normalize(w.xy)), 6.0f) * exp(-(1.0f/(magnitudeSq * L_ * L_))) * exp(-magnitudeSq * pow(L/2000, 2))/ sqrt(2.0f);
+    float h0k = clamp(clampVal, -4000, 4000);
 
     // Calculate h0minusk texture
-    float h0minusk = clamp(sqrt(A/(magnitudeSq * magnitudeSq)) * pow(dot(normalize(-k), normalize(w)), 4.0) * exp(-(1.0/(magnitudeSq * L_ * L_))) * exp(-magnitudeSq * pow(L/2000.0, 2)))/ sqrt(2.0), 0, 1000000);
+    clampVal = sqrt(A/(magnitudeSq * magnitudeSq)) * pow(dot(normalize(-k), normalize(w.xy)), 6.0f) * exp(-(1.0f/(magnitudeSq * L_ * L_))) * exp(-magnitudeSq * pow(L/2000.0f, 2))/ sqrt(2.0f);
+    float h0minusk = clamp(clampVal, -4000, 4000);
 
     vec4 gauss_random = randGauss();
      
     // Store in red and green channels
-    imageStore(tilde_h0k, ivec2(gl_GlobalInvocationID.xy), vec4(gauss_random.xy * h0k, 0, 1));
-    imageStore(tilde_h0minusk. ivec2(gl_GlobalInvocationID.xy), vec4(gauss_random.zw * h0minusk, 0, 1));
+    imageStore(tilde_h0k, ivec2(gl_GlobalInvocationID.xy), vec4(gauss_random.xy * h0k, 0.0f, 1.0f));
+    imageStore(tilde_h0minusk, ivec2(gl_GlobalInvocationID.xy), vec4(gauss_random.zw * h0minusk, 0.0f, 1.0f));
 }

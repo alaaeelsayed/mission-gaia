@@ -6,8 +6,12 @@
 #include "../camera/freeroamcamera.h"
 #include "../obj/skybox.h"
 #include "../obj/plane.h"
+#include "../obj/water.h"
 #include "../obj/skybox.h"
 #include "../text/textbox.h"
+#include "../misc/imgui/imgui.h"
+#include "../misc/imgui/imgui_impl_glfw.h"
+#include "../misc/imgui/imgui_impl_opengl3.h"
 
 #include "../../irrklang/include/irrKlang.h"
 
@@ -91,8 +95,14 @@ private:
 	float m_fThirst = 100;
 	int m_iLights = 0;
 
+	// Water
+	Water *m_pWater = nullptr;
+
 	// For Flashlight Positioning (should be changed)
 	glm::vec3 m_vPrevCamRot;
+
+	// Debug Menu
+	bool m_bDebug = true;
 };
 
 #endif
