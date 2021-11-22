@@ -2,6 +2,8 @@ uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 world;
 uniform mat4 worldIT;
+uniform sampler2D u_heightMap;
+
 
 in vec4 a_position;
 in vec3 a_normal;
@@ -15,9 +17,14 @@ out vec4 v_tangent;
 
 void main()
 {
-    gl_Position = projection * view * world * a_position;
     v_uv1 = a_uv1;
-	v_pos = (world * a_position).xyz;
+    vec4 pos = a_position;
+
+    
+    float height = texture(u_heightMap, v_uv1).g * 0.02f;
+    pos.y += height;
+	v_pos = (world * pos).xyz;
     v_normal = worldIT * vec4(a_normal, 0.0);
     v_tangent = worldIT * vec4(a_tangent, 0.0);
+    gl_Position = projection * view * world * pos;
 }

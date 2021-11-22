@@ -19,8 +19,8 @@ uniform int N; // FFT Frequency Resolution
 
 void main(void)
 {
-    vec2 x = gl_GlobalInvocationID.xy;
-    float k = mod(x.y * (float(N) / pow(2, x.x + 1)), N);
+    vec2    x       = gl_GlobalInvocationID.xy;
+    float   k       = mod(x.y * (float(N) / pow(2, x.x + 1)), N);
     complex twiddle = complex(cos(2.0 * M_PI * k / float(N)), sin(2.0 * M_PI * k / float(N)));
 
     int butterflyspan = int(pow(2, x.x));
@@ -51,4 +51,5 @@ void main(void)
         // bot butterfly wing
         else
             imageStore(twiddleIndices, ivec2(x), vec4(twiddle.real, twiddle.im, x.y - butterflyspan, x.y));
-    }}
+    }
+}

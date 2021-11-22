@@ -23,9 +23,6 @@ StateGameplay::~StateGameplay()
 	m_pSoundEngine->drop();
 	m_pSoundEngine = nullptr;
 
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
-
 	for (Model *model : m_lModels)
 	{
 		delete model;
@@ -50,18 +47,20 @@ void StateGameplay::Enter(std::string arg)
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glEnable(GL_DEPTH_TEST);
 
-		IMGUI_CHECKVERSION();
-		// Debug Menu
-		ImGui::CreateContext();
-		ImGui_ImplGlfw_InitForOpenGL(m_pApp->getWindow(), true);
-		ImGui_ImplOpenGL3_Init("#version 430");
-		ImGui::StyleColorsDark();
-
 		// m_font = new Font("data/fonts/inconsolata.fnt", "data/textures/fonts/");
 
 		m_pSoundEngine = irrklang::createIrrKlangDevice();
 		m_pSoundEngine->play2D(m_natureSoundPath.c_str(), true);
 
+		// Debug Menu
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGuiIO &io = ImGui::GetIO();
+		(void)io;
+		ImGui::StyleColorsDark();
+
+		ImGui_ImplGlfw_InitForOpenGL(m_pApp->getWindow(), true);
+		ImGui_ImplOpenGL3_Init("#version 430 core");
 		// m_hungerText = new TextBox(200.0f, 200.0f);
 		// m_hungerText->SetPos(0.0f, 0.0f);
 
@@ -198,6 +197,7 @@ void StateGameplay::Enter(std::string arg)
 
 void StateGameplay::Update(float p_fDelta)
 {
+
 	if (m_pCam)
 		m_pSkybox->update(p_fDelta);
 
@@ -238,20 +238,10 @@ void StateGameplay::Update(float p_fDelta)
 
 void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int width, int height)
 {
+	// Debug Menu
 
 	glClearColor(0.3f, 0.3f, 0.3f, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	// Debug Menu
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
-
-	ImGui::Begin("Debug Menu"); 	
-	ImGui::End();
-
-	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 	m_pWorldProgram->SetUniform("u_lightDir", m_sunDirection);
 	m_pWorldProgram->SetUniform("u_viewPos", m_pCam->getViewDirection());
@@ -324,9 +314,6 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 	// 		m_pSpotlight->vAttenuation = glm::vec3(0.0f, 0.5f, 0.0f);
 	// 	}
 	// }
-
-	// if (!m_pApp->isKeyDown('F'))
-	// 	m_bKeyDown = false;
 
 	// if (m_bFlashlightEquipped)
 	// 	m_pFlashlight->render(mProj, mView);

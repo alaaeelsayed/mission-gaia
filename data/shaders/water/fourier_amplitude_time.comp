@@ -12,6 +12,8 @@ layout (binding = 4, rgba32f) readonly uniform image2D tilde_h0minusk;
 
 uniform int L;
 uniform float t;
+uniform int N; // FFT Frequency Resolution
+const float g = 9.81;
 
 // Complex Numbers
 struct complex
@@ -45,36 +47,63 @@ complex conj(complex c)
 
 void main(void)
 {
-    vec2 x = ivec2(gl_GlobalInvocationID.xy);
-    vec2 k = vec2(2.0 * M_PI * x.x/L, 2.0 * M_PI * x.y/L);
+    vec2  x     = vec2(gl_GlobalInvocationID.xy) - float(N) / 2.0;
+    vec2  k     = vec2((2.0 * M_PI * float(x.x)) / float(L), (2.0 * M_PI * float(x.y)) / float(L));
+    float k_mag = length(k);
 
-    float magnitude = length(k);
-    if (magnitude < 0.0001) 
-        magnitude = 0.0001; // Prevent division by zero
-    float w = sqrt(9.81 * magnitude); // Dispersion Relation
+    if (k_mag < 0.00001)
+        k_mag = 0.00001;
 
-    complex tilde_h0k = complex(imageLoad(tilde_h0k, ivec2(gl_GlobalInvocationID.xy)).r, imageLoad(tilde_h0k, ivec2(gl_GlobalInvocationID.xy)).g);
-    complex tilde_h0minuskconj = complex(imageLoad(tilde_h0minusk, ivec2(gl_GlobalInvocationID.xy)).r, imageLoad(tilde_h0minusk, ivec2(gl_GlobalInvocationID.xy)).g);
+    float w = sqrt(g * k_mag);
 
-    float cosinusoid = cos(w*t);
-    float sinusoid = sin(w*t);
+    vec2 h0k      = imageLoad(tilde_h0k, ivec2(gl_GlobalInvocationID.xy)).xy;
+    vec2 h0minusk = imageLoad(tilde_h0minusk, ivec2(gl_GlobalInvocationID.xy)).xy;
 
-    // Euler Formula
-    complex exp_iwt = complex(cosinusoid, sinusoid);
-    complex exp_iwt_inv = complex(cosinusoid, -sinusoid);
+    complex fourier_amp;
+
+    fourier_amp.real = h0k.x;
+    fourier_amp.im   = h0k.y;
+
+    complex fourier_amp_conj;
+
+    fourier_amp_conj.real = h0minusk.x;
+    fourier_amp_conj.im   = h0minusk.y;
+
+    fourier_amp_conj = conj(fourier_amp_conj);
+
+    float consinus = cos(w * t);
+    float sinus    = sin(w * t);
+
+    complex exp_iwkt;
+
+    exp_iwkt.real = consinus;
+    exp_iwkt.im   = sinus;
+
+    complex exp_iwkt_minus;
+
+    exp_iwkt_minus.real = consinus;
+    exp_iwkt_minus.im   = -sinus;
 
     // dy
-    complex h_k_t_dy = add(mul(tilde_h0k, exp_iwt), mul(tilde_h0minuskconj, exp_iwt_inv));
+    complex d_k_t_dy = add(mul(fourier_amp, exp_iwkt), mul(fourier_amp_conj, exp_iwkt_minus));
 
     // dx
-    complex dx = complex(0.0, -k.x/magnitude);
-    complex h_k_t_dx = mul(dx, h_k_t_dy);
+    complex dx;
+
+    dx.real = 0.0;
+    dx.im   = -k.x / k_mag;
+
+    complex d_k_t_dx = mul(dx, d_k_t_dy);
 
     // dz
-    complex dy = complex(0.0, -k.y/magnitude);
-    complex h_k_t_dz = mul(dy, h_k_t_dy);
+    complex dy;
 
-    imageStore(tilde_hkt_dy, ivec2(gl_GlobalInvocationID.xy), vec4(h_k_t_dy.real, h_k_t_dy.im, 0, 1));
-    imageStore(tilde_hkt_dx, ivec2(gl_GlobalInvocationID.xy), vec4(h_k_t_dx.real, h_k_t_dx.im, 0, 1));
-    imageStore(tilde_hkt_dz, ivec2(gl_GlobalInvocationID.xy), vec4(h_k_t_dz.real, h_k_t_dz.im, 0, 1));
+    dy.real = 0.0;
+    dy.im   = -k.y / k_mag;
+
+    complex d_k_t_dz = mul(dy, d_k_t_dy);
+
+    imageStore(tilde_hkt_dx, ivec2(gl_GlobalInvocationID.xy), vec4(d_k_t_dx.real, d_k_t_dx.im, 0.0, 1.0));
+    imageStore(tilde_hkt_dy, ivec2(gl_GlobalInvocationID.xy), vec4(d_k_t_dy.real, d_k_t_dy.im, 0.0, 1.0));
+    imageStore(tilde_hkt_dz, ivec2(gl_GlobalInvocationID.xy), vec4(d_k_t_dz.real, d_k_t_dz.im, 0.0, 1.0));
 }

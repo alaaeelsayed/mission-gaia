@@ -37,7 +37,7 @@ void Gaia::init()
 
 void Gaia::update(float dt)
 {
-    if (m_app->isKeyDown(GLFW_KEY_ESCAPE) && !m_keyDown)
+    if (m_app->isKeyDown(GLFW_KEY_ESCAPE) && !m_bKeyDown)
     {
         if (m_pStateMachine->GetCurrentState() == eStateGameplay_PauseMenu)
         {
@@ -47,14 +47,35 @@ void Gaia::update(float dt)
         {
             m_pStateMachine->GoToState(eStateGameplay_PauseMenu);
         }
-        m_keyDown = true;
+        m_bKeyDown = true;
     }
 
     if (!m_app->isKeyDown(GLFW_KEY_ESCAPE))
-        m_keyDown = false;
+        m_bKeyDown = false;
 
-    if (m_pStateMachine->GetCurrentState() != eStateGameplay_PauseMenu)
+    if (m_pStateMachine->GetCurrentState() != eStateGameplay_PauseMenu && !m_bDebugMode)
         m_camera->update(dt);
+
+    if (!m_app->isKeyDown('M'))
+    {
+        m_bDebugKeyDown = false;
+    }
+
+    if (m_app->isKeyDown('M') && !m_bDebugKeyDown)
+    {
+        m_bDebugKeyDown = true;
+        m_bDebugMode = !m_bDebugMode;
+    }
+
+    if (m_bDebugMode || m_pStateMachine->GetCurrentState() == eStateGameplay_PauseMenu)
+    {
+        m_app->setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+    else
+    {
+        m_app->setInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+
     m_pStateMachine->Update(dt);
 }
 

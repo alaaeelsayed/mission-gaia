@@ -1,12 +1,12 @@
 #include "plane.h"
 
 const Vertex Plane::gs_planeVertices[6] = {
-    {-0.5f, 0.0f, 0.5f, 0, 3, 0.0f, 1.0f, 0.0f},
-    {0.5f, 0.0f, 0.5f, 3, 3, 0.0f, 1.0f, 0.0f},
-    {0.5f, 0.0f, -0.5f, 3, 0, 0.0f, 1.0f, 0.0f},
-    {0.5f, 0.0f, -0.5f, 3, 0, 0.0f, 1.0f, 0.0f},
+    {-0.5f, 0.0f, 0.5f, 0, 1, 0.0f, 1.0f, 0.0f},
+    {0.5f, 0.0f, 0.5f, 1, 1, 0.0f, 1.0f, 0.0f},
+    {0.5f, 0.0f, -0.5f, 1, 0, 0.0f, 1.0f, 0.0f},
+    {0.5f, 0.0f, -0.5f, 1, 0, 0.0f, 1.0f, 0.0f},
     {-0.5f, 0.0f, -0.5f, 0, 0, 0.0f, 1.0f, 0.0f},
-    {-0.5f, 0.0f, 0.5f, 0, 3, 0.0f, 1.0f, 0.0f},
+    {-0.5f, 0.0f, 0.5f, 0, 1, 0.0f, 1.0f, 0.0f},
 };
 
 Plane::~Plane()
@@ -31,6 +31,79 @@ Plane::Plane(wolf::Program *m_pProgram, const std::string &texturePath)
     m_pDecl->AppendAttribute(wolf::AT_Normal, 3, wolf::CT_Float);
     m_pDecl->SetVertexBuffer(m_pVB);
     m_pDecl->End();
+}
+
+Plane::Plane(wolf::Program *m_pProgram, int subdivisions) : Shape(m_pProgram, "")
+{
+    this->m_pProgram = m_pProgram;
+    m_iNumSegments = subdivisions * subdivisions;
+    Vertex *pAllVerts = new Vertex[m_iNumSegments * 6];
+    float curx = -0.5f;
+    float y = 0;
+    float curz = -0.5f;
+    float quadSize = 1.0f / subdivisions;
+    int vertIdx = 0;
+
+    int count = 0;
+
+    for (int z = 0; z < subdivisions; ++z)
+    {
+        for (int x = 0; x < subdivisions; ++x)
+        {
+
+            // m_fTextureCoords[count] = currX;
+            // m_fTextureCoords[count + 1] = currY + quadSize;
+            // m_fTextureCoords[count + 2] = currX;
+            // m_fTextureCoords[count + 3] = currY;
+
+            for (int i = 0; i < 6; ++i)
+            {
+                pAllVerts[vertIdx].x = (glm::vec3(curx, 0.0f, curz) + glm::vec3(gs_planeVertices[i].x, gs_planeVertices[i].y, gs_planeVertices[i].z) * quadSize).x;
+                pAllVerts[vertIdx].y = (glm::vec3(curx, 0.0f, curz) + glm::vec3(gs_planeVertices[i].x, gs_planeVertices[i].y, gs_planeVertices[i].z) * quadSize).y;
+                pAllVerts[vertIdx].z = (glm::vec3(curx, 0.0f, curz) + glm::vec3(gs_planeVertices[i].x, gs_planeVertices[i].y, gs_planeVertices[i].z) * quadSize).z;
+
+                if (i == 0 || i == 5)
+                {
+                    pAllVerts[vertIdx].u = x * quadSize;
+                    pAllVerts[vertIdx].v = z * quadSize + quadSize;
+                }
+                else if (i == 1)
+                {
+                    pAllVerts[vertIdx].u = x * quadSize + quadSize;
+                    pAllVerts[vertIdx].v = z * quadSize + quadSize;
+                }
+                else if (i == 2 || i == 3)
+                {
+                    pAllVerts[vertIdx].u = x * quadSize + quadSize;
+                    pAllVerts[vertIdx].v = z * quadSize;
+                }
+                else if (i == 4)
+                {
+                    pAllVerts[vertIdx].u = x * quadSize;
+                    pAllVerts[vertIdx].v = z * quadSize;
+                }
+
+                pAllVerts[vertIdx].nX = gs_planeVertices[i].nX;
+                pAllVerts[vertIdx].nY = gs_planeVertices[i].nY;
+                pAllVerts[vertIdx].nZ = gs_planeVertices[i].nZ;
+                vertIdx++;
+            }
+            curx += quadSize;
+        }
+        curz += quadSize;
+        curx = -0.5f;
+    }
+
+    m_pVB = wolf::BufferManager::CreateVertexBuffer(pAllVerts, sizeof(Vertex) * 6 * m_iNumSegments);
+    m_pDecl = new wolf::VertexDeclaration();
+    m_pDecl->Begin();
+    m_pDecl->AppendAttribute(wolf::AT_Position, 3, wolf::CT_Float);
+    m_pDecl->AppendAttribute(wolf::AT_TexCoord1, 2, wolf::CT_Float);
+    m_pDecl->AppendAttribute(wolf::AT_Normal, 3, wolf::CT_Float);
+    m_pDecl->SetVertexBuffer(m_pVB);
+    m_pDecl->End();
+
+    delete[] pAllVerts;
 }
 
 void Plane::update(float dt)
@@ -120,18 +193,18 @@ void Plane::render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, in
     mWorld *= glm::scale(glm::mat4(1.0f), glm::vec3(m_width, m_height, m_depth));
 
     // Use Texture
-    m_pTexture->SetFilterMode(wolf::Texture::FM_TrilinearMipmap, wolf::Texture::FM_TrilinearMipmap);
-    m_pTexture->SetWrapMode(wolf::Texture::WM_Repeat);
-    m_pTexture->Bind();
+    if (m_pTexture)
+    {
+        m_pTexture->SetFilterMode(wolf::Texture::FM_TrilinearMipmap, wolf::Texture::FM_TrilinearMipmap);
+        m_pTexture->SetWrapMode(wolf::Texture::WM_Repeat);
+        m_pTexture->Bind();
+    }
 
     // Bind Uniforms
     m_pProgram->SetUniform("projection", mProj);
     m_pProgram->SetUniform("view", mView);
     m_pProgram->SetUniform("world", mWorld);
     m_pProgram->SetUniform("worldIT", glm::transpose(glm::inverse(mWorld)));
-    m_pProgram->SetUniform("u_tex", 0);
-    m_pProgram->SetUniform("u_lightColor", glm::vec3(0.4f, 0.4f, 0.4f));
-    m_pProgram->SetUniform("u_ambientLight", glm::vec3(0.3f, 0.3f, 0.3f));
 
     // Use Shader Program
     m_pProgram->Bind();
@@ -140,5 +213,5 @@ void Plane::render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, in
     m_pDecl->Bind();
 
     // Draw!
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glDrawArrays(GL_TRIANGLES, 0, 6 * m_iNumSegments);
 }
