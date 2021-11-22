@@ -60,11 +60,11 @@ private:
     // Phillips Spectrum Variables (Wind)
     int N = 256;
     int L = 1000;
-    float A = 2.0f;
-    glm::vec3 W = glm::vec3(1.0f, 1.0f, 0.0f);
-    float S = 80.0f;
+    float A = 4.5f;
+    glm::vec3 W = glm::vec3(0.0f, 1.0f, 0.0f);
+    float S = 9.3f;
     float suppression = 0.1f;
-    glm::vec3 m_vWaterColor = glm::vec3(0.0f, 0.369668034f, 0.839894319f);
+    glm::vec3 m_vWaterColor = glm::vec3(0.250f, 0.878f, 0.815f);
 
     // Textures
     wolf::Texture *m_pH0Texture = nullptr;

@@ -149,8 +149,8 @@ void Water::render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, in
     if (ImGui::Button("Calm Water"))
     {
         L = 1000;
-        A = 4.5;
-        S = 9.3;
+        A = 4.5f;
+        S = 9.3f;
         W.x = 0;
         W.y = 1.0f;
         m_bUpdate = true;
@@ -158,16 +158,16 @@ void Water::render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, in
     if (ImGui::Button("Aggressive Water"))
     {
         L = 1000;
-        A = 5.3;
-        S = 39;
-        W.x = 0;
+        A = 5.3f;
+        S = 39.0f;
+        W.x = 0.0f;
         W.y = 1.0f;
         m_bUpdate = true;
     }
     if (ImGui::Button("Lava"))
     {
         L = 2000;
-        A = 24.8;
+        A = 24.8f;
         W.x = 0;
         W.y = 1.0f;
         S = 10.9f;
@@ -177,9 +177,9 @@ void Water::render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, in
     if (ImGui::Button("Cloudy"))
     {
         L = 829;
-        A = 20.650;
-        W.x = 0.5;
-        W.y = 0.8;
+        A = 20.650f;
+        W.x = 0.5f;
+        W.y = 0.8f;
         S = 50.0f;
         m_vWaterColor = glm::vec3(1.0f, 1.0f, 1.0f);
         m_bUpdate = true;
