@@ -94,7 +94,7 @@ Water::Water()
         _generateTwiddleFactors();
 
         // Initialize water surface
-        m_pSurface = new Plane(m_pRenderProgram, 1000);
+        m_pSurface = new Plane(m_pRenderProgram, 256);
 
         m_bInitialized = true;
     }
@@ -124,7 +124,7 @@ void Water::render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, in
     m_pRenderProgram->SetUniform("u_lightDir", glm::vec3(10.0f, 10.0f, 30.0f));
     m_pRenderProgram->SetUniform("u_lightColor", glm::vec3(0.4f, 0.4f, 0.4f));
     m_pRenderProgram->SetUniform("u_waterColor", m_vWaterColor);
-    m_pRenderProgram->SetUniform("u_ambientLight", glm::vec3(0.3f, 0.3f, 0.3f));
+    m_pRenderProgram->SetUniform("u_ambientLight", glm::vec3(0.5f, 0.5f, 0.5f));
 
     m_pSurface->render(mProj, mView, width, height);
 

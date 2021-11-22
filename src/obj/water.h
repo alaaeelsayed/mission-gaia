@@ -59,7 +59,7 @@ private:
     glm::vec3 W = glm::vec3(1.0f, 1.0f, 0.0f);
     float S = 80.0f;
     float suppression = 0.1f;
-    glm::vec3 m_vWaterColor = glm::vec3(0.0f, 0.169668034f, 0.439894319f);
+    glm::vec3 m_vWaterColor = glm::vec3(0.0f, 0.369668034f, 0.839894319f);
 
     // Textures
     wolf::Texture *m_pH0Texture = nullptr;
