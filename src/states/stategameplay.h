@@ -55,6 +55,7 @@ private:
 	const std::string m_skyboxPath = "data/textures/skybox/skybox.png";
 
 	const std::string m_natureSoundPath = "data/sounds/nature.ogg";
+	const std::string m_waterSoundPath = "data/sounds/ocean.wav";
 
 	std::vector<Light *> m_vLights;
 	wolf::Program *m_pWorldProgram = 0;
@@ -70,7 +71,7 @@ private:
 	Model *m_pFlashlight = nullptr;
 	Light *m_pSpotlight = nullptr;
 
-	irrklang::ISoundEngine *m_pSoundEngine = nullptr;
+	wolf::SoundManager *m_pSoundManager = nullptr;
 
 	const int m_gridSize = 20;
 

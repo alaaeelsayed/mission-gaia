@@ -32,6 +32,7 @@ Water::~Water()
     wolf::ProgramManager::DestroyProgram(m_pButterflyProgram);
 
     delete m_pSurface;
+    delete m_pCamera;
 
     // Debug
     ImGui_ImplOpenGL3_Shutdown();

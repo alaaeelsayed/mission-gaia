@@ -2,6 +2,7 @@
 
 #include "../../wolf/wolf.h"
 #include "./plane.h"
+#include "../camera/camera.h"
 #include "../misc/imgui/imgui.h"
 #include "../misc/imgui/imgui_impl_glfw.h"
 #include "../misc/imgui/imgui_impl_opengl3.h"
@@ -24,6 +25,10 @@ public:
         m_pSurface->setWidth(vScale.x);
         m_pSurface->setHeight(vScale.y);
         m_pSurface->setDepth(vScale.z);
+    }
+    void setCamera(Camera *p_pCamera)
+    {
+        m_pCamera = p_pCamera;
     }
 
 private:
@@ -76,6 +81,9 @@ private:
     wolf::Texture *m_pNoise01 = nullptr;
     wolf::Texture *m_pNoise02 = nullptr;
     wolf::Texture *m_pNoise03 = nullptr;
+
+    // Camera for underwater flag
+    Camera *m_pCamera = nullptr;
 
     bool m_bUpdate = false;
 

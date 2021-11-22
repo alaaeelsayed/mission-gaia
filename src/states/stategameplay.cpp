@@ -20,8 +20,8 @@ StateGameplay::~StateGameplay()
 	delete m_font;
 	delete m_hungerText;
 	delete m_thirstText;
-	m_pSoundEngine->drop();
-	m_pSoundEngine = nullptr;
+
+	delete m_pSoundManager;
 
 	for (Model *model : m_lModels)
 	{
@@ -48,10 +48,10 @@ void StateGameplay::Enter(std::string arg)
 		glEnable(GL_DEPTH_TEST);
 
 		// m_font = new Font("data/fonts/inconsolata.fnt", "data/textures/fonts/");
-
-		m_pSoundEngine = irrklang::createIrrKlangDevice();
-		m_pSoundEngine->play2D(m_natureSoundPath.c_str(), true);
-
+		m_pSoundManager = new wolf::SoundManager();
+		m_pSoundManager->CreateSoundSystem();
+		m_pSoundManager->Play2D("Nature", m_natureSoundPath, true);
+		m_pSoundManager->Play2D("Water", m_waterSoundPath, true);
 		// Debug Menu
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -186,6 +186,7 @@ void StateGameplay::Enter(std::string arg)
 
 		// Water
 		m_pWater = new Water();
+		m_pWater->setCamera(m_pCam);
 		m_pWater->setScale(glm::vec3(500.0f, 500.0f, 500.0f));
 
 		if (m_pCam)
