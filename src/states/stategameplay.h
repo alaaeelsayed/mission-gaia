@@ -56,6 +56,7 @@ private:
 
 	const std::string m_natureSoundPath = "data/sounds/nature.ogg";
 	const std::string m_waterSoundPath = "data/sounds/ocean.wav";
+	const std::string m_creatureGrowlPath = "data/sounds/creature_growl.wav";
 
 	std::vector<Light *> m_vLights;
 	wolf::Program *m_pWorldProgram = 0;

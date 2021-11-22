@@ -50,7 +50,7 @@ void StateGameplay::Enter(std::string arg)
 		// m_font = new Font("data/fonts/inconsolata.fnt", "data/textures/fonts/");
 		m_pSoundManager = new wolf::SoundManager();
 		m_pSoundManager->CreateSoundSystem();
-		m_pSoundManager->Play2D("Nature", m_natureSoundPath, true);
+		// m_pSoundManager->Play2D("Nature", m_natureSoundPath, true);
 		m_pSoundManager->Play2D("Water", m_waterSoundPath, true);
 		// Debug Menu
 		IMGUI_CHECKVERSION();
@@ -95,13 +95,13 @@ void StateGameplay::Enter(std::string arg)
 		// m_pFlashlight->setTexture("data/textures/flashlight.png");
 		// m_lModels.push_back(m_pFlashlight);
 
-		// for (int i = 0; i < 10; i++)
+		// for (int i = 0; i < 4; i++)
 		// {
 		// 	Model *m_pCreature = new Model("data/models/low_poly_spitter.obj", "skinned");
+		// 	m_pCreature->setTag("enemy");
 		// 	m_pCreature->setTexture("data/textures/gimpy_diffuse.tga");
 		// 	m_pCreature->setNormal("data/textures/gimpy_normal.tga");
 		// 	m_pCreature->setOffset(m_pCreature->getModel()->getAABBMin());
-
 		// 	Light *pPointLight = new Light();
 		// 	float r = _randomFloat(0.0001f, 0.0018f);
 		// 	float g = _randomFloat(0.0001f, 0.0028f);
@@ -117,6 +117,7 @@ void StateGameplay::Enter(std::string arg)
 		// 	int z = _randomNum(-20, 20);
 		// 	m_pCreature->setScale(glm::vec3(scale, scale, scale));
 		// 	m_pCreature->translate(glm::vec3(x, 0.0f, z));
+
 		// 	m_pCreature->setRotation(rotation, glm::vec3(0.0f, 1.0f, 0.0f));
 		// 	m_lModels.push_back(m_pCreature);
 		// }
@@ -179,7 +180,6 @@ void StateGameplay::Enter(std::string arg)
 		// }
 
 		m_pWorldProgram = wolf::ProgramManager::CreateProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
-		// m_pWorldProgram->addShader("data/shaders/water/fourier_amplitude_time.comp", GL_COMPUTE_SHADER);
 
 		// m_pPlane = new Plane(m_pWorldProgram, m_groundTexPath);
 		// m_pPlane->setScale(500.0f);
@@ -207,6 +207,17 @@ void StateGameplay::Update(float p_fDelta)
 	// glm::vec3 lightspot = glm::normalize(m_pCam->getViewDirection() - glm::vec3(m_pSpotlight->vPosRange.x, m_pSpotlight->vPosRange.y, m_pSpotlight->vPosRange.z));
 	// m_pSpotlight->vLightSpot = glm::vec4(lightspot, 0.2f);
 	// m_pFlashlight->setPosition(m_pCam->getViewDirection() + glm::vec3(0.23f, -0.25f, 0.0f));
+
+	// for (Model *pModel : m_lModels)
+	// {
+	// 	float distance = glm::distance(m_pCam->getPosition(), pModel->getPosition());
+	// 	if (!pModel->getTag().compare("enemy") && distance <= 10.0f)
+	// 	{
+	// 		glm::vec3 vCreaturePos = pModel->getPosition();
+	// 		m_pSoundManager->Play3D("CreatureGrowl", m_creatureGrowlPath, irrklang::vec3df(vCreaturePos.x, vCreaturePos.y, vCreaturePos.z), 1.0f, 10.0f);
+	// 	}
+	// }
+
 	// m_fHunger = glm::max(m_fHunger - (p_fDelta * (rand() % 3 + 2)), 0.0f);
 	// m_fThirst = glm::max(m_fThirst - p_fDelta * (rand() % 2 + 1), 0.0f);
 
@@ -250,7 +261,7 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 	// for (Model *model : m_lModels)
 	// {
 
-	// 	std::sort(m_vLights.begin(), m_vLights.end(), [this, model ](const Light *lhs, const Light *rhs) -> bool
+	// 	std::sort(m_vLights.begin(), m_vLights.end(), [this, model](const Light *lhs, const Light *rhs) -> bool
 	// 			  { return _isEffectiveLight(lhs, rhs, model); });
 
 	// 	for (int i = 0; i < 4; i++)

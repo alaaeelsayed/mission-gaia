@@ -95,7 +95,7 @@ Water::Water()
         _generateTwiddleFactors();
 
         // Initialize water surface
-        m_pSurface = new Plane(m_pRenderProgram, 256);
+        m_pSurface = new Plane(m_pRenderProgram, 512);
 
         m_bInitialized = true;
     }
@@ -145,6 +145,56 @@ void Water::render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, in
     {
         m_bUpdate = true;
     }
+    ImGui::Text("Configurations:");
+    if (ImGui::Button("Calm Water"))
+    {
+        L = 1000;
+        A = 4.5;
+        S = 9.3;
+        W.x = 0;
+        W.y = 1.0f;
+        m_bUpdate = true;
+    }
+    if (ImGui::Button("Aggressive Water"))
+    {
+        L = 1000;
+        A = 5.3;
+        S = 39;
+        W.x = 0;
+        W.y = 1.0f;
+        m_bUpdate = true;
+    }
+    if (ImGui::Button("Lava"))
+    {
+        L = 2000;
+        A = 24.8;
+        W.x = 0;
+        W.y = 1.0f;
+        S = 10.9f;
+        m_vWaterColor = glm::vec3(0.811f, 0.062f, 0.125f);
+        m_bUpdate = true;
+    }
+    if (ImGui::Button("Cloudy"))
+    {
+        L = 829;
+        A = 20.650;
+        W.x = 0.5;
+        W.y = 0.8;
+        S = 50.0f;
+        m_vWaterColor = glm::vec3(1.0f, 1.0f, 1.0f);
+        m_bUpdate = true;
+    }
+    if (ImGui::Button("Cartoon"))
+    {
+        L = 2000;
+        A = 15.0f;
+        W.x = 0.5f;
+        W.y = 0.8f;
+        S = 7.0f;
+        m_vWaterColor = glm::vec3(0.250f, 0.878f, 0.815f);
+        m_bUpdate = true;
+    }
+
     ImGui::End();
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
