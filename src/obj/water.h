@@ -98,6 +98,6 @@ private:
     // Debug Menu
     bool m_bUpdate = false;
     bool m_bStop = false;
-    bool m_bIsChoppy = false;
+    bool m_bIsChoppy = true;
     std::string m_sStopResume = "Stop Water";
 };

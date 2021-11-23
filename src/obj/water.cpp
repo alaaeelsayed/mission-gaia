@@ -156,7 +156,7 @@ void Water::render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, in
     ImGui::NewFrame();
     ImGui::Begin("Debug Menu");
     ImGui::SetWindowSize(ImVec2(400.0f, 400.0f), true);
-    ImGui::SliderInt("L", &L, 0, 4000);
+    ImGui::SliderInt("L", &L, 0, 2000);
     ImGui::SliderFloat("A", &A, 0.0f, 100.0f);
     ImGui::SliderFloat("Wind.x", &W.x, 0.0f, 1.0f);
     ImGui::SliderFloat("Wind.y", &W.y, 0.0f, 1.0f);
