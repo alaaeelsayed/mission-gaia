@@ -33,6 +33,7 @@ Water::~Water()
 
     delete m_pSurface;
     delete m_pCamera;
+    delete m_pEffect;
 
     // Debug
     ImGui_ImplOpenGL3_Shutdown();
@@ -97,20 +98,34 @@ Water::Water()
         // Initialize water surface
         m_pSurface = new Plane(m_pRenderProgram, 512);
 
+        // Initialize rain effect
+        m_pEffect = new Effect(m_sRainPath);
+
         m_bInitialized = true;
     }
 }
 
 void Water::update(float dt)
 {
+    if (m_bRenderRain)
+    {
+        m_pEffect->update(dt);
+    }
+    m_pEffect->setPos(m_pCamera->getPosition());
+
+    if (m_bStop)
+    {
+        return;
+    }
     if (m_bUpdate)
     {
         _calculateH0K();
         m_bUpdate = false;
     }
+
     _calculateH0T();
-    _butterflyOperation(m_pH0Tdx, m_pDx);
     _butterflyOperation(m_pH0Tdy, m_pDy);
+    _butterflyOperation(m_pH0Tdx, m_pDx);
     _butterflyOperation(m_pH0Tdz, m_pDz);
 }
 
@@ -122,6 +137,10 @@ void Water::render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, in
 
     // Bind Uniforms
     m_pRenderProgram->SetTexture("u_heightMap", m_pDy);
+    m_pRenderProgram->SetTexture("u_choppyX", m_pDx);
+    m_pRenderProgram->SetTexture("u_choppyZ", m_pDz);
+    m_pRenderProgram->SetUniform("u_isChoppy", m_bIsChoppy);
+    m_pRenderProgram->SetUniform("u_choppiness", choppiness);
     m_pRenderProgram->SetUniform("u_lightDir", glm::vec3(10.0f, 10.0f, 30.0f));
     m_pRenderProgram->SetUniform("u_lightColor", glm::vec3(0.4f, 0.4f, 0.4f));
     m_pRenderProgram->SetUniform("u_waterColor", m_vWaterColor);
@@ -129,50 +148,66 @@ void Water::render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, in
 
     m_pSurface->render(mProj, mView, width, height);
 
+    if (m_bRenderRain)
+        m_pEffect->render(mProj, mView);
+
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     ImGui::Begin("Debug Menu");
     ImGui::SetWindowSize(ImVec2(400.0f, 400.0f), true);
-    ImGui::SliderInt("L", &L, 0, 2000);
-    ImGui::SliderFloat("A", &A, 0.0f, 40.0f);
+    ImGui::SliderInt("L", &L, 0, 4000);
+    ImGui::SliderFloat("A", &A, 0.0f, 100.0f);
     ImGui::SliderFloat("Wind.x", &W.x, 0.0f, 1.0f);
     ImGui::SliderFloat("Wind.y", &W.y, 0.0f, 1.0f);
     ImGui::SliderFloat("Windspeed", &S, 0.0f, 100.0f);
-    ImGui::SliderFloat("Suppression", &suppression, 0.0f, 5.0f);
+    ImGui::SliderFloat("Choppiness", &choppiness, 0.0f, 2.0f);
     ImGui::ColorPicker3("Water Color", glm::value_ptr(m_vWaterColor));
+    ImGui::Checkbox("Choppy", &m_bIsChoppy);
     if (ImGui::Button("Update"))
     {
         m_bUpdate = true;
     }
+    if (ImGui::Button(m_sStopResume.c_str()))
+    {
+        m_bStop = !m_bStop;
+        if (m_bStop)
+            m_sStopResume = "Resume Water";
+        else
+            m_sStopResume = "Stop Water";
+    }
     ImGui::Text("Configurations:");
     if (ImGui::Button("Calm Water"))
     {
-        L = 1000;
-        A = 4.5f;
-        S = 9.3f;
+        L = 642;
+        A = 17.5f;
         W.x = 0;
         W.y = 1.0f;
+        S = 13.3f;
         m_bUpdate = true;
+        m_bRenderRain = false;
     }
     if (ImGui::Button("Aggressive Water"))
     {
-        L = 1000;
-        A = 5.3f;
-        S = 39.0f;
+        L = 585;
+        A = 31.3f;
+        S = 95.0f;
         W.x = 0.0f;
         W.y = 1.0f;
         m_bUpdate = true;
+        m_bRenderRain = false;
     }
     if (ImGui::Button("Lava"))
     {
         L = 2000;
-        A = 24.8f;
+        A = 19.8f;
         W.x = 0;
         W.y = 1.0f;
         S = 10.9f;
         m_vWaterColor = glm::vec3(0.811f, 0.062f, 0.125f);
         m_bUpdate = true;
+        m_bRenderRain = false;
+        m_bIsChoppy = false;
     }
     if (ImGui::Button("Cloudy"))
     {
@@ -183,6 +218,8 @@ void Water::render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, in
         S = 50.0f;
         m_vWaterColor = glm::vec3(1.0f, 1.0f, 1.0f);
         m_bUpdate = true;
+        m_bRenderRain = true;
+        m_bIsChoppy = false;
     }
     if (ImGui::Button("Cartoon"))
     {
@@ -193,6 +230,8 @@ void Water::render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, in
         S = 7.0f;
         m_vWaterColor = glm::vec3(0.250f, 0.878f, 0.815f);
         m_bUpdate = true;
+        m_bRenderRain = false;
+        m_bIsChoppy = false;
     }
 
     ImGui::End();

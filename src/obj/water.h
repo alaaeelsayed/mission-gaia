@@ -6,6 +6,7 @@
 #include "../misc/imgui/imgui.h"
 #include "../misc/imgui/imgui_impl_glfw.h"
 #include "../misc/imgui/imgui_impl_opengl3.h"
+#include "../particle-system/effect.h"
 
 class Water
 {
@@ -60,11 +61,12 @@ private:
     // Phillips Spectrum Variables (Wind)
     int N = 256;
     int L = 1000;
-    float A = 4.5f;
+    float A = 5.3f;
     glm::vec3 W = glm::vec3(0.0f, 1.0f, 0.0f);
-    float S = 9.3f;
+    float S = 39.0f;
     float suppression = 0.1f;
-    glm::vec3 m_vWaterColor = glm::vec3(0.250f, 0.878f, 0.815f);
+    float choppiness = 1.0f;
+    glm::vec3 m_vWaterColor = glm::vec3(0.035f, 0.764f, 0.858f);
 
     // Textures
     wolf::Texture *m_pH0Texture = nullptr;
@@ -85,8 +87,17 @@ private:
     // Camera for underwater flag
     Camera *m_pCamera = nullptr;
 
-    bool m_bUpdate = false;
+    // Rain Effect for cloud configuration (fun)
+    Effect *m_pEffect = nullptr;
+    std::string m_sRainPath = "data/effects/rain.pfx";
+    bool m_bRenderRain = false;
 
     Plane *m_pSurface = nullptr;
     int m_iSegments = 32;
+
+    // Debug Menu
+    bool m_bUpdate = false;
+    bool m_bStop = false;
+    bool m_bIsChoppy = false;
+    std::string m_sStopResume = "Stop Water";
 };
