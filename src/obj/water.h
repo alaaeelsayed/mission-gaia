@@ -65,7 +65,7 @@ private:
     glm::vec3 W = glm::vec3(0.0f, 1.0f, 0.0f);
     float S = 39.0f;
     float suppression = 0.1f;
-    float choppiness = 1.0f;
+    float choppiness = 1.7f;
     glm::vec3 m_vWaterColor = glm::vec3(0.035f, 0.764f, 0.858f);
 
     // Textures
@@ -99,5 +99,6 @@ private:
     bool m_bUpdate = false;
     bool m_bStop = false;
     bool m_bIsChoppy = true;
+    bool m_bInvertColors = false;
     std::string m_sStopResume = "Stop Water";
 };

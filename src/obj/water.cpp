@@ -110,8 +110,8 @@ void Water::update(float dt)
     if (m_bRenderRain)
     {
         m_pEffect->update(dt);
+        // m_pEffect->setPos(m_pCamera->getPosition());
     }
-    m_pEffect->setPos(m_pCamera->getPosition());
 
     if (m_bStop)
     {
@@ -141,6 +141,7 @@ void Water::render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, in
     m_pRenderProgram->SetTexture("u_choppyZ", m_pDz);
     m_pRenderProgram->SetUniform("u_isChoppy", m_bIsChoppy);
     m_pRenderProgram->SetUniform("u_choppiness", choppiness);
+    m_pRenderProgram->SetUniform("u_invertColors", m_bInvertColors);
     m_pRenderProgram->SetUniform("u_lightDir", glm::vec3(10.0f, 10.0f, 30.0f));
     m_pRenderProgram->SetUniform("u_lightColor", glm::vec3(0.4f, 0.4f, 0.4f));
     m_pRenderProgram->SetUniform("u_waterColor", m_vWaterColor);
@@ -164,6 +165,7 @@ void Water::render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, in
     ImGui::SliderFloat("Choppiness", &choppiness, 0.0f, 2.0f);
     ImGui::ColorPicker3("Water Color", glm::value_ptr(m_vWaterColor));
     ImGui::Checkbox("Choppy", &m_bIsChoppy);
+    ImGui::Checkbox("Invert Colors", &m_bInvertColors);
     if (ImGui::Button("Update"))
     {
         m_bUpdate = true;
@@ -184,6 +186,8 @@ void Water::render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, in
         W.x = 0;
         W.y = 1.0f;
         S = 13.3f;
+        m_bIsChoppy = true;
+        choppiness = 2.0f;
         m_bUpdate = true;
         m_bRenderRain = false;
     }
@@ -194,6 +198,8 @@ void Water::render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, in
         S = 95.0f;
         W.x = 0.0f;
         W.y = 1.0f;
+        m_bIsChoppy = true;
+        choppiness = 1.7f;
         m_bUpdate = true;
         m_bRenderRain = false;
     }
