@@ -42,31 +42,31 @@ void StatePauseMenu::Enter(std::string arg)
 		// Menu
 
 		m_pPauseMenu = new TextBox(500.0f, 100.0f);
-		m_pPauseMenu->SetPos((m_pApp->getScreenSize().x / 2) - 200.0f, (m_pApp->getScreenSize().y / 2) - 100.0f);
 		m_pPauseMenu->SetText(m_font, "Pause Menu");
-		m_pPauseMenu->SetColor(0.1f, 0.0f, 0.0f, 1.0f);
-		m_pPauseMenu->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
-		m_pPauseMenu->SetVerticalAlignment(TextBox::Alignment::AL_Top);
+		m_pPauseMenu->SetColor(0.0f, 0.2f, 0.2f, 1.0f);
+		m_pPauseMenu->SetHorizontalAlignment(TextBox::Alignment::AL_Center);
+		m_pPauseMenu->SetVerticalAlignment(TextBox::Alignment::AL_Center);
 
 		m_pResumeGame = new TextBox(500.0f, 100.0f);
-		m_pResumeGame->SetPos((m_pApp->getScreenSize().x / 2) - 200.0f, m_pApp->getScreenSize().y / 2);
 		m_pResumeGame->SetText(m_font, "Resume Game");
-		m_pResumeGame->SetColor(0.1f, 0.0f, 0.0f, 1.0f);
-		m_pResumeGame->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
-		m_pResumeGame->SetVerticalAlignment(TextBox::Alignment::AL_Top);
+		m_pResumeGame->SetColor(0.0f, 0.2f, 0.2f, 1.0f);
+		m_pResumeGame->SetHorizontalAlignment(TextBox::Alignment::AL_Center);
+		m_pResumeGame->SetVerticalAlignment(TextBox::Alignment::AL_Center);
 
 		m_pQuitGame = new TextBox(500.0f, 100.0f);
-		m_pQuitGame->SetPos((m_pApp->getScreenSize().x / 2) - 200.0f, (m_pApp->getScreenSize().y / 2) + 100.0f);
 		m_pQuitGame->SetText(m_font, "Quit Game");
-		m_pQuitGame->SetColor(0.1f, 0.0f, 0.0f, 1.0f);
-		m_pQuitGame->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
-		m_pQuitGame->SetVerticalAlignment(TextBox::Alignment::AL_Top);
+		m_pQuitGame->SetColor(0.0f, 0.2f, 0.2f, 1.0f);
+		m_pQuitGame->SetHorizontalAlignment(TextBox::Alignment::AL_Center);
+		m_pQuitGame->SetVerticalAlignment(TextBox::Alignment::AL_Center);
 	}
 }
 
 void StatePauseMenu::Update(float p_fDelta)
 {
 	// m_pSkybox->update(p_fDelta);
+	m_pPauseMenu->SetPos(-250.0f, 200.0f, -600.0f);
+	m_pResumeGame->SetPos(-250.0f, 50.0f, -600.0f);
+	m_pQuitGame->SetPos(-250.0f, -100.0f, -600.0f);
 
 	int iButton = m_pApp->isLMBDown();
 	if (iButton)
@@ -95,9 +95,9 @@ void StatePauseMenu::Render(const glm::mat4 mProj, const glm::mat4 mView, int wi
 	m_pWorldProgram->SetUniform("u_lightDir", m_sunDirection);
 
 	m_pSkybox->render(mProj, mView, width, height);
-	m_pPauseMenu->Render(mProj, mView, width, height);
-	m_pResumeGame->Render(mProj, mView, width, height);
-	m_pQuitGame->Render(mProj, mView, width, height);
+	m_pPauseMenu->Render(mProj, mView);
+	m_pResumeGame->Render(mProj, mView);
+	m_pQuitGame->Render(mProj, mView);
 }
 
 int StatePauseMenu::_randomNum(int lowerBound, int upperBound)

@@ -19,15 +19,7 @@ public:
     TextBox(float width, float height);
     ~TextBox();
 
-    void _clearLines();
-    void _clearVertices();
-    void _calculateVertices();
-    void _addText(const Font *font, const std::string &text);
-    void _addVertices(std::vector<float> &vertices, float xStart, float xEnd, float yStart, float yEnd, float uStart, float uEnd, float vStart, float vEnd);
-
-    float _getCurrentHeight();
-
-    void SetPos(float x, float y);
+    void SetPos(float x, float y, float z);
 
     void SetColor(float r, float g, float b, float a);
 
@@ -43,10 +35,18 @@ public:
     float GetWidth() const;
     float GetHeight() const;
 
-    void Render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, int height);
+    void Render(const glm::mat4 &mProj, const glm::mat4 &mView);
 
 private:
-    float m_x, m_y, m_z = 10.0f;
+    void _clearLines();
+    void _clearVertices();
+    void _calculateVertices();
+    void _addText(const Font *font, const std::string &text);
+    void _addVertices(std::vector<float> &vertices, float xStart, float xEnd, float yStart, float yEnd, float uStart, float uEnd, float vStart, float vEnd);
+
+    float _getCurrentHeight();
+
+    float m_x, m_y, m_z = 0.0f;
     float m_colorR = 1.0f, m_colorG = 0.0f, m_colorB = 0.0f, m_colorA = 1.0f;
     float m_width, m_height;
     bool m_outlined = false;

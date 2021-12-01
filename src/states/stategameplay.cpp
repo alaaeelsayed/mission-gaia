@@ -8,7 +8,8 @@ StateGameplay::StateGameplay()
 
 StateGameplay::~StateGameplay()
 {
-	delete m_pPlane;
+	delete m_pTerrain;
+	delete m_pTerrainGenerator;
 	delete m_pFlashlight;
 	delete m_pSpotlight;
 	wolf::ProgramManager::DestroyProgram(m_pWorldProgram);
@@ -49,22 +50,22 @@ void StateGameplay::Enter(std::string arg)
 		m_font = new Font("data/fonts/inconsolata.fnt", "data/textures/fonts/");
 
 		m_pSoundEngine = irrklang::createIrrKlangDevice();
-		m_pSoundEngine->play2D(m_natureSoundPath.c_str(), true);
+		
+		if(m_pSoundEngine)
+			m_pSoundEngine->play2D(m_natureSoundPath.c_str(), true);
 
 		m_hungerText = new TextBox(200.0f, 200.0f);
-		m_hungerText->SetPos(0.0f, 0.0f);
+		m_hungerText->SetPos(-550.0f, -120.0f, -800.0f);
 
-		std::string hunger = std::to_string(m_fHunger) + "%";
-		m_hungerText->SetText(m_font, hunger.c_str());
+		m_hungerText->SetText(m_font, "%f%", m_fHunger);
 		m_hungerText->SetColor(1.0f, 1.0f, 1.0f, 0.6f);
 		m_hungerText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
 		m_hungerText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
 
 		m_thirstText = new TextBox(200.0f, 200.0f);
-		m_thirstText->SetPos(0.0f, 100.0f);
+		m_thirstText->SetPos(-550.0f, -200.0f, -800.0f);
 
-		std::string thirst = std::to_string(m_fThirst) + "%";
-		m_thirstText->SetText(m_font, thirst.c_str());
+		m_thirstText->SetText(m_font, "%f%", m_fThirst);
 		m_thirstText->SetColor(1.0f, 1.0f, 1.0f, 0.6f);
 		m_thirstText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
 		m_thirstText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
@@ -103,8 +104,8 @@ void StateGameplay::Enter(std::string arg)
 			m_pCreature->attachLight(pPointLight);
 			int scale = _randomNum(2, 5);
 			float rotation = (float)_randomNum(-60, 60);
-			int x = _randomNum(-20, 20);
-			int z = _randomNum(-20, 20);
+			int x = _randomNum(-100, 100);
+			int z = _randomNum(-100, 100);
 			m_pCreature->setScale(glm::vec3(scale, scale, scale));
 			m_pCreature->translate(glm::vec3(x, 0.0f, z));
 			m_pCreature->setRotation(rotation, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -170,8 +171,9 @@ void StateGameplay::Enter(std::string arg)
 
 		m_pWorldProgram = wolf::ProgramManager::CreateProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
 
-		m_pPlane = new Plane(m_pWorldProgram, m_groundTexPath);
-		m_pPlane->setScale(500.0f);
+		m_pTerrainGenerator = new TerrainGenerator();
+
+		m_pTerrain = new Terrain(0, 0, m_pTerrainGenerator);
 		if (m_pCam)
 		{
 			m_pSkybox = new Skybox(m_pWorldProgram, m_pCam, m_skyboxPath);
@@ -190,10 +192,13 @@ void StateGameplay::Update(float p_fDelta)
 	m_fHunger = glm::max(m_fHunger - (p_fDelta * (rand() % 3 + 2)), 0.0f);
 	m_fThirst = glm::max(m_fThirst - p_fDelta * (rand() % 2 + 1), 0.0f);
 
-	std::string hunger = std::to_string((int)m_fHunger);
-	std::string thirst = std::to_string((int)m_fThirst);
+	int hunger = (int)m_fHunger;
+	int thirst = (int)m_fThirst;
 
-	m_hungerText->SetText(m_font, hunger.c_str());
+	glm::vec3 camPosition = m_pCam->getPosition();
+	
+	// m_hungerText->SetPos(camPosition.x - 50.0f, camPosition.y - 50.0f, camPosition.z + 60.0f);
+	m_hungerText->SetText(m_font, "%d%", hunger);
 	if (m_fHunger >= 70)
 		m_hungerText->SetColor(0.0f, 1.0f, 0.0f, 0.6f);
 	else if (m_fHunger >= 40)
@@ -208,7 +213,8 @@ void StateGameplay::Update(float p_fDelta)
 	else
 		m_thirstText->SetColor(1.0f, 0.0f, 0.0f, 0.6f);
 
-	m_thirstText->SetText(m_font, thirst.c_str());
+	// m_thirstText->SetPos(camPosition.x- 50.0f, camPosition.y- 30.0f, camPosition.z + 60.0f);
+	m_thirstText->SetText(m_font, "%d%", thirst);
 
 	for (Model *model : m_lModels)
 	{
@@ -240,7 +246,8 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 					  float fLight1Dist = glm::distance(glm::vec3(lhs->vPosRange.x, lhs->vPosRange.y, lhs->vPosRange.z), model->getPosition());
 					  float fLight2Dist = glm::distance(glm::vec3(rhs->vPosRange.x, rhs->vPosRange.y, rhs->vPosRange.z), model->getPosition());
 
-					  return glm::any(glm::lessThan(lhs->vAttenuation, rhs->vAttenuation)) && (fLight1Dist < fLight2Dist); });
+					  return glm::any(glm::lessThan(lhs->vAttenuation, rhs->vAttenuation)) && (fLight1Dist < fLight2Dist);
+				  });
 
 		for (int i = 0; i < 4; i++)
 		{
@@ -285,7 +292,7 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 
 	if (m_pCam)
 		m_pSkybox->render(mProj, mView, width, height);
-	m_pPlane->render(mProj, mView, width, height);
+	m_pTerrain->Render(mProj, mView);
 
 	if (m_pApp->isKeyDown('F') && !m_bKeyDown)
 	{
@@ -308,8 +315,8 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 	if (m_bFlashlightEquipped)
 		m_pFlashlight->render(mProj, mView);
 
-	m_hungerText->Render(mProj, mView, width, height);
-	m_thirstText->Render(mProj, mView, width, height);
+	m_hungerText->Render(mProj, mView);
+	m_thirstText->Render(mProj, mView);
 }
 
 int StateGameplay::_randomNum(int lowerBound, int upperBound)

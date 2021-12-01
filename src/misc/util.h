@@ -1,3 +1,5 @@
+#pragma once
+
 #include <random>
 #ifndef UTIL_H
 #define UTIL_H

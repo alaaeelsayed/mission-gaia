@@ -27,7 +27,7 @@ TextBox::TextBox(float width, float height) : m_width(width), m_height(height)
     // Appreciate wolf for caching all of this
     m_program = wolf::ProgramManager::CreateProgram("data/shaders/text.vsh", "data/shaders/text.fsh");
 
-    m_outlineVB = wolf::BufferManager::CreateVertexBuffer(gs_outlineVertices, sizeof(GLfloat) * 4 * 5);
+    m_outlineVB = wolf::BufferManager::CreateVertexBuffer(gs_outlineVertices, sizeof(GLfloat) * 4 * 4);
 
     m_outlineDecl = new wolf::VertexDeclaration();
     m_outlineDecl->Begin();
@@ -123,17 +123,17 @@ void TextBox::_calculateVertices()
                 font->GetExtentsForChar(character, &uStart, &uEnd, &vStart, &vEnd);
                 font->GetDataForChar(character, &xOffset, &yOffset, &xAdvance, &width, &height);
 
-                float x = currX - xOffset;
-                float y = currY - yOffset;
+                float x = currX + xOffset;
+                float y = currY + yOffset;
 
                 _addVertices(floats, x, y, x + width, y + height, uStart, uEnd, vStart, vEnd);
 
-                currX -= xAdvance;
+                currX += xAdvance;
             }
-            currX -= word.GetSpaceWidth();
+            currX += word.GetSpaceWidth();
         }
         currX = 0;
-        currY -= lineHeight;
+        currY += lineHeight;
     }
     for (std::map<const wolf::Texture *, std::vector<GLfloat>>::iterator it = tempFloats.begin(); it != tempFloats.end(); ++it)
     {
@@ -211,38 +211,38 @@ void TextBox::_addVertices(std::vector<GLfloat> &floats, float xStart, float ySt
     // Top left
     floats.push_back(xStart);
     floats.push_back(yStart);
-    floats.push_back(uEnd);
-    floats.push_back(vEnd);
+    floats.push_back(uStart);
+    floats.push_back(vStart);
 
     // Top right
     floats.push_back(xEnd);
     floats.push_back(yStart);
-    floats.push_back(uStart);
+    floats.push_back(uEnd);
+    floats.push_back(vStart);
+
+    // Bottom right
+    floats.push_back(xEnd);
+    floats.push_back(yEnd);
+    floats.push_back(uEnd);
     floats.push_back(vEnd);
 
     // Bottom right
     floats.push_back(xEnd);
     floats.push_back(yEnd);
-    floats.push_back(uStart);
-    floats.push_back(vStart);
-
-    // Bottom right
-    floats.push_back(xEnd);
-    floats.push_back(yEnd);
-    floats.push_back(uStart);
-    floats.push_back(vStart);
+    floats.push_back(uEnd);
+    floats.push_back(vEnd);
 
     // Bottom left
     floats.push_back(xStart);
     floats.push_back(yEnd);
-    floats.push_back(uEnd);
-    floats.push_back(vStart);
+    floats.push_back(uStart);
+    floats.push_back(vEnd);
 
     // Top left
     floats.push_back(xStart);
     floats.push_back(yStart);
-    floats.push_back(uEnd);
-    floats.push_back(vEnd);
+    floats.push_back(uStart);
+    floats.push_back(vStart);
 }
 
 float TextBox::_getCurrentHeight()
@@ -255,10 +255,11 @@ float TextBox::_getCurrentHeight()
     return height;
 }
 
-void TextBox::SetPos(float x, float y)
+void TextBox::SetPos(float x, float y, float z)
 {
     m_x = x;
     m_y = y;
+    m_z = z;
 }
 
 void TextBox::SetColor(float r, float g, float b, float a)
@@ -359,19 +360,19 @@ float TextBox::GetHeight() const
 }
 
 // 1 draw call per texture (aka 1 call per fontsheet)
-void TextBox::Render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, int height)
+void TextBox::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 {
     glm::mat4 mWorld = glm::mat4(1.0f);
-    mWorld *= glm::scale(glm::mat4(1.0f), glm::vec3(m_width / 1000.0f, m_height / 1000.0f, 1.0f));
+    mWorld = glm::translate(mWorld, glm::vec3(m_x, m_y, m_z));
+    mWorld = glm::rotate(mWorld, glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     // draw the outline first
     if (m_outlined)
     {
         m_program->SetUniform("projection", mProj);
-        m_program->SetUniform("view", mView);
+        m_program->SetUniform("view", glm::mat4(1.0f));
         m_program->SetUniform("world", mWorld);
 
         m_program->SetUniform("u_outline", true);
-        m_program->SetUniform("u_translation", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
         m_program->SetUniform("u_color", glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 
         m_program->Bind();
@@ -387,11 +388,10 @@ void TextBox::Render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, 
         wolf::VertexDeclaration *decl = it->second;
 
         m_program->SetUniform("projection", mProj);
-        m_program->SetUniform("view", mView);
+        m_program->SetUniform("view", glm::mat4(1.0f));
         m_program->SetUniform("world", mWorld);
 
         m_program->SetUniform("u_outline", false);
-        m_program->SetUniform("u_translation", glm::vec4(m_x, m_y, 0.0f, 0.0f));
         m_program->SetUniform("u_color", glm::vec4(m_colorR, m_colorG, m_colorB, m_colorA));
         m_program->SetTexture("u_tex", texture);
 

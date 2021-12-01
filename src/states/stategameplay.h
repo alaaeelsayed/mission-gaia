@@ -8,6 +8,7 @@
 #include "../obj/plane.h"
 #include "../obj/skybox.h"
 #include "../text/textbox.h"
+#include "../terrain/terrain.h"
 
 #include "../../irrklang/include/irrKlang.h"
 
@@ -50,7 +51,7 @@ private:
 	const std::string m_groundTexPath = "data/textures/ground/ground.png";
 	const std::string m_skyboxPath = "data/textures/skybox/skybox.png";
 
-	const std::string m_natureSoundPath = "data/sounds/nature.ogg";
+	const std::string m_natureSoundPath = "data/sounds/ambient.ogg";
 
 	std::vector<Light *> m_vLights;
 	wolf::Program *m_pWorldProgram = 0;
@@ -77,7 +78,9 @@ private:
 
 	GLfloat m_sunAngle = -60;
 
-	Plane *m_pPlane = 0;
+	TerrainGenerator *m_pTerrainGenerator = 0;
+	Terrain *m_pTerrain = 0;
+
 	Skybox *m_pSkybox = 0;
 
 	bool m_bKeyDown = false;

@@ -89,7 +89,7 @@ void FreeRoamCamera::_rotate(const glm::vec2 &mouseMovement)
 void FreeRoamCamera::reset()
 {
     m_position = glm::vec3(0.0f, 0.0f, 3.0f);
-    m_eye = glm::vec3(0.0f, 0.0f, 0.0f);
+    m_eye = glm::vec3(0.0f, 0.0f, -1.0f);
     m_up = glm::vec3(0.0f, 1.0f, 0.0f);
 }
 
