@@ -6,6 +6,8 @@ class Plane : public Shape
 {
 public:
     Plane(wolf::Program *m_pProgram, const std::string &texturePath);
+    Plane(wolf::Program *m_pProgram, int subdivisions = 0);
+
     ~Plane() override;
 
     void update(float dt) override;
@@ -32,4 +34,6 @@ public:
 
 private:
     wolf::Texture *m_pTexture2 = nullptr;
+    int m_iNumSegments = 1;
+    float *m_fTextureCoords = nullptr;
 };

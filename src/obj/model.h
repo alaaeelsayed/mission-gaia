@@ -39,6 +39,15 @@ public:
     wolf::Model *getModel();
     void attachLight(StateGameplay::Light *pLight);
     void update(float fDelta);
+    void setTag(const std::string &p_sTag)
+    {
+        m_sTag = p_sTag;
+    }
+
+    const std::string &getTag()
+    {
+        return m_sTag;
+    }
 
     wolf::Material *getMaterial();
 
@@ -62,4 +71,5 @@ private:
     glm::vec3 m_vOffset = glm::vec3(0.0f, 0.0f, 0.0f);
 
     StateGameplay::Light *m_pLight = nullptr;
+    std::string m_sTag = "";
 };

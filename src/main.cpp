@@ -45,14 +45,13 @@ int main(int, char **)
     // fprintf(imageFile, "P5\n");
     // fprintf(imageFile, "%d %d\n", width, height);
     // fprintf(imageFile, "255\n");
-    // float max = -1;
     // TerrainGenerator generator;
-    // for (int i = 0; i < width; i++)
+    // for (int j = 0; j < height; j++)
     // {
-    //     for (int j = 0; j < height; j++)
+    //     for (int i = 0; i < width; i++)
     //     {
-    //         float value = generator.GenerateHeight(i, j);
-    //         fputc(((value + 40.0f) / 80.0f) * 255, imageFile);
+    //         float value = generator.GenerateHeight(i, j, 0, 0);
+    //         fputc(((value + 60.0f) / 120.0f) * 255, imageFile);
     //     }
     // }
 

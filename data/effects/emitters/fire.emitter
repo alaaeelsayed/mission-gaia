@@ -1,0 +1,17 @@
+<emitter name="fire" num_particles="100"
+ duration="-1" mode="continuous" type="box_emitter" box_emitter_min="3.0,3.0,3.0"
+ box_emitter_max="6.0,6.0, 6.0" birthrate="30">
+
+ <spawn_property name="velocity" type="random" min="0,0,0" max="0,1,0"/>
+ <spawn_property name="color" type="constant" value="1,0,0,1"/>
+ <spawn_property name="size" type="random" min="16" max="24"/>
+ <spawn_property name="lifetime" type="constant" value="1.0"/>
+
+ <affector type="scale">
+ <property name="mode" value="over_life"/>
+ <property name="start" value="1"/>
+ <property name="end" value="2"/>
+ </affector>
+
+ <affector type="add_velocity"/>
+</emitter>

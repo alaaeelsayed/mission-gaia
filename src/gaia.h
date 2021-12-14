@@ -18,6 +18,8 @@ public:
 private:
     Camera *m_camera = nullptr;
     wolf::App *m_app = nullptr;
-    bool m_keyDown = false;
+    bool m_bKeyDown = false;
+    bool m_bDebugKeyDown = false;
+    bool m_bDebugMode = false;
     Common::StateMachine *m_pStateMachine = 0;
 };

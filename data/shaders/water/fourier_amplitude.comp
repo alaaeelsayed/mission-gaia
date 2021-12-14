@@ -17,8 +17,9 @@ uniform sampler2D noise_i1;
 uniform int N; // FFT Frequency Resolution
 uniform int L; // Horizontal Dimension of Ocean
 uniform float A; // Amplitude 
-uniform vec2 w; // Wind Direction
+uniform vec3 w; // Wind Direction
 uniform float windspeed;
+uniform float suppression;
 
 const float g = 9.81; // Gravity
 
@@ -28,10 +29,10 @@ vec4 randGauss()
 {
     vec2 texCoord = vec2(gl_GlobalInvocationID.xy)/float(N);
 
-    float noise00 = clamp(texture(noise_r0, texCoord).r + 0.00001, 0, 1);
-    float noise01 = clamp(texture(noise_i0, texCoord).r + 0.00001, 0, 1);
-    float noise02 = clamp(texture(noise_r1, texCoord).r + 0.00001, 0, 1);
-    float noise03 = clamp(texture(noise_i1, texCoord).r + 0.00001, 0, 1);
+    float noise00 = clamp(texture(noise_r0, texCoord).r, 0.001, 1.0);
+    float noise01 = clamp(texture(noise_i0, texCoord).r, 0.001, 1.0);
+    float noise02 = clamp(texture(noise_r1, texCoord).r, 0.001, 1.0);
+    float noise03 = clamp(texture(noise_i1, texCoord).r, 0.001, 1.0);
 
     float u0 = 2.0*M_PI*noise00;
     float v0 = sqrt(-2.0 * log(noise01));
@@ -43,29 +44,34 @@ vec4 randGauss()
     return rnd;
 }
 
-void main(void)
+float suppression_factor(float k_mag_sqr)
 {
-    // Calculate Philips Spectrum
-    vec2 x = vec2(gl_GlobalInvocationID.xy);
-    vec2 k = vec2(2.0 * M_PI * x.x/L, 2.0 * M_PI * x.y/L);
+    return exp(-k_mag_sqr * suppression * suppression);
+}
 
-    float L_ = (windspeed * windspeed)/g;
-    float magnitude = length(k);
-    if (magnitude < 0.0001)
-        magnitude = 0.0001; // Prevent division by zero
-    float magnitudeSq = magnitude * magnitude;
+float philips_power_spectrum(vec2 k, float k_mag, float k_mag_sqr, float L_philips, float suppression)
+{
+    return (A * (exp(-1.0 / (k_mag_sqr * L_philips * L_philips))) * pow(dot(normalize(k), w.xy), 2.0) * suppression) / (k_mag_sqr * k_mag_sqr);
+}
 
-    // Calculate h0k texture
-    float clampVal = sqrt(A/(magnitudeSq * magnitudeSq)) * pow(dot(normalize(k), normalize(w)), 4.0f) * exp(-(1.0f/(magnitudeSq * L_ * L_))) * exp(-magnitudeSq * pow(L/2000.0f, 2))/ sqrt(2.0f);
-    float h0k = clamp(clampVal, 0, 1000000);
+void main()
+{
+    vec2  x         = vec2(gl_GlobalInvocationID.xy) - float(N) / 2.0;
+    vec2  k         = vec2((2.0 * M_PI * float(x.x)) / float(L), (2.0 * M_PI * float(x.y)) / float(L));
+    float L_philips = (windspeed * windspeed) / g;
+    float k_mag     = length(k);
 
-    // Calculate h0minusk texture
-    clampVal = sqrt(A/(magnitudeSq * magnitudeSq)) * pow(dot(normalize(-k), normalize(w)), 4.0f) * exp(-(1.0f/(magnitudeSq * L_ * L_))) * exp(-magnitudeSq * pow(L/2000.0f, 2))/ sqrt(2.0f);
-    float h0minusk = clamp(clampVal, 0, 1000000);
+    if (k_mag < 0.00001)
+        k_mag = 0.00001;
 
-    vec4 gauss_random = randGauss();
-     
-    // Store in red and green channels
-    imageStore(tilde_h0k, ivec2(gl_GlobalInvocationID.xy), vec4(gauss_random.xy * h0k, 0, 1));
-    imageStore(tilde_h0minusk, ivec2(gl_GlobalInvocationID.xy), vec4(gauss_random.zw * h0minusk, 0, 1));
+    float k_mag_sqr   = k_mag * k_mag;
+    float suppression = suppression_factor(k_mag_sqr);
+
+    float h0k      = clamp(sqrt(philips_power_spectrum(k, k_mag, k_mag_sqr, L_philips, suppression)) / sqrt(2.0), -4000.0, 4000.0);
+    float h0minusk = clamp(sqrt(philips_power_spectrum(-k, k_mag, k_mag_sqr, L_philips, suppression)) / sqrt(2.0), -4000.0, 4000.0);
+
+    vec4 rnd = randGauss();
+
+    imageStore(tilde_h0k, ivec2(gl_GlobalInvocationID.xy), vec4(rnd.xy * h0k, 0.0, 1.0));
+    imageStore(tilde_h0minusk, ivec2(gl_GlobalInvocationID.xy), vec4(rnd.zw * h0minusk, 0.0, 1.0));
 }

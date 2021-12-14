@@ -364,22 +364,6 @@ void TextBox::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 {
     glm::mat4 mWorld = glm::mat4(1.0f);
     mWorld = glm::translate(mWorld, glm::vec3(m_x, m_y, m_z));
-    mWorld = glm::rotate(mWorld, glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    // draw the outline first
-    if (m_outlined)
-    {
-        m_program->SetUniform("projection", mProj);
-        m_program->SetUniform("view", glm::mat4(1.0f));
-        m_program->SetUniform("world", mWorld);
-
-        m_program->SetUniform("u_outline", true);
-        m_program->SetUniform("u_color", glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-
-        m_program->Bind();
-        m_outlineDecl->Bind();
-
-        glDrawArrays(GL_LINES, 0, 8);
-    }
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     for (auto it = m_vertices.begin(); it != m_vertices.end(); ++it)
@@ -388,10 +372,9 @@ void TextBox::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
         wolf::VertexDeclaration *decl = it->second;
 
         m_program->SetUniform("projection", mProj);
-        m_program->SetUniform("view", glm::mat4(1.0f));
+        m_program->SetUniform("view", mView);
         m_program->SetUniform("world", mWorld);
 
-        m_program->SetUniform("u_outline", false);
         m_program->SetUniform("u_color", glm::vec4(m_colorR, m_colorG, m_colorB, m_colorA));
         m_program->SetTexture("u_tex", texture);
 

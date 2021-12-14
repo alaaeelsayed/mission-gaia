@@ -29,6 +29,10 @@ void StatePauseMenu::Enter(std::string arg)
 
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LEQUAL);
+
+		glm::vec2 screenSize = m_pApp->getScreenSize();
+		m_frameBuffer = wolf::BufferManager::CreateFrameBuffer(screenSize.x, screenSize.y);
 
 		m_font = new Font("data/fonts/alpha.fnt", "data/textures/fonts/");
 
@@ -63,15 +67,17 @@ void StatePauseMenu::Enter(std::string arg)
 
 void StatePauseMenu::Update(float p_fDelta)
 {
+	glm::vec2 screenSize = m_pApp->getScreenSize();
+
 	// m_pSkybox->update(p_fDelta);
-	m_pPauseMenu->SetPos(-250.0f, 200.0f, -600.0f);
-	m_pResumeGame->SetPos(-250.0f, 50.0f, -600.0f);
-	m_pQuitGame->SetPos(-250.0f, -100.0f, -600.0f);
+	m_pPauseMenu->SetPos(screenSize.x / 2 - 250.0f, screenSize.y / 2 - 300.0f, 0.0f);
+	m_pResumeGame->SetPos(screenSize.x / 2 - 250.0f, screenSize.y / 2 - 100.0f, 0.0f);
+	m_pQuitGame->SetPos(screenSize.x / 2 - 250.0f, screenSize.y / 2 + 100.0f, 0.0f);
 
 	int iButton = m_pApp->isLMBDown();
 	if (iButton)
 	{
-		int x, y = 0;
+		float x, y = 0;
 		x = m_pApp->getMousePos().x;
 		y = m_pApp->getMousePos().y;
 		if (x > m_pResumeGame->GetPos().x && x < m_pResumeGame->GetPos().x + m_pResumeGame->GetWidth() && y > m_pResumeGame->GetPos().y && y < m_pResumeGame->GetPos().y + m_pResumeGame->GetHeight())
@@ -89,15 +95,28 @@ void StatePauseMenu::Update(float p_fDelta)
 
 void StatePauseMenu::Render(const glm::mat4 mProj, const glm::mat4 mView, int width, int height)
 {
+
+	m_frameBuffer->Bind();
+
+	glViewport(0, 0, width, height);
+
 	glClearColor(0.3f, 0.3f, 0.3f, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	m_pWorldProgram->SetUniform("u_lightDir", m_sunDirection);
 
 	m_pSkybox->render(mProj, mView, width, height);
-	m_pPauseMenu->Render(mProj, mView);
-	m_pResumeGame->Render(mProj, mView);
-	m_pQuitGame->Render(mProj, mView);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	m_frameBuffer->Render();
+
+	m_pPauseMenu->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
+	m_pResumeGame->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
+	m_pQuitGame->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
 }
 
 int StatePauseMenu::_randomNum(int lowerBound, int upperBound)

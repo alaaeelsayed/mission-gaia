@@ -9,6 +9,5 @@ out vec2 v_uv1;
 void main()
 {
     gl_Position = projection * view * world * a_position;
-    gl_Position.z = 1.0f;
 	v_uv1 = a_uv1;
 }

@@ -110,10 +110,9 @@ void Model::update(float fDelta)
 void Model::render(const glm::mat4 &mProj, const glm::mat4 &mView, const glm::vec3 &mViewPos)
 {
     glm::mat4 mWorld = glm::translate(glm::mat4(1.0f), m_vPosition);
-    mWorld *= glm::rotate(glm::mat4(1.0f), m_vRotation.w, glm::vec3(m_vRotation.x, m_vRotation.y, m_vRotation.z));
-
-    mWorld *= glm::scale(glm::mat4(1.0f), m_vScale);
     mWorld = glm::translate(mWorld, -m_vOffset);
+    mWorld = glm::rotate(mWorld, m_vRotation.w, glm::vec3(m_vRotation.x, m_vRotation.y, m_vRotation.z));
+    mWorld = glm::scale(mWorld, m_vScale);
 
     m_pMat->SetUniform("u_viewPos", mViewPos);
     m_pModel->Render(mWorld, mView, mProj);

@@ -8,6 +8,7 @@
 #include "../obj/skybox.h"
 #include "../obj/model.h"
 #include "../text/textbox.h"
+#include "../../wolf/wolf.h"
 
 class StatePauseMenu : public Common::StateBase
 {
@@ -41,6 +42,8 @@ private:
 	TextBox *m_pPauseMenu = nullptr;
 	TextBox *m_pResumeGame = nullptr;
 	TextBox *m_pQuitGame = nullptr;
+
+	wolf::FrameBuffer *m_frameBuffer;
 };
 
 #endif

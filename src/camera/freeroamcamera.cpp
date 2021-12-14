@@ -32,7 +32,7 @@ void FreeRoamCamera::update(float dt)
     }
 
     // LControl
-    float cameraSpeed = m_pApp->isKeyDown(341) * 0.5f + 0.3f;
+    float cameraSpeed = m_pApp->isKeyDown(341) * 2.0f + 0.3f;
 
     if (m_pApp->isKeyDown('w'))
     {

@@ -6,9 +6,13 @@
 #include "../camera/freeroamcamera.h"
 #include "../obj/skybox.h"
 #include "../obj/plane.h"
+#include "../obj/water.h"
 #include "../obj/skybox.h"
 #include "../text/textbox.h"
 #include "../terrain/terrain.h"
+#include "../misc/imgui/imgui.h"
+#include "../misc/imgui/imgui_impl_glfw.h"
+#include "../misc/imgui/imgui_impl_opengl3.h"
 
 #include "../../irrklang/include/irrKlang.h"
 
@@ -42,6 +46,7 @@ public:
 	void RegisterCamera(Camera *pCam);
 
 private:
+	void _renderTerrain();
 	int _randomNum(int lowerBound, int upperBound);
 	float _randomFloat(float lo, float hi);
 
@@ -52,6 +57,8 @@ private:
 	const std::string m_skyboxPath = "data/textures/skybox/skybox.png";
 
 	const std::string m_natureSoundPath = "data/sounds/ambient.ogg";
+	const std::string m_waterSoundPath = "data/sounds/ocean.wav";
+	const std::string m_creatureGrowlPath = "data/sounds/creature_growl.wav";
 
 	std::vector<Light *> m_vLights;
 	wolf::Program *m_pWorldProgram = 0;
@@ -67,7 +74,7 @@ private:
 	Model *m_pFlashlight = nullptr;
 	Light *m_pSpotlight = nullptr;
 
-	irrklang::ISoundEngine *m_pSoundEngine = nullptr;
+	wolf::SoundManager *m_pSoundManager = nullptr;
 
 	const int m_gridSize = 20;
 
@@ -79,7 +86,7 @@ private:
 	GLfloat m_sunAngle = -60;
 
 	TerrainGenerator *m_pTerrainGenerator = 0;
-	Terrain *m_pTerrain = 0;
+	std::vector<Terrain *> m_lTerrains;
 
 	Skybox *m_pSkybox = 0;
 
@@ -94,8 +101,17 @@ private:
 	float m_fThirst = 100;
 	int m_iLights = 0;
 
+	// Water
+	Water *m_pWater = nullptr;
+
 	// For Flashlight Positioning (should be changed)
 	glm::vec3 m_vPrevCamRot;
+
+	// Debug Menu
+	bool m_bDebug = true;
+
+	int m_terrainSize, m_terrainVerts, m_terrainOctaves;
+	float m_terrainAmplitude, m_terrainRoughness;
 };
 
 #endif
