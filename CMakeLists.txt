@@ -65,6 +65,7 @@ include_directories(
     thirdparty/glm 
     thirdparty/glew/include 
     thirdparty/assimp/include 
+    thirdparty/bullet/include
     irrklang/include
     ${OPENGL_INCLUDE_DIRS})
 
@@ -111,6 +112,9 @@ add_executable(sample
     ${HEADER_FILES}
     )
 target_link_libraries(sample ${CMAKE_SOURCE_DIR}/irrklang/lib/Winx64-visualStudio/irrKlang.lib)
+target_link_libraries(sample ${CMAKE_SOURCE_DIR}/thirdparty/bullet/lib/BulletCollision.lib)
+target_link_libraries(sample ${CMAKE_SOURCE_DIR}/thirdparty/bullet/lib/LinearMath.lib)
+target_link_libraries(sample ${CMAKE_SOURCE_DIR}/thirdparty/bullet/lib/BulletDynamics.lib)
 target_link_libraries(sample assimp glfw glew ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES})
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
