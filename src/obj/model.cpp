@@ -54,9 +54,6 @@ void Model::setNormal(const char *texPath)
 void Model::setPosition(const glm::vec3 &vPosition)
 {
     m_vPosition = vPosition;
-    m_x = vPosition.x;
-    m_y = vPosition.y;
-    m_z = vPosition.z;
 }
 
 glm::vec3 Model::getPosition()
@@ -79,14 +76,14 @@ void Model::translate(const glm::vec3 &vPosition)
     m_vPosition += vPosition;
 }
 
-void Model::setRotation(float fAngle, const glm::vec3 &vAxis)
+void Model::setRotation(const glm::vec3 &vRotation)
 {
-    m_vRotation = glm::vec4(vAxis, glm::radians(fAngle));
+    m_vRotation = vRotation;
 }
 
-void Model::rotate(float fAngle, const glm::vec3 &vAxis)
+void Model::rotate(const glm::vec3 &vRotation)
 {
-    m_vRotation = glm::vec4(vAxis, m_vRotation.w + fAngle);
+    m_vRotation += vRotation;
 }
 
 void Model::setScale(const glm::vec3 &vScale)
@@ -109,10 +106,8 @@ void Model::update(float fDelta)
 
 void Model::render(const glm::mat4 &mProj, const glm::mat4 &mView, const glm::vec3 &mViewPos)
 {
-    glm::mat4 mWorld = glm::translate(glm::mat4(1.0f), m_vPosition);
-    mWorld = glm::translate(mWorld, -m_vOffset);
-    mWorld = glm::rotate(mWorld, m_vRotation.w, glm::vec3(m_vRotation.x, m_vRotation.y, m_vRotation.z));
-    mWorld = glm::scale(mWorld, m_vScale);
+    glm::mat4 mWorld = glm::translate(glm::mat4(1.0f), m_vPosition - m_vOffset) *
+                       glm::mat4_cast(glm::quat(m_vRotation)) * glm::scale(m_vScale);
 
     m_pMat->SetUniform("u_viewPos", mViewPos);
     m_pModel->Render(mWorld, mView, mProj);

@@ -1,20 +1,22 @@
 #pragma once
 
 #include "../../wolf/wolf.h"
-#include "../camera/camera.h"
-#include "cube.h"
+#include "node.h"
 
-class Skybox
+class Skybox : public Node
 {
 public:
-    Skybox(wolf::Program *m_pProgram, Camera *m_pCamera, std::string filePath);
-    virtual ~Skybox();
-    void update(float dt);
-    void render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, int height);
+    Skybox(const std::string &texturePath);
+    ~Skybox() override;
+
+    void Update(float dt) override;
+    void Render(const glm::mat4 &mProj, const glm::mat4 &mView) override;
 
 private:
-    glm::vec3 m_pCamPosition = glm::vec3(0.0f, 0.0f, 0.0f);
-    wolf::Program *m_pProgram = 0;
-    Cube *m_pSkyboxCube = 0;
-    Camera *m_pCamera = 0;
+    static const Vertex s_skyboxVertices[36];
+
+    wolf::VertexBuffer *m_vb = 0;
+    wolf::VertexDeclaration *m_decl = 0;
+    wolf::Texture *m_texture = 0;
+    wolf::Material *m_material = 0;
 };

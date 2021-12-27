@@ -1,37 +1,29 @@
 #pragma once
 #include "../../wolf/wolf.h"
-#include "./shape.h"
+#include "node.h"
 
-class Cube : public Shape
+class Cube : public Node
 {
 public:
-    Cube(wolf::Program *m_pProgram, const std::string &texturePath, bool isSkybox = false);
+    Cube(const std::string &texturePath);
     ~Cube() override;
 
-    void update(float dt) override;
-    void render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, int height) override;
-    void setPosition(const glm::vec3 &position) override;
+    void Update(float dt) override;
+    void Render(const glm::mat4 &mProj, const glm::mat4 &mView) override;
 
-    void setScale(float scale) override;
-    glm::vec3 getPosition() const override;
-    void setHeight(float height) override;
-    void setWidth(float width) override;
-    void setDepth(float depth) override;
-    void setX(float x) override;
-    void setY(float y) override;
-    void setZ(float z) override;
+    void SetWidth(float width);
+    void SetHeight(float height);
+    void SetDepth(float depth);
 
-    float getX() const override;
-    float getY() const override;
-    float getZ() const override;
-
-    float getHeight() const override;
-    float getWidth() const override;
-    float getDepth() const override;
-
-    static const Vertex gs_skyboxCubeVertices[36];
-    static const Vertex gs_cubeVertices[36];
+    float GetWidth() const;
+    float GetHeight() const;
+    float GetDepth() const;
 
 private:
-    bool isSkybox = false;
+    static const Vertex s_cubeVertices[36];
+
+    wolf::VertexBuffer *m_vb = 0;
+    wolf::VertexDeclaration *m_decl = 0;
+    wolf::Texture *m_texture = 0;
+    wolf::Material *m_material = 0;
 };

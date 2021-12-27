@@ -11,7 +11,7 @@ FreeRoamCamera::~FreeRoamCamera()
 {
 }
 
-void FreeRoamCamera::update(float dt)
+void FreeRoamCamera::Update(float dt)
 {
     glm::vec2 mousePos = m_pApp->getMousePos();
 
@@ -63,14 +63,36 @@ void FreeRoamCamera::update(float dt)
     m_lastMousePos = mousePos;
 }
 
-glm::mat4 FreeRoamCamera::getViewMatrix()
+glm::mat4 FreeRoamCamera::GetViewMatrix()
 {
     return glm::lookAt(m_position, _getCameraTarget(), glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
-glm::mat4 FreeRoamCamera::getProjMatrix(int width, int height)
+glm::mat4 FreeRoamCamera::GetProjMatrix(int width, int height)
 {
     return glm::perspective(glm::radians(m_fov), (float)width / (float)height, m_near, m_far);
+}
+
+void FreeRoamCamera::Reset()
+{
+    m_position = glm::vec3(0.0f, 0.0f, 3.0f);
+    m_eye = glm::vec3(0.0f, 0.0f, -1.0f);
+    m_up = glm::vec3(0.0f, 1.0f, 0.0f);
+}
+
+glm::vec3 FreeRoamCamera::GetViewDirection() const
+{
+    return m_eye;
+}
+
+glm::vec3 FreeRoamCamera::GetPosition() const
+{
+    return this->m_position;
+}
+
+void FreeRoamCamera::SetPosition(const glm::vec3 &m_position)
+{
+    this->m_position = m_position;
 }
 
 glm::vec3 FreeRoamCamera::_getCameraTarget() const
@@ -86,13 +108,6 @@ void FreeRoamCamera::_rotate(const glm::vec2 &mouseMovement)
     m_eye = glm::normalize(glm::vec3(cos(glm::radians(m_rotX)) * cos(glm::radians(m_rotY)), sin(glm::radians(m_rotY)), sin(glm::radians(m_rotX)) * cos(glm::radians(m_rotY))));
 }
 
-void FreeRoamCamera::reset()
-{
-    m_position = glm::vec3(0.0f, 0.0f, 3.0f);
-    m_eye = glm::vec3(0.0f, 0.0f, -1.0f);
-    m_up = glm::vec3(0.0f, 1.0f, 0.0f);
-}
-
 glm::vec3 FreeRoamCamera::_getCameraSide()
 {
     glm::vec3 side = glm::cross(m_eye, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -102,19 +117,4 @@ glm::vec3 FreeRoamCamera::_getCameraSide()
 glm::vec3 FreeRoamCamera::_getCameraUp()
 {
     return glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
-}
-
-glm::vec3 FreeRoamCamera::getViewDirection() const
-{
-    return _getCameraTarget();
-}
-
-glm::vec3 FreeRoamCamera::getPosition() const
-{
-    return this->m_position;
-}
-
-void FreeRoamCamera::setPosition(const glm::vec3 &m_position)
-{
-    this->m_position = m_position;
 }

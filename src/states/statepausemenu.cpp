@@ -67,6 +67,9 @@ void StatePauseMenu::Enter(std::string arg)
 
 void StatePauseMenu::Update(float p_fDelta)
 {
+	if (m_pCam)
+		m_pSkybox->update(p_fDelta);
+
 	glm::vec2 screenSize = m_pApp->getScreenSize();
 
 	// m_pSkybox->update(p_fDelta);

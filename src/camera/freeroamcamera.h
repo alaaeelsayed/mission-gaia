@@ -9,13 +9,13 @@ public:
     FreeRoamCamera(wolf::App *pApp);
     ~FreeRoamCamera() override;
 
-    void update(float dt) override;
-    glm::mat4 getViewMatrix() override;
-    glm::mat4 getProjMatrix(int width, int height) override;
-    glm::vec3 getViewDirection() const override;
-    glm::vec3 getPosition() const override;
-    void setPosition(const glm::vec3 &m_position) override;
-    void reset();
+    void Update(float dt) override;
+    glm::mat4 GetViewMatrix() override;
+    glm::mat4 GetProjMatrix(int width, int height) override;
+    glm::vec3 GetViewDirection() const override;
+    glm::vec3 GetPosition() const override;
+    void SetPosition(const glm::vec3 &m_position) override;
+    void Reset();
 
 private:
     glm::vec3 _getCameraUp() override;

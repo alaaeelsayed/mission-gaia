@@ -8,13 +8,13 @@ public:
     Camera(wolf::App *pApp) : m_pApp(pApp) {}
     virtual ~Camera(){};
 
-    virtual void update(float dt) = 0;
-    virtual glm::mat4 getViewMatrix() = 0;
-    virtual glm::mat4 getProjMatrix(int width, int height) = 0;
-    virtual glm::vec3 getViewDirection() const = 0;
-    virtual glm::vec3 getPosition() const = 0;
-    virtual void setPosition(const glm::vec3 &m_position) = 0;
-    glm::vec3 getRotation() { return glm::vec3(m_rotX, m_rotY, 0.0f); };
+    virtual void Update(float dt) = 0;
+    virtual glm::mat4 GetViewMatrix() = 0;
+    virtual glm::mat4 GetProjMatrix(int width, int height) = 0;
+    virtual glm::vec3 GetViewDirection() const = 0;
+    virtual glm::vec3 GetPosition() const = 0;
+    virtual void SetPosition(const glm::vec3 &m_position) = 0;
+    glm::vec3 GetRotation() { return glm::vec3(m_rotX, m_rotY, 0.0f); };
 
 protected:
     virtual glm::vec3 _getCameraUp() = 0;

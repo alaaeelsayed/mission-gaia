@@ -70,10 +70,8 @@ void StateGameplay::Enter(std::string arg)
 		m_thirstText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
 
 		m_pFlashlight = new Model("data/models/flashlight.fbx", "dim");
-		m_pFlashlight->setPosition(glm::vec3(11, 9, -22));
-		m_pFlashlight->setScale(glm::vec3(0.005f, 0.005f, 0.005f));
-		// m_pFlashlight->setRotation(180, glm::vec3(0.0f, 1.0f, 0.0f));
-
+		m_pFlashlight->setPosition(glm::vec3(80, -50, -200));
+		m_pFlashlight->setRotation(glm::vec3(0.0f, DEG_TO_RAD(180), 0.0f));
 		m_pSpotlight = new Light();
 		m_pSpotlight->vPosRange = glm::vec4(0.0f, 0.0f, 0.0f, 100.0f);
 		m_pSpotlight->vColor = glm::vec3(0.005f, 0.005f, 0.005f);
@@ -107,15 +105,15 @@ void StateGameplay::Enter(std::string arg)
 			int z = _randomNum(-100, 100);
 			m_pCreature->setScale(glm::vec3(scale, scale, scale));
 			m_pCreature->translate(glm::vec3(x, 0.0f, z));
-			m_pCreature->setRotation(rotation, glm::vec3(0.0f, 1.0f, 0.0f));
+			// m_pCreature->setRotation(rotation, glm::vec3(0.0f, 1.0f, 0.0f));
 			m_lModels.push_back(m_pCreature);
 		}
 
 		// m_font = new Font("data/fonts/inconsolata.fnt", "data/textures/fonts/");
 		m_pSoundManager = new wolf::SoundManager();
 		m_pSoundManager->CreateSoundSystem();
-		// m_pSoundManager->Play2D("Nature", m_natureSoundPath, true);
-		m_pSoundManager->Play2D("Water", m_waterSoundPath, true);
+		m_pSoundManager->Play2D("Nature", m_natureSoundPath, true);
+		m_pSoundManager->Play3D("Water", m_waterSoundPath, glm::vec3(0.0f, 0.0f, 0.0f), 10.0f, true);
 		// Debug Menu
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -166,7 +164,7 @@ void StateGameplay::Update(float p_fDelta)
 
 	glm::vec3 lightspot = glm::normalize(m_pCam->getViewDirection() - glm::vec3(m_pSpotlight->vPosRange.x, m_pSpotlight->vPosRange.y, m_pSpotlight->vPosRange.z));
 	m_pSpotlight->vLightSpot = glm::vec4(lightspot, 0.2f);
-	m_pFlashlight->setPosition(m_pCam->getPosition() + glm::vec3(0.23f, -0.25f, 0.0f));
+
 	m_fHunger = glm::max(m_fHunger - (p_fDelta * (rand() % 3 + 2)), 0.0f);
 	m_fThirst = glm::max(m_fThirst - p_fDelta * (rand() % 2 + 1), 0.0f);
 
@@ -204,6 +202,7 @@ void StateGameplay::Update(float p_fDelta)
 	m_pTerrainGenerator->SetOctaves(m_terrainOctaves);
 	m_pTerrainGenerator->SetVertexCount(m_terrainVerts);
 	m_pTerrainGenerator->SetRoughness(m_terrainRoughness);
+	m_pSoundManager->SetListenerPosition(m_pCam->getPosition(), m_pCam->getViewDirection());
 }
 
 void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int width, int height)
@@ -321,7 +320,7 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 		m_bKeyDown = false;
 
 	if (m_bFlashlightEquipped)
-		m_pFlashlight->render(mProj, mView);
+		m_pFlashlight->render(mProj, glm::mat4(1.0f));
 
 	m_hungerText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
 	m_thirstText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));

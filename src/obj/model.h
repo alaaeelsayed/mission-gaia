@@ -31,8 +31,8 @@ public:
     void setNormal(const char *normalPath);
     void setPosition(const glm::vec3 &vPosition);
     void translate(const glm::vec3 &vPosition);
-    void rotate(float fAngle, const glm::vec3 &vAxis);
-    void setRotation(float fAngle, const glm::vec3 &vAxis);
+    void rotate(const glm::vec3 &vRotation);
+    void setRotation(const glm::vec3 &vRotation);
     void setScale(const glm::vec3 &vScale);
     glm::vec3 getScale();
     void setOffset(const glm::vec3 &vOffset);
@@ -56,12 +56,8 @@ public:
 
 private:
     glm::vec3 m_vPosition = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec4 m_vRotation = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f); // xyz for axis w for angle
+    glm::vec3 m_vRotation = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 m_vScale = glm::vec3(1.0f, 1.0f, 1.0f);
-    float m_x = 0.0f;
-    float m_y = 0.0f;
-    float m_z = 0.0f;
-    float m_fRotation = 0.0f;
 
     wolf::Model *m_pModel = 0;
     wolf::Texture *m_pTexture = 0;
