@@ -101,6 +101,8 @@ private:
 	float m_fThirst = 100;
 	int m_iLights = 0;
 
+	Plane *m_pPlane = nullptr;
+
 	// Water
 	Water *m_pWater = nullptr;
 

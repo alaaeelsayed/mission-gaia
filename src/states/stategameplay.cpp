@@ -37,6 +37,7 @@ StateGameplay::~StateGameplay()
 	{
 		delete pLight;
 	}
+	wolf::BulletPhysicsManager::DestroyInstance();
 }
 
 void StateGameplay::Exit()
@@ -49,6 +50,11 @@ void StateGameplay::Enter(std::string arg)
 
 	if (!m_pWorldProgram)
 	{
+
+		wolf::BulletPhysicsManager::CreateInstance("data/physics/physics_materials.xml",
+												   "data/shaders/lines.vsh",
+												   "data/shaders/lines.fsh");
+
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glEnable(GL_DEPTH_TEST);
 		m_font = new Font("data/fonts/inconsolata.fnt", "data/textures/fonts/");
@@ -115,7 +121,7 @@ void StateGameplay::Enter(std::string arg)
 		m_pSoundManager = new wolf::SoundManager();
 		m_pSoundManager->CreateSoundSystem();
 		// m_pSoundManager->Play2D("Nature", m_natureSoundPath, true);
-		m_pSoundManager->Play2D("Water", m_waterSoundPath, true);
+		// m_pSoundManager->Play2D("Water", m_waterSoundPath, true);
 		// Debug Menu
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -145,10 +151,14 @@ void StateGameplay::Enter(std::string arg)
 			}
 		}
 
+		// Ground
+		m_pPlane = new Plane(m_pWorldProgram, m_groundTexPath);
+		m_pPlane->setScale(100);
+
 		// Water
-		m_pWater = new Water();
-		m_pWater->setCamera(m_pCam);
-		m_pWater->setScale(glm::vec3(500.0f, 500.0f, 500.0f));
+		// m_pWater = new Water();
+		// m_pWater->setCamera(m_pCam);
+		// m_pWater->setScale(glm::vec3(500.0f, 500.0f, 500.0f));
 		// m_pWater->setPosition(glm::vec3(1000.0f, -20.0f, 1000.0f));
 
 		if (m_pCam)
@@ -160,7 +170,7 @@ void StateGameplay::Enter(std::string arg)
 
 void StateGameplay::Update(float p_fDelta)
 {
-
+	wolf::BulletPhysicsManager::Instance()->Update(p_fDelta);
 	if (m_pCam)
 		m_pSkybox->update(p_fDelta);
 
@@ -197,7 +207,7 @@ void StateGameplay::Update(float p_fDelta)
 		model->update(p_fDelta);
 	}
 	m_vPrevCamRot = m_pCam->getRotation();
-	m_pWater->update(p_fDelta);
+	// m_pWater->update(p_fDelta);
 
 	m_pTerrainGenerator->SetSize(m_terrainSize);
 	m_pTerrainGenerator->SetAmplitude(m_terrainAmplitude);
@@ -266,7 +276,8 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 	if (m_pCam)
 		m_pSkybox->render(mProj, mView, width, height);
 
-	m_pWater->render(mProj, mView, width, height);
+	// m_pWater->render(mProj, mView, width, height);
+	m_pPlane->render(mProj, mView, width, height);
 
 	for (Terrain *terrain : m_lTerrains)
 	{
