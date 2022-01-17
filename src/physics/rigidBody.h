@@ -15,7 +15,7 @@ public:
     RigidBody(const std::string &pConfiguration);
     ~RigidBody();
 
-    void Update(float p_fDelta, const glm::vec3 &p_vPosition, void* p_pObject);
+    void Update(float p_fDelta, const glm::vec3 &p_vPosition);
 
     //------------------------------------------------------------------------------
     // Public methods for "GOC_RigidBody" family of components

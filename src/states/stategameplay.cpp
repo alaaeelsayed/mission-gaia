@@ -209,6 +209,25 @@ void StateGameplay::Update(float p_fDelta)
 	m_vPrevCamRot = m_pCam->getRotation();
 	// m_pWater->update(p_fDelta);
 
+	if (m_pApp->isKeyDown('F') && !m_bKeyDown)
+	{
+		m_bKeyDown = true;
+		m_pSoundManager->Play2D("flashlight", m_flashlightSoundPath, false, true);
+		m_bFlashlightEquipped = !m_bFlashlightEquipped;
+		m_pSpotlight->bEnabled = !m_pSpotlight->bEnabled;
+		if (!m_pSpotlight->bEnabled)
+		{
+			m_pSpotlight->vAttenuation = glm::vec3(1.0f, 1.0f, 1.0f);
+		}
+		else
+		{
+			m_pSpotlight->vAttenuation = glm::vec3(0.0f, 0.5f, 0.0f);
+		}
+	}
+
+	if (!m_pApp->isKeyDown('F'))
+		m_bKeyDown = false;
+
 	m_pTerrainGenerator->SetSize(m_terrainSize);
 	m_pTerrainGenerator->SetAmplitude(m_terrainAmplitude);
 	m_pTerrainGenerator->SetOctaves(m_terrainOctaves);
