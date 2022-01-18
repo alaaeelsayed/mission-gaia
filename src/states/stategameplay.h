@@ -13,6 +13,7 @@
 #include "../misc/imgui/imgui.h"
 #include "../misc/imgui/imgui_impl_glfw.h"
 #include "../misc/imgui/imgui_impl_opengl3.h"
+#include "../misc/util.h"
 
 #include "../../irrklang/include/irrKlang.h"
 
@@ -119,6 +120,8 @@ private:
 
 	int m_terrainSize, m_terrainVerts, m_terrainOctaves;
 	float m_terrainAmplitude, m_terrainRoughness;
+
+	float m_fEnemySpeed = 0.003f;
 };
 
 #endif

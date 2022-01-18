@@ -49,4 +49,10 @@ namespace Util
 
         return glm::vec4(x, y, z, w);
     }
+
+    static bool inProximity(const glm::vec3 &p_vPos, const glm::vec3 &p_vPos2)
+    {
+        auto distance = glm::distance(p_vPos, p_vPos2);
+        return distance <= 70;
+    }
 };

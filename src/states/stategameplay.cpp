@@ -94,6 +94,7 @@ void StateGameplay::Enter(std::string arg)
 		for (int i = 0; i < 10; i++)
 		{
 			Model *m_pCreature = new Model("data/models/low_poly_spitter.obj", "skinned");
+			m_pCreature->setTag("enemy");
 			m_pCreature->setTexture("data/textures/gimpy_diffuse.tga");
 			m_pCreature->setNormal("data/textures/gimpy_normal.tga");
 			m_pCreature->setOffset(m_pCreature->getModel()->getAABBMin());
@@ -233,6 +234,23 @@ void StateGameplay::Update(float p_fDelta)
 	m_pTerrainGenerator->SetOctaves(m_terrainOctaves);
 	m_pTerrainGenerator->SetVertexCount(m_terrainVerts);
 	m_pTerrainGenerator->SetRoughness(m_terrainRoughness);
+
+	for (Model *pModel : m_lModels)
+	{
+		if (pModel->getTag().compare("enemy") == 0)
+		{
+			// Model is an enemy
+			glm::vec3 m_vModelPos = pModel->getPosition();
+			glm::vec3 m_vPlayerPos = m_pCam->getPosition();
+
+			if (Util::inProximity(m_vModelPos, m_vPlayerPos))
+			{
+				float xDist = m_vPlayerPos.x - m_vModelPos.x;
+				float zDist = m_vPlayerPos.z - m_vModelPos.z;
+				pModel->setPosition(m_vModelPos + glm::vec3(xDist * m_fEnemySpeed, 0.0f, zDist * m_fEnemySpeed));
+						}
+		}
+	}
 }
 
 void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int width, int height)
@@ -245,52 +263,52 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 	m_pWorldProgram->SetUniform("u_lightDir", m_sunDirection);
 	m_pWorldProgram->SetUniform("u_viewPos", m_pCam->getViewDirection());
 
-	// for (Model *model : m_lModels)
-	// {
+	for (Model *model : m_lModels)
+	{
 
-	// 	std::sort(m_vLights.begin(), m_vLights.end(), [this, model](const Light *lhs, const Light *rhs) -> bool
-	// 			  { return _isEffectiveLight(lhs, rhs, model); });
+		std::sort(m_vLights.begin(), m_vLights.end(), [this, model](const Light *lhs, const Light *rhs) -> bool
+				  { return _isEffectiveLight(lhs, rhs, model); });
 
-	// 	for (int i = 0; i < 4; i++)
-	// 	{
-	// 		// Point lights
-	// 		Light *pLight = m_vLights[i];
-	// 		if (pLight->bEnabled)
-	// 		{
-	// 			m_pWorldProgram->SetUniform("u_lightPosRange" + std::to_string(i + 1), pLight->vPosRange);
-	// 			m_pWorldProgram->SetUniform("u_lightColor" + std::to_string(i + 1), pLight->vColor);
-	// 			m_pWorldProgram->SetUniform("u_lightAttenuation" + std::to_string(i + 1), pLight->vAttenuation);
-	// 			model->getMaterial()->SetUniform("u_lightPosRange" + std::to_string(i + 1), pLight->vPosRange);
-	// 			model->getMaterial()->SetUniform("u_lightColor" + std::to_string(i + 1), pLight->vColor);
-	// 			model->getMaterial()->SetUniform("u_lightAttenuation" + std::to_string(i + 1), pLight->vAttenuation);
-	// 		}
-	// 	}
+		for (int i = 0; i < 4; i++)
+		{
+			// Point lights
+			Light *pLight = m_vLights[i];
+			if (pLight->bEnabled)
+			{
+				m_pWorldProgram->SetUniform("u_lightPosRange" + std::to_string(i + 1), pLight->vPosRange);
+				m_pWorldProgram->SetUniform("u_lightColor" + std::to_string(i + 1), pLight->vColor);
+				m_pWorldProgram->SetUniform("u_lightAttenuation" + std::to_string(i + 1), pLight->vAttenuation);
+				model->getMaterial()->SetUniform("u_lightPosRange" + std::to_string(i + 1), pLight->vPosRange);
+				model->getMaterial()->SetUniform("u_lightColor" + std::to_string(i + 1), pLight->vColor);
+				model->getMaterial()->SetUniform("u_lightAttenuation" + std::to_string(i + 1), pLight->vAttenuation);
+			}
+		}
 
-	// 	// Spot Light
-	// 	if (m_pSpotlight->bEnabled)
-	// 	{
-	// 		m_pWorldProgram->SetUniform("u_lightPosRange", m_pSpotlight->vPosRange);
-	// 		m_pWorldProgram->SetUniform("u_lightColor", m_pSpotlight->vColor);
-	// 		m_pWorldProgram->SetUniform("u_lightSpot", m_pSpotlight->vLightSpot);
-	// 		m_pWorldProgram->SetUniform("u_lightAttenuation", m_pSpotlight->vAttenuation);
+		// Spot Light
+		if (m_pSpotlight->bEnabled)
+		{
+			m_pWorldProgram->SetUniform("u_lightPosRange", m_pSpotlight->vPosRange);
+			m_pWorldProgram->SetUniform("u_lightColor", m_pSpotlight->vColor);
+			m_pWorldProgram->SetUniform("u_lightSpot", m_pSpotlight->vLightSpot);
+			m_pWorldProgram->SetUniform("u_lightAttenuation", m_pSpotlight->vAttenuation);
 
-	// 		model->getMaterial()->SetUniform("u_lightPosRange", m_pSpotlight->vPosRange);
-	// 		model->getMaterial()->SetUniform("u_lightColor", m_pSpotlight->vColor);
-	// 		model->getMaterial()->SetUniform("u_lightSpot", m_pSpotlight->vLightSpot);
-	// 		model->getMaterial()->SetUniform("u_lightAttenuation", m_pSpotlight->vAttenuation);
-	// 	}
-	// 	else
-	// 	{
-	// 		m_pWorldProgram->SetUniform("u_lightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-	// 		m_pWorldProgram->SetUniform("u_lightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-	// 		m_pWorldProgram->SetUniform("u_lightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
+			model->getMaterial()->SetUniform("u_lightPosRange", m_pSpotlight->vPosRange);
+			model->getMaterial()->SetUniform("u_lightColor", m_pSpotlight->vColor);
+			model->getMaterial()->SetUniform("u_lightSpot", m_pSpotlight->vLightSpot);
+			model->getMaterial()->SetUniform("u_lightAttenuation", m_pSpotlight->vAttenuation);
+		}
+		else
+		{
+			m_pWorldProgram->SetUniform("u_lightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+			m_pWorldProgram->SetUniform("u_lightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+			m_pWorldProgram->SetUniform("u_lightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
 
-	// 		model->getMaterial()->SetUniform("u_lightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-	// 		model->getMaterial()->SetUniform("u_lightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-	// 		model->getMaterial()->SetUniform("u_lightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
-	// 	}
-	// 	model->render(mProj, mView, m_pCam->getViewDirection());
-	// }
+			model->getMaterial()->SetUniform("u_lightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+			model->getMaterial()->SetUniform("u_lightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+			model->getMaterial()->SetUniform("u_lightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
+		}
+		model->render(mProj, mView, m_pCam->getViewDirection());
+	}
 
 	if (m_pCam)
 		m_pSkybox->render(mProj, mView, width, height);
@@ -298,39 +316,39 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 	// m_pWater->render(mProj, mView, width, height);
 	m_pPlane->render(mProj, mView, width, height);
 
-	for (Terrain *terrain : m_lTerrains)
-	{
-		terrain->Render(mProj, mView);
-	}
+	// for (Terrain *terrain : m_lTerrains)
+	// {
+	// 	terrain->Render(mProj, mView);
+	// }
 
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
-	ImGui::Begin("Terrain Debug Menu");
-	ImGui::SetWindowSize(ImVec2(400.0f, 400.0f), true);
-	ImGui::SliderInt("Size", &m_terrainSize, 0, 1600);
-	ImGui::SliderInt("Vertex Count", &m_terrainVerts, 0, 1024);
-	ImGui::SliderInt("Octaves", &m_terrainOctaves, 0, 10);
-	ImGui::SliderFloat("Amplitude", &m_terrainAmplitude, 0, 200.0f);
-	ImGui::SliderFloat("Roughness", &m_terrainRoughness, 0, 2.0f);
-	if (ImGui::Button("Rerender"))
-	{
-		_renderTerrain();
-	}
-	if (ImGui::Button("Generate New Terrain"))
-	{
-		delete m_pTerrainGenerator;
-		m_pTerrainGenerator = new TerrainGenerator();
-		m_pTerrainGenerator->SetSize(m_terrainSize);
-		m_pTerrainGenerator->SetAmplitude(m_terrainAmplitude);
-		m_pTerrainGenerator->SetOctaves(m_terrainOctaves);
-		m_pTerrainGenerator->SetVertexCount(m_terrainVerts);
-		m_pTerrainGenerator->SetRoughness(m_terrainRoughness);
-		_renderTerrain();
-	}
-	ImGui::End();
-	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	// ImGui_ImplOpenGL3_NewFrame();
+	// ImGui_ImplGlfw_NewFrame();
+	// ImGui::NewFrame();
+	// ImGui::Begin("Terrain Debug Menu");
+	// ImGui::SetWindowSize(ImVec2(400.0f, 400.0f), true);
+	// ImGui::SliderInt("Size", &m_terrainSize, 0, 1600);
+	// ImGui::SliderInt("Vertex Count", &m_terrainVerts, 0, 1024);
+	// ImGui::SliderInt("Octaves", &m_terrainOctaves, 0, 10);
+	// ImGui::SliderFloat("Amplitude", &m_terrainAmplitude, 0, 200.0f);
+	// ImGui::SliderFloat("Roughness", &m_terrainRoughness, 0, 2.0f);
+	// if (ImGui::Button("Rerender"))
+	// {
+	// 	_renderTerrain();
+	// }
+	// if (ImGui::Button("Generate New Terrain"))
+	// {
+	// 	delete m_pTerrainGenerator;
+	// 	m_pTerrainGenerator = new TerrainGenerator();
+	// 	m_pTerrainGenerator->SetSize(m_terrainSize);
+	// 	m_pTerrainGenerator->SetAmplitude(m_terrainAmplitude);
+	// 	m_pTerrainGenerator->SetOctaves(m_terrainOctaves);
+	// 	m_pTerrainGenerator->SetVertexCount(m_terrainVerts);
+	// 	m_pTerrainGenerator->SetRoughness(m_terrainRoughness);
+	// 	_renderTerrain();
+	// }
+	// ImGui::End();
+	// ImGui::Render();
+	// ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 	if (m_pApp->isKeyDown('F') && !m_bKeyDown)
 	{
