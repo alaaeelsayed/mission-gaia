@@ -114,6 +114,8 @@ private:
 
 	// Debug Menu
 	bool m_bDebug = true;
+	bool m_bWalking = false;
+	bool m_bRunning = false;
 
 	int m_terrainSize, m_terrainVerts, m_terrainOctaves;
 	float m_terrainAmplitude, m_terrainRoughness;

@@ -350,6 +350,34 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 	if (!m_pApp->isKeyDown('F'))
 		m_bKeyDown = false;
 
+	if (m_pApp->isKeyDown('W') || m_pApp->isKeyDown('A') || m_pApp->isKeyDown('D') || m_pApp->isKeyDown('S'))
+	{
+		if (!m_bWalking && !m_bRunning)
+		{
+			m_pSoundManager->Play2D("walking", m_walkingSoundPath, true, true);
+			m_bWalking = true;
+		}
+
+		if (m_pApp->isKeyDown(GLFW_KEY_LEFT_CONTROL) && !m_bRunning)
+		{
+			m_pSoundManager->Play2D("running", m_runningSoundPath, true, true);
+			m_bWalking = false;
+			m_bRunning = true;
+		}
+	}
+	if (!m_pApp->isKeyDown('W') && !m_pApp->isKeyDown('A') && !m_pApp->isKeyDown('D') && !m_pApp->isKeyDown('S'))
+	{
+
+		m_bWalking = false;
+		m_bRunning = false;
+		ISound *pWalking = m_pSoundManager->GetSound("walking");
+		ISound *pRunning = m_pSoundManager->GetSound("running");
+		if (pWalking && !pWalking->getIsPaused())
+			m_pSoundManager->PauseSound("walking");
+		if (pRunning && !pRunning->getIsPaused())
+			m_pSoundManager->PauseSound("running");
+	}
+
 	if (m_bFlashlightEquipped)
 		m_pFlashlight->render(mProj, mView);
 
