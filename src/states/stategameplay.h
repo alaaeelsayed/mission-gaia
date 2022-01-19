@@ -14,6 +14,7 @@
 #include "../misc/imgui/imgui_impl_glfw.h"
 #include "../misc/imgui/imgui_impl_opengl3.h"
 #include "../misc/util.h"
+#include "./statemachine.h"
 
 #include "../../irrklang/include/irrKlang.h"
 
@@ -45,6 +46,8 @@ public:
 	virtual void Exit();
 	virtual void Render(const glm::mat4 mProj, const glm::mat4 mView, int width, int height);
 	void RegisterCamera(Camera *pCam);
+	void RegisterMachine(Common::StateMachine *pMachine);
+	virtual void Reset();
 
 private:
 	void _renderTerrain();
@@ -135,6 +138,8 @@ private:
 	float m_fEnemySpeed = 0.003f;
 	glm::vec3 m_vEnemyRange = glm::vec3(70.0f, 20.0f, 70.0f);
 	glm::vec3 m_vFoodRange = glm::vec3(20.0f, 20.0f, 20.0f);
+
+	Common::StateMachine *m_pStateMachine = nullptr;
 };
 
 #endif

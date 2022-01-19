@@ -1,5 +1,5 @@
-#ifndef STATEPAUSEMENU_H
-#define STATEPAUSEMENU_H
+#ifndef StateRespawn_H
+#define StateRespawn_H
 
 #include "statebase.h"
 #include "../camera/freeroamcamera.h"
@@ -10,14 +10,14 @@
 #include "../text/textbox.h"
 #include "../../wolf/wolf.h"
 
-class StatePauseMenu : public Common::StateBase
+class StateRespawn : public Common::StateBase
 {
 public:
 	//------------------------------------------------------------------------------
 	// Public methods.
 	//------------------------------------------------------------------------------
-	StatePauseMenu();
-	virtual ~StatePauseMenu();
+	StateRespawn();
+	virtual ~StateRespawn();
 
 	// Overridden from StateBase
 	virtual void Enter(std::string arg = "");
@@ -25,7 +25,9 @@ public:
 	virtual void Exit();
 	virtual void Render(const glm::mat4 mProj, const glm::mat4 mView, int width, int height);
 	virtual void Reset();
+
 	void RegisterCamera(Camera *pCam);
+	void RegisterGameplay(Common::StateBase *pState);
 
 private:
 	int _randomNum(int lowerBound, int upperBound);
@@ -40,11 +42,13 @@ private:
 	Skybox *m_pSkybox = 0;
 
 	Font *m_font;
-	TextBox *m_pPauseMenu = nullptr;
-	TextBox *m_pResumeGame = nullptr;
+	TextBox *m_pDead = nullptr;
+	TextBox *m_pRespawn = nullptr;
 	TextBox *m_pQuitGame = nullptr;
 
 	wolf::FrameBuffer *m_frameBuffer;
+
+	Common::StateBase *m_pGameplayState;
 };
 
 #endif

@@ -1,25 +1,25 @@
-#include "./statepausemenu.h"
+#include "./StateRespawn.h"
 #include "states.h"
 
-StatePauseMenu::StatePauseMenu()
+StateRespawn::StateRespawn()
 {
 }
 
-StatePauseMenu::~StatePauseMenu()
+StateRespawn::~StateRespawn()
 {
 	wolf::ProgramManager::DestroyProgram(m_pWorldProgram);
 	delete m_pSkybox;
 	delete m_font;
-	delete m_pPauseMenu;
-	delete m_pResumeGame;
+	delete m_pDead;
+	delete m_pRespawn;
 	delete m_pQuitGame;
 }
 
-void StatePauseMenu::Exit()
+void StateRespawn::Exit()
 {
 }
 
-void StatePauseMenu::Enter(std::string arg)
+void StateRespawn::Enter(std::string arg)
 {
 	m_pApp->setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	m_pApp->setCursorPos(500.0f, 300.0f);
@@ -45,17 +45,17 @@ void StatePauseMenu::Enter(std::string arg)
 
 		// Menu
 
-		m_pPauseMenu = new TextBox(500.0f, 100.0f);
-		m_pPauseMenu->SetText(m_font, "Pause Menu");
-		m_pPauseMenu->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		m_pPauseMenu->SetHorizontalAlignment(TextBox::Alignment::AL_Center);
-		m_pPauseMenu->SetVerticalAlignment(TextBox::Alignment::AL_Center);
+		m_pDead = new TextBox(500.0f, 100.0f);
+		m_pDead->SetText(m_font, "You are Dead");
+		m_pDead->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
+		m_pDead->SetHorizontalAlignment(TextBox::Alignment::AL_Center);
+		m_pDead->SetVerticalAlignment(TextBox::Alignment::AL_Center);
 
-		m_pResumeGame = new TextBox(500.0f, 100.0f);
-		m_pResumeGame->SetText(m_font, "Resume Game");
-		m_pResumeGame->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		m_pResumeGame->SetHorizontalAlignment(TextBox::Alignment::AL_Center);
-		m_pResumeGame->SetVerticalAlignment(TextBox::Alignment::AL_Center);
+		m_pRespawn = new TextBox(500.0f, 100.0f);
+		m_pRespawn->SetText(m_font, "Respawn");
+		m_pRespawn->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		m_pRespawn->SetHorizontalAlignment(TextBox::Alignment::AL_Center);
+		m_pRespawn->SetVerticalAlignment(TextBox::Alignment::AL_Center);
 
 		m_pQuitGame = new TextBox(500.0f, 100.0f);
 		m_pQuitGame->SetText(m_font, "Quit Game");
@@ -65,13 +65,13 @@ void StatePauseMenu::Enter(std::string arg)
 	}
 }
 
-void StatePauseMenu::Update(float p_fDelta)
+void StateRespawn::Update(float p_fDelta)
 {
 	glm::vec2 screenSize = m_pApp->getScreenSize();
 
 	// m_pSkybox->update(p_fDelta);
-	m_pPauseMenu->SetPos(screenSize.x / 2 - 250.0f, screenSize.y / 2 - 300.0f, 0.0f);
-	m_pResumeGame->SetPos(screenSize.x / 2 - 250.0f, screenSize.y / 2 - 100.0f, 0.0f);
+	m_pDead->SetPos(screenSize.x / 2 - 250.0f, screenSize.y / 2 - 300.0f, 0.0f);
+	m_pRespawn->SetPos(screenSize.x / 2 - 250.0f, screenSize.y / 2 - 100.0f, 0.0f);
 	m_pQuitGame->SetPos(screenSize.x / 2 - 250.0f, screenSize.y / 2 + 100.0f, 0.0f);
 
 	int iButton = m_pApp->isLMBDown();
@@ -80,12 +80,13 @@ void StatePauseMenu::Update(float p_fDelta)
 		float x, y = 0;
 		x = m_pApp->getMousePos().x;
 		y = m_pApp->getMousePos().y;
-		if (x > m_pResumeGame->GetPos().x && x < m_pResumeGame->GetPos().x + m_pResumeGame->GetWidth() && y > m_pResumeGame->GetPos().y && y < m_pResumeGame->GetPos().y + m_pResumeGame->GetHeight())
-		{
-			// Resume Game
-			m_pStateMachine->GoToState(eStateGameplay_Gameplay);
-		}
-		else if (x > m_pQuitGame->GetPos().x && x < m_pQuitGame->GetPos().x + m_pQuitGame->GetWidth() && y > m_pQuitGame->GetPos().y && y < m_pQuitGame->GetPos().y + m_pQuitGame->GetHeight())
+		// if (x > m_pRespawn->GetPos().x && x < m_pRespawn->GetPos().x + m_pRespawn->GetWidth() && y > m_pRespawn->GetPos().y && y < m_pRespawn->GetPos().y + m_pRespawn->GetHeight())
+		// {
+		// 	// Respawn Game
+		// 	m_pGameplayState->Reset();
+		// 	m_pStateMachine->GoToState(eStateGameplay_Gameplay);
+		// }
+		if (x > m_pQuitGame->GetPos().x && x < m_pQuitGame->GetPos().x + m_pQuitGame->GetWidth() && y > m_pQuitGame->GetPos().y && y < m_pQuitGame->GetPos().y + m_pQuitGame->GetHeight())
 		{
 			// Exit Game
 			m_pApp->exit();
@@ -93,7 +94,7 @@ void StatePauseMenu::Update(float p_fDelta)
 	}
 }
 
-void StatePauseMenu::Render(const glm::mat4 mProj, const glm::mat4 mView, int width, int height)
+void StateRespawn::Render(const glm::mat4 mProj, const glm::mat4 mView, int width, int height)
 {
 
 	m_frameBuffer->Bind();
@@ -114,22 +115,27 @@ void StatePauseMenu::Render(const glm::mat4 mProj, const glm::mat4 mView, int wi
 
 	m_frameBuffer->Render();
 
-	m_pPauseMenu->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
-	m_pResumeGame->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
+	m_pDead->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
+	// m_pRespawn->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
 	m_pQuitGame->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
 }
 
-int StatePauseMenu::_randomNum(int lowerBound, int upperBound)
+int StateRespawn::_randomNum(int lowerBound, int upperBound)
 {
-	// Generates random number in range. Includes lower bound and upper bound
+	// Generates random number in range. Isncludes lower bound and upper bound
 	return rand() % (upperBound - lowerBound + 1) + lowerBound;
 }
 
-void StatePauseMenu::RegisterCamera(Camera *pCam)
+void StateRespawn::RegisterCamera(Camera *pCam)
 {
 	m_pCam = pCam;
 }
 
-void StatePauseMenu::Reset()
+void StateRespawn::RegisterGameplay(Common::StateBase *pState)
+{
+	m_pGameplayState = pState;
+}
+
+void StateRespawn::Reset()
 {
 }

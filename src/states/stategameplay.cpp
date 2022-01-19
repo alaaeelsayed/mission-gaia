@@ -22,6 +22,7 @@ StateGameplay::~StateGameplay()
 	delete m_thirstText;
 	delete m_drinkText;
 	delete m_eatText;
+	delete m_pStateMachine;
 
 	delete m_pSoundManager;
 
@@ -44,6 +45,44 @@ StateGameplay::~StateGameplay()
 
 void StateGameplay::Exit()
 {
+}
+
+void StateGameplay::Reset()
+{
+	delete m_pTerrainGenerator;
+	delete m_pFlashlight;
+	delete m_pSpotlight;
+	wolf::ProgramManager::DestroyProgram(m_pWorldProgram);
+	m_pWorldProgram = nullptr;
+	wolf::MaterialManager::DestroyMaterial(m_pMat);
+	wolf::TextureManager::DestroyTexture(m_pCreatureTex);
+	wolf::TextureManager::DestroyTexture(m_pShipTex);
+	delete m_pSkybox;
+	delete m_pCam;
+	delete m_font;
+	delete m_hungerText;
+	delete m_thirstText;
+	delete m_drinkText;
+	delete m_eatText;
+	delete m_pStateMachine;
+
+	delete m_pSoundManager;
+
+	for (Terrain *terrain : m_lTerrains)
+	{
+		delete terrain;
+	}
+
+	for (Model *model : m_lModels)
+	{
+		delete model;
+	}
+
+	for (Light *pLight : m_vLights)
+	{
+		delete pLight;
+	}
+	wolf::BulletPhysicsManager::DestroyInstance();
 }
 
 void StateGameplay::Enter(std::string arg)
@@ -342,6 +381,11 @@ void StateGameplay::Update(float p_fDelta)
 		m_bDrinking = false;
 		m_bEating = false;
 	}
+
+	if (m_fHunger <= 0.0f && m_fThirst <= 0.0f)
+	{
+		m_pStateMachine->GoToState(eStateGameplay_Respawn);
+	}
 }
 
 void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int width, int height)
@@ -531,6 +575,11 @@ bool StateGameplay::_isEffectiveLight(const Light *pLight1, const Light *pLight2
 void StateGameplay::RegisterCamera(Camera *pCam)
 {
 	m_pCam = pCam;
+}
+
+void StateGameplay::RegisterMachine(Common::StateMachine *pMachine)
+{
+	m_pStateMachine = pMachine;
 }
 
 void StateGameplay::_renderTerrain()

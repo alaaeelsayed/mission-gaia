@@ -27,6 +27,7 @@ namespace Common
 		virtual void Update(float p_fDelta) = 0;
 		virtual void Exit() = 0;
 		virtual void Render(const glm::mat4 mProj, const glm::mat4 mView, int width, int height) = 0;
+		virtual void Reset() = 0;
 		void RegisterApp(wolf::App *pApp) { m_pApp = pApp; };
 
 	private:

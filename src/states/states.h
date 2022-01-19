@@ -4,6 +4,7 @@
 enum States
 {
 	eStateGameplay_PauseMenu = 0,
+	eStateGameplay_Respawn,
 	eStateGameplay_Gameplay
 };
 

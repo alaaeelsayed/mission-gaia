@@ -4,6 +4,7 @@
 #include "states/statemachine.h"
 #include "states/stategameplay.h"
 #include "states/statepausemenu.h"
+#include "states/staterespawn.h"
 
 class Gaia
 {
