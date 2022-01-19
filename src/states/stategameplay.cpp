@@ -21,6 +21,7 @@ StateGameplay::~StateGameplay()
 	delete m_hungerText;
 	delete m_thirstText;
 	delete m_drinkText;
+	delete m_eatText;
 
 	delete m_pSoundManager;
 
@@ -84,6 +85,14 @@ void StateGameplay::Enter(std::string arg)
 		m_drinkText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
 		m_drinkText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
 
+		m_eatText = new TextBox(700.0f, 200.0f);
+		m_eatText->SetPos(400.0f, 50.0f, 0.0f);
+
+		m_eatText->SetText(m_font, m_eatPrompt.c_str());
+		m_eatText->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		m_eatText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
+		m_eatText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
+
 		m_pFlashlight = new Model("data/models/flashlight.fbx", "dim");
 		m_pFlashlight->setPosition(glm::vec3(11, 9, -22));
 		m_pFlashlight->setScale(glm::vec3(0.005f, 0.005f, 0.005f));
@@ -127,6 +136,23 @@ void StateGameplay::Enter(std::string arg)
 			m_lModels.push_back(m_pCreature);
 		}
 
+		for (int i = 0; i < 10; i++)
+		{
+			Model *m_pBush = new Model("data/models/shrub.fbx", "skinned");
+			m_pBush->setTag("food");
+			m_pBush->setTexture("data/textures/shrub.png");
+			m_pBush->setOffset(m_pBush->getModel()->getAABBMin());
+
+			int scale = _randomNum(2, 5);
+			float rotation = (float)_randomNum(-60, 60);
+			int x = _randomNum(-100, 100);
+			int z = _randomNum(-100, 100);
+			m_pBush->setScale(glm::vec3(0.01f, 0.01f, 0.01f));
+			m_pBush->translate(glm::vec3(x, 0.0f, z));
+			m_pBush->setRotation(rotation, glm::vec3(0.0f, 1.0f, 0.0f));
+			m_lModels.push_back(m_pBush);
+		}
+
 		// m_font = new Font("data/fonts/inconsolata.fnt", "data/textures/fonts/");
 		m_pSoundManager = new wolf::SoundManager();
 		m_pSoundManager->CreateSoundSystem();
@@ -168,8 +194,8 @@ void StateGameplay::Enter(std::string arg)
 		// Water
 		m_pWater = new Water();
 		m_pWater->setCamera(m_pCam);
-		m_pWater->setScale(glm::vec3(500.0f, 500.0f, 500.0f));
-		// m_pWater->setPosition(glm::vec3(1000.0f, -20.0f, 1000.0f));
+		m_pWater->setScale(glm::vec3(100.0f, 10.0f, 100.0f));
+		m_pWater->setPosition(glm::vec3(300.0f, -20.0f, 300.0f));
 
 		if (m_pCam)
 		{
@@ -244,6 +270,7 @@ void StateGameplay::Update(float p_fDelta)
 	m_pTerrainGenerator->SetVertexCount(m_terrainVerts);
 	m_pTerrainGenerator->SetRoughness(m_terrainRoughness);
 
+	m_bNearFood = false;
 	for (Model *pModel : m_lModels)
 	{
 		if (pModel->getTag().compare("enemy") == 0)
@@ -269,10 +296,23 @@ void StateGameplay::Update(float p_fDelta)
 				}
 			}
 		}
+
+		// CHECK IF NEAR FOOD
+		if (pModel->getTag().compare("food") == 0)
+		{
+			// Model is an enemy
+			glm::vec3 m_vModelPos = pModel->getPosition();
+			glm::vec3 m_vPlayerPos = m_pCam->getPosition();
+
+			if (Util::inProximity(m_vModelPos, m_vPlayerPos, m_vFoodRange))
+			{
+				m_bNearFood = true;
+			}
+		}
 	}
 
 	// CHECK IF NEAR WATER
-	m_bNearWater = Util::inProximity(m_pWater->getPosition(), m_pCam->getPosition(), glm::vec3(500.0f, 50.0f, 500.0f));
+	m_bNearWater = Util::inProximity(m_pWater->getPosition(), m_pCam->getPosition(), m_pWater->getScale());
 
 	if (m_bNearWater && m_pApp->isKeyDown('E') && !m_bDrinking)
 	{
@@ -286,6 +326,22 @@ void StateGameplay::Update(float p_fDelta)
 
 	if (!m_pApp->isKeyDown('E'))
 		m_bDrinking = false;
+
+	if (m_bNearFood && m_pApp->isKeyDown('E') && !m_bEating)
+	{
+		m_bEating = true;
+		m_pSoundManager->Play2D("eating", m_eatingSoundPath, false, true);
+
+		m_fHunger += 10.0f;
+		if (m_fHunger > 100.0f)
+			m_fHunger = 100.0f;
+	}
+
+	if (!m_pApp->isKeyDown('E'))
+	{
+		m_bDrinking = false;
+		m_bEating = false;
+	}
 }
 
 void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int width, int height)
@@ -439,6 +495,10 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 	if (m_bNearWater)
 	{
 		m_drinkText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
+	}
+	if (m_bNearFood)
+	{
+		m_eatText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
 	}
 }
 

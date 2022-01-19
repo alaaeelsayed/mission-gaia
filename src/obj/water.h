@@ -28,6 +28,8 @@ public:
         m_pSurface->setHeight(vScale.y);
         m_pSurface->setDepth(vScale.z);
     }
+
+    glm::vec3 getScale() { return m_vScale; }
     void setCamera(Camera *p_pCamera)
     {
         m_pCamera = p_pCamera;
