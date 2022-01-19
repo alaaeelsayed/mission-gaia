@@ -20,6 +20,7 @@ public:
         m_vPosition = vPosition;
         m_pSurface->setPosition(vPosition);
     };
+    glm::vec3 getPosition() { return m_vPosition; };
     void setScale(const glm::vec3 &vScale)
     {
         m_vScale = vScale;

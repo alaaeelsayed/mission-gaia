@@ -63,6 +63,9 @@ private:
 	const std::string m_flashlightSoundPath = "data/sounds/flashlight.ogg";
 	const std::string m_runningSoundPath = "data/sounds/running.ogg";
 	const std::string m_walkingSoundPath = "data/sounds/walking.ogg";
+	const std::string m_drinkingSoundPath = "data/sounds/drinking.ogg";
+
+	const std::string m_drinkPrompt = "Press E to drink";
 
 	std::vector<Light *> m_vLights;
 	wolf::Program *m_pWorldProgram = 0;
@@ -96,11 +99,14 @@ private:
 
 	bool m_bKeyDown = false;
 	bool m_bFlashlightEquipped = false;
+	bool m_bDrinking = false;
 
 	Font *m_font;
 	TextBox *m_hungerText;
 	TextBox *m_thirstText;
+	TextBox *m_drinkText;
 
+	bool m_bNearWater = false;
 	float m_fHunger = 100;
 	float m_fThirst = 100;
 	int m_iLights = 0;
@@ -122,6 +128,7 @@ private:
 	float m_terrainAmplitude, m_terrainRoughness;
 
 	float m_fEnemySpeed = 0.003f;
+	glm::vec3 m_vEnemyRange = glm::vec3(70.0f, 20.0f, 70.0f);
 };
 
 #endif

@@ -20,6 +20,7 @@ StateGameplay::~StateGameplay()
 	delete m_font;
 	delete m_hungerText;
 	delete m_thirstText;
+	delete m_drinkText;
 
 	delete m_pSoundManager;
 
@@ -47,7 +48,7 @@ void StateGameplay::Exit()
 void StateGameplay::Enter(std::string arg)
 {
 	m_pApp->setInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
+	srand(time(NULL));
 	if (!m_pWorldProgram)
 	{
 
@@ -74,6 +75,14 @@ void StateGameplay::Enter(std::string arg)
 		m_thirstText->SetColor(1.0f, 1.0f, 1.0f, 0.6f);
 		m_thirstText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
 		m_thirstText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
+
+		m_drinkText = new TextBox(700.0f, 200.0f);
+		m_drinkText->SetPos(400.0f, 50.0f, 0.0f);
+
+		m_drinkText->SetText(m_font, m_drinkPrompt.c_str());
+		m_drinkText->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		m_drinkText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
+		m_drinkText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
 
 		m_pFlashlight = new Model("data/models/flashlight.fbx", "dim");
 		m_pFlashlight->setPosition(glm::vec3(11, 9, -22));
@@ -157,9 +166,9 @@ void StateGameplay::Enter(std::string arg)
 		m_pPlane->setScale(100);
 
 		// Water
-		// m_pWater = new Water();
-		// m_pWater->setCamera(m_pCam);
-		// m_pWater->setScale(glm::vec3(500.0f, 500.0f, 500.0f));
+		m_pWater = new Water();
+		m_pWater->setCamera(m_pCam);
+		m_pWater->setScale(glm::vec3(500.0f, 500.0f, 500.0f));
 		// m_pWater->setPosition(glm::vec3(1000.0f, -20.0f, 1000.0f));
 
 		if (m_pCam)
@@ -208,7 +217,7 @@ void StateGameplay::Update(float p_fDelta)
 		model->update(p_fDelta);
 	}
 	m_vPrevCamRot = m_pCam->getRotation();
-	// m_pWater->update(p_fDelta);
+	m_pWater->update(p_fDelta);
 
 	if (m_pApp->isKeyDown('F') && !m_bKeyDown)
 	{
@@ -243,14 +252,40 @@ void StateGameplay::Update(float p_fDelta)
 			glm::vec3 m_vModelPos = pModel->getPosition();
 			glm::vec3 m_vPlayerPos = m_pCam->getPosition();
 
-			if (Util::inProximity(m_vModelPos, m_vPlayerPos))
+			if (Util::inProximity(m_vModelPos, m_vPlayerPos, m_vEnemyRange))
 			{
 				float xDist = m_vPlayerPos.x - m_vModelPos.x;
 				float zDist = m_vPlayerPos.z - m_vModelPos.z;
 				pModel->setPosition(m_vModelPos + glm::vec3(xDist * m_fEnemySpeed, 0.0f, zDist * m_fEnemySpeed));
-						}
+			}
+			else
+			{
+				bool rand_bool = Util::randBool();
+				if (rand_bool)
+				{
+					float xDist = Util::randNum(0.0f, 5.0f);
+					float zDist = Util::randNum(0.0f, 5.0f);
+					pModel->setPosition(m_vModelPos + glm::vec3(xDist * m_fEnemySpeed, 0.0f, zDist * m_fEnemySpeed));
+				}
+			}
 		}
 	}
+
+	// CHECK IF NEAR WATER
+	m_bNearWater = Util::inProximity(m_pWater->getPosition(), m_pCam->getPosition(), glm::vec3(500.0f, 50.0f, 500.0f));
+
+	if (m_bNearWater && m_pApp->isKeyDown('E') && !m_bDrinking)
+	{
+		m_bDrinking = true;
+		m_pSoundManager->Play2D("drinking", m_drinkingSoundPath, false, true);
+
+		m_fThirst += 10.0f;
+		if (m_fThirst > 100.0f)
+			m_fThirst = 100.0f;
+	}
+
+	if (!m_pApp->isKeyDown('E'))
+		m_bDrinking = false;
 }
 
 void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int width, int height)
@@ -313,7 +348,7 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 	if (m_pCam)
 		m_pSkybox->render(mProj, mView, width, height);
 
-	// m_pWater->render(mProj, mView, width, height);
+	m_pWater->render(mProj, mView, width, height);
 	m_pPlane->render(mProj, mView, width, height);
 
 	// for (Terrain *terrain : m_lTerrains)
@@ -401,6 +436,10 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 
 	m_hungerText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
 	m_thirstText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
+	if (m_bNearWater)
+	{
+		m_drinkText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
+	}
 }
 
 int StateGameplay::_randomNum(int lowerBound, int upperBound)
