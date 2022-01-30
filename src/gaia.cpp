@@ -16,7 +16,8 @@ void Gaia::init()
 {
     // Initialize the StateMachine and supported states and go to the main statem_pFreeRoamCamera = new FreeRoamCamera(m_pApp);
     m_camera = new FreeRoamCamera(m_app);
-    m_camera->setPosition(glm::vec3(10, 10, -20));
+    m_camera->setPosition(glm::vec3(300.0f, 10.0f, 300.0f));
+
     m_pStateMachine = new Common::StateMachine();
 
     StateGameplay *pGameplay = new StateGameplay();

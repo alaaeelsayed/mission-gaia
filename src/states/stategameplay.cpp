@@ -98,6 +98,24 @@ void StateGameplay::Enter(std::string arg)
 
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glEnable(GL_DEPTH_TEST);
+
+		m_pTerrainGenerator = new TerrainGenerator();
+
+		m_terrainSize = m_pTerrainGenerator->GetSize();
+		m_terrainVerts = m_pTerrainGenerator->GetVertexCount();
+		m_terrainOctaves = m_pTerrainGenerator->GetOctaves();
+		m_terrainRoughness = m_pTerrainGenerator->GetRoughness();
+		m_terrainAmplitude = m_pTerrainGenerator->GetAmplitude();
+
+		for (int i = 0; i < 4; i++)
+		{
+			for (int j = 0; j < 4; j++)
+			{
+				Terrain *terrain = new Terrain(i, j, m_pTerrainGenerator);
+				m_lTerrains.push_back(terrain);
+			}
+		}
+
 		m_font = new Font("data/fonts/inconsolata.fnt", "data/textures/fonts/");
 
 		m_hungerText = new TextBox(200.0f, 200.0f);
@@ -132,7 +150,7 @@ void StateGameplay::Enter(std::string arg)
 		m_eatText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
 		m_eatText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
 
-		m_pFlashlight = new Model("data/models/flashlight.fbx", "dim");
+		m_pFlashlight = new Model("data/models/older-flashlight.fbx", "dim");
 		m_pFlashlight->setPosition(glm::vec3(11, 9, -22));
 		m_pFlashlight->setScale(glm::vec3(0.005f, 0.005f, 0.005f));
 		// m_pFlashlight->setRotation(180, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -148,7 +166,7 @@ void StateGameplay::Enter(std::string arg)
 		m_pFlashlight->setTexture("data/textures/flashlight.png");
 		m_lModels.push_back(m_pFlashlight);
 
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < 30; i++)
 		{
 			Model *m_pCreature = new Model("data/models/low_poly_spitter.obj", "skinned");
 			m_pCreature->setTag("enemy");
@@ -167,8 +185,9 @@ void StateGameplay::Enter(std::string arg)
 			m_pCreature->attachLight(pPointLight);
 			int scale = _randomNum(2, 5);
 			float rotation = (float)_randomNum(-60, 60);
-			int x = _randomNum(-100, 100);
-			int z = _randomNum(-100, 100);
+			int x = _randomNum(200, 600);
+			int z = _randomNum(200, 600);
+
 			m_pCreature->setScale(glm::vec3(scale, scale, scale));
 			m_pCreature->translate(glm::vec3(x, 0.0f, z));
 			m_pCreature->setRotation(rotation, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -184,10 +203,13 @@ void StateGameplay::Enter(std::string arg)
 
 			int scale = _randomNum(2, 5);
 			float rotation = (float)_randomNum(-60, 60);
-			int x = _randomNum(-100, 100);
-			int z = _randomNum(-100, 100);
+			int x = _randomNum(200, 600);
+			int z = _randomNum(200, 600);
+
 			m_pBush->setScale(glm::vec3(0.01f, 0.01f, 0.01f));
-			m_pBush->translate(glm::vec3(x, 0.0f, z));
+
+			float height = m_pTerrainGenerator->GenerateHeight(x % m_pTerrainGenerator->GetSize(), z % m_pTerrainGenerator->GetSize(), x / m_pTerrainGenerator->GetSize(), z / m_pTerrainGenerator->GetSize());
+			m_pBush->translate(glm::vec3(x, height, z));
 			m_pBush->setRotation(rotation, glm::vec3(0.0f, 1.0f, 0.0f));
 			m_lModels.push_back(m_pBush);
 		}
@@ -209,32 +231,15 @@ void StateGameplay::Enter(std::string arg)
 
 		m_pWorldProgram = wolf::ProgramManager::CreateProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
 
-		m_pTerrainGenerator = new TerrainGenerator();
-
-		m_terrainSize = m_pTerrainGenerator->GetSize();
-		m_terrainVerts = m_pTerrainGenerator->GetVertexCount();
-		m_terrainOctaves = m_pTerrainGenerator->GetOctaves();
-		m_terrainRoughness = m_pTerrainGenerator->GetRoughness();
-		m_terrainAmplitude = m_pTerrainGenerator->GetAmplitude();
-
-		for (int i = 0; i < 4; i++)
-		{
-			for (int j = 0; j < 4; j++)
-			{
-				Terrain *terrain = new Terrain(i, j, m_pTerrainGenerator);
-				m_lTerrains.push_back(terrain);
-			}
-		}
-
 		// Ground
-		m_pPlane = new Plane(m_pWorldProgram, m_groundTexPath);
-		m_pPlane->setScale(100);
+		// m_pPlane = new Plane(m_pWorldProgram, m_groundTexPath);
+		// m_pPlane->setScale(100);
 
 		// Water
 		m_pWater = new Water();
 		m_pWater->setCamera(m_pCam);
 		m_pWater->setScale(glm::vec3(100.0f, 10.0f, 100.0f));
-		m_pWater->setPosition(glm::vec3(300.0f, -20.0f, 300.0f));
+		m_pWater->setPosition(glm::vec3(300.0f, 5.0f, 300.0f));
 
 		if (m_pCam)
 		{
@@ -322,7 +327,10 @@ void StateGameplay::Update(float p_fDelta)
 			{
 				float xDist = m_vPlayerPos.x - m_vModelPos.x;
 				float zDist = m_vPlayerPos.z - m_vModelPos.z;
-				pModel->setPosition(m_vModelPos + glm::vec3(xDist * m_fEnemySpeed, 0.0f, zDist * m_fEnemySpeed));
+				pModel->setPosition(m_vModelPos + glm::vec3(xDist * p_fDelta * m_fEnemySpeed, 0.0f, zDist * p_fDelta * m_fEnemySpeed));
+
+				// Rotate in direction of player
+				pModel->setRotation(glm::degrees(atan2(-zDist, xDist)) + 90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 			}
 			else
 			{
@@ -331,7 +339,7 @@ void StateGameplay::Update(float p_fDelta)
 				{
 					float xDist = Util::randNum(0.0f, 5.0f);
 					float zDist = Util::randNum(0.0f, 5.0f);
-					pModel->setPosition(m_vModelPos + glm::vec3(xDist * m_fEnemySpeed, 0.0f, zDist * m_fEnemySpeed));
+					pModel->setPosition(m_vModelPos + glm::vec3(xDist * p_fDelta * m_fEnemySpeed, 0.0f, zDist * p_fDelta * m_fEnemySpeed));
 				}
 			}
 		}
@@ -449,12 +457,12 @@ void StateGameplay::Render(const glm::mat4 mProj, const glm::mat4 mView, int wid
 		m_pSkybox->render(mProj, mView, width, height);
 
 	m_pWater->render(mProj, mView, width, height);
-	m_pPlane->render(mProj, mView, width, height);
+	// m_pPlane->render(mProj, mView, width, height);
 
-	// for (Terrain *terrain : m_lTerrains)
-	// {
-	// 	terrain->Render(mProj, mView);
-	// }
+	for (Terrain *terrain : m_lTerrains)
+	{
+		terrain->Render(mProj, mView);
+	}
 
 	// ImGui_ImplOpenGL3_NewFrame();
 	// ImGui_ImplGlfw_NewFrame();

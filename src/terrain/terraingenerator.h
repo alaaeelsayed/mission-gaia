@@ -6,7 +6,7 @@
 #include <cmath>
 
 #ifndef AMPLITUDE
-#define AMPLITUDE 200.0f
+#define AMPLITUDE 30.0f
 #endif
 
 #ifndef SIZE
