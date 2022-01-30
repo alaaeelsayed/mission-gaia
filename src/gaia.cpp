@@ -1,72 +1,75 @@
 #include "gaia.h"
+#include "scene/scene.h"
 
 Gaia::Gaia(wolf::App *app) : m_app(app)
 {
-    init();
+    Init();
 }
 
 Gaia::~Gaia()
 {
     printf("Destroying Gaia\n");
-    delete m_camera;
-    delete m_pStateMachine;
+    delete m_stateMachine;
 }
 
-void Gaia::init()
+void Gaia::Init()
 {
-    // Initialize the StateMachine and supported states and go to the main statem_pFreeRoamCamera = new FreeRoamCamera(m_pApp);
-    m_camera = new FreeRoamCamera(m_app);
-    m_camera->setPosition(glm::vec3(10, 10, -20));
-    m_pStateMachine = new Common::StateMachine();
+    Scene::CreateInstance();
+    Culling::CreateInstance();
 
-    StateGameplay *pGameplay = new StateGameplay();
-    pGameplay->RegisterCamera(m_camera);
-    pGameplay->RegisterApp(m_app);
+    Camera *camera = new FreeRoamCamera(m_app);
+    camera->SetPosition(glm::vec3(10, 10, -20));
 
-    StatePauseMenu *pPauseMenu = new StatePauseMenu();
-    pPauseMenu->RegisterCamera(m_camera);
-    pPauseMenu->RegisterApp(m_app);
+    Scene::Instance()->SetActiveCamera(camera);
 
-    m_pStateMachine->RegisterState(eStateGameplay_Gameplay, pGameplay);
-    m_pStateMachine->RegisterState(eStateGameplay_PauseMenu, pPauseMenu);
-    m_pStateMachine->GoToState(eStateGameplay_Gameplay);
+    m_stateMachine = new Common::StateMachine();
+
+    StateGameplay *gameplay = new StateGameplay();
+    gameplay->RegisterApp(m_app);
+
+    StatePauseMenu *pauseMenu = new StatePauseMenu();
+    pauseMenu->RegisterApp(m_app);
+
+    m_stateMachine->RegisterState(eStateGameplay_Gameplay, gameplay);
+    m_stateMachine->RegisterState(eStateGameplay_PauseMenu, pauseMenu);
+    m_stateMachine->GoToState(eStateGameplay_Gameplay);
 
     printf("Successfully initialized Gaia\n");
 }
 
-void Gaia::update(float dt)
+void Gaia::Update(float dt)
 {
-    if (m_app->isKeyDown(GLFW_KEY_ESCAPE) && !m_bKeyDown)
+    if (m_app->isKeyDown(GLFW_KEY_ESCAPE) && !m_keyDown)
     {
-        if (m_pStateMachine->GetCurrentState() == eStateGameplay_PauseMenu)
+        if (m_stateMachine->GetCurrentState() == eStateGameplay_PauseMenu)
         {
-            m_pStateMachine->GoToState(eStateGameplay_Gameplay);
+            m_stateMachine->GoToState(eStateGameplay_Gameplay);
         }
         else
         {
-            m_pStateMachine->GoToState(eStateGameplay_PauseMenu);
+            m_stateMachine->GoToState(eStateGameplay_PauseMenu);
         }
-        m_bKeyDown = true;
+        m_keyDown = true;
     }
 
     if (!m_app->isKeyDown(GLFW_KEY_ESCAPE))
-        m_bKeyDown = false;
+        m_keyDown = false;
 
-    if (m_pStateMachine->GetCurrentState() != eStateGameplay_PauseMenu && !m_bDebugMode)
-        m_camera->update(dt);
+    if (m_stateMachine->GetCurrentState() != eStateGameplay_PauseMenu && !m_debugMode)
+        Scene::Instance()->GetActiveCamera()->Update(dt);
 
     if (!m_app->isKeyDown('M'))
     {
-        m_bDebugKeyDown = false;
+        m_debugKeyDown = false;
     }
 
-    if (m_app->isKeyDown('M') && !m_bDebugKeyDown)
+    if (m_app->isKeyDown('M') && !m_debugKeyDown)
     {
-        m_bDebugKeyDown = true;
-        m_bDebugMode = !m_bDebugMode;
+        m_debugKeyDown = true;
+        m_debugMode = !m_debugMode;
     }
 
-    if (m_bDebugMode || m_pStateMachine->GetCurrentState() == eStateGameplay_PauseMenu)
+    if (m_debugMode || m_stateMachine->GetCurrentState() == eStateGameplay_PauseMenu)
     {
         m_app->setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
@@ -75,12 +78,18 @@ void Gaia::update(float dt)
         m_app->setInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 
-    m_pStateMachine->Update(dt);
+    m_stateMachine->Update(dt);
+    Scene::Instance()->Update(dt);
 }
 
-void Gaia::render(int width, int height)
+void Gaia::Render(int width, int height)
 {
-    glm::mat4 mProj = m_camera->getProjMatrix(width, height);
-    glm::mat4 mView = m_camera->getViewMatrix();
-    m_pStateMachine->Render(mProj, mView, width, height);
+    glClearColor(0.3f, 0.3f, 0.3f, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    Camera *camera = Scene::Instance()->GetActiveCamera();
+    Scene::Instance()->SetWidth(width);
+    Scene::Instance()->SetHeight(height);
+    Scene::Instance()->Render();
+    m_stateMachine->Render(camera->GetProjMatrix(width, height), camera->GetViewMatrix());
 }

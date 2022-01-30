@@ -1,39 +1,25 @@
 #pragma once
 #include "../../wolf/wolf.h"
-#include "shape.h"
+#include "node.h"
 
-class Plane : public Shape
+class Plane : public Node
 {
 public:
-    Plane(wolf::Program *m_pProgram, const std::string &texturePath);
-    Plane(wolf::Program *m_pProgram, int subdivisions = 0);
+    Plane(const std::string &texturePath);
+    Plane(int subdivisions = 0);
 
-    ~Plane() override;
+    virtual ~Plane();
 
-    void update(float dt) override;
-    void render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, int height) override;
-    void setPosition(const glm::vec3 &position) override;
-    void setScale(float scale) override;
-    glm::vec3 getPosition() const override;
-    void setHeight(float height) override;
-    void setWidth(float width) override;
-    void setDepth(float depth) override;
-    void setX(float x) override;
-    void setY(float y) override;
-    void setZ(float z) override;
-
-    float getX() const override;
-    float getY() const override;
-    float getZ() const override;
-
-    float getHeight() const override;
-    float getWidth() const override;
-    float getDepth() const override;
-
-    static const Vertex gs_planeVertices[6];
+    void Update(float dt) override;
+    void Render(const glm::mat4 &mProj, const glm::mat4 &mView) override;
 
 private:
-    wolf::Texture *m_pTexture2 = nullptr;
-    int m_iNumSegments = 1;
-    float *m_fTextureCoords = nullptr;
+    static const Vertex s_planeVertices[6];
+
+    int m_numSegments = 1;
+    float *m_textureCoords = nullptr;
+    wolf::VertexBuffer *m_vb = 0;
+    wolf::VertexDeclaration *m_decl = 0;
+    wolf::Texture *m_texture = 0;
+    wolf::Material *m_material = 0;
 };

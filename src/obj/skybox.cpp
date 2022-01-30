@@ -67,7 +67,7 @@ Skybox::Skybox(const std::string &texturePath) : Node(BoundingBox())
     // Material should be unique to a texture
     m_material = wolf::MaterialManager::CreateMaterial(texturePath);
     m_material->SetProgram("data/shaders/skybox.vsh", "data/shaders/skybox.fsh");
-    m_material->SetTexture("u_texture", m_texture);
+    m_material->SetTexture("tex", m_texture);
 
     m_decl = new wolf::VertexDeclaration();
     m_decl->Begin();
@@ -85,7 +85,7 @@ void Skybox::Update(float dt)
 void Skybox::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 {
     m_material->SetUniform("projection", mProj);
-    m_material->SetUniform("view", mView);
+    m_material->SetUniform("view", glm::mat4(glm::mat3(mView)));
     m_material->SetUniform("world", GetWorldTransform());
     m_material->Apply();
 

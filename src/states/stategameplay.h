@@ -27,12 +27,12 @@ public:
 	class Light
 	{
 	public:
-		bool bEnabled = true;
-		glm::vec4 vPosRange;
-		glm::vec3 vColor;
-		glm::vec3 vAttenuation;
-		glm::vec4 vLightSpot = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
-		glm::vec3 vLightDir = glm::vec3(0.0f, 0.0f, 0.0f);
+		bool enabled = true;
+		glm::vec4 posRange;
+		glm::vec3 color;
+		glm::vec3 attenuation;
+		glm::vec4 lightSpot = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+		glm::vec3 lightDir = glm::vec3(0.0f, 0.0f, 0.0f);
 	};
 
 	StateGameplay();
@@ -40,19 +40,17 @@ public:
 
 	// Overridden from StateBase
 	virtual void Enter(std::string arg = "");
-	virtual void Update(float p_fDelta);
+	virtual void Update(float dt);
+	virtual void Render(const glm::mat4 &mProj, const glm::mat4 &mView);
 	virtual void Exit();
-	virtual void Render(const glm::mat4 mProj, const glm::mat4 mView, int width, int height);
-	void RegisterCamera(Camera *pCam);
 
 private:
 	void _renderTerrain();
 	int _randomNum(int lowerBound, int upperBound);
 	float _randomFloat(float lo, float hi);
 
-	bool _isEffectiveLight(const Light *pLight1, const Light *pLight2, Model *pModel) const;
+	bool _isEffectiveLight(const Light *light1, const Light *light2, Model *model) const;
 
-	Camera *m_pCam = 0;
 	const std::string m_groundTexPath = "data/textures/ground/ground.png";
 	const std::string m_skyboxPath = "data/textures/skybox/skybox.png";
 
@@ -60,21 +58,21 @@ private:
 	const std::string m_waterSoundPath = "data/sounds/ocean.wav";
 	const std::string m_creatureGrowlPath = "data/sounds/creature_growl.wav";
 
-	std::vector<Light *> m_vLights;
-	wolf::Program *m_pWorldProgram = 0;
-	std::vector<Model *> m_lModels;
-	std::vector<glm::vec3> m_lPositions;
-	wolf::Material *m_pMat = nullptr;
+	std::vector<Light *> m_lights;
+	wolf::Program *m_worldProgram = 0;
+	std::vector<Model *> m_models;
+	std::vector<glm::vec3> m_positions;
+	wolf::Material *m_mat = nullptr;
 
-	wolf::Texture *m_pCreatureTex = nullptr;
+	wolf::Texture *m_creatureTex = nullptr;
 
-	wolf::Model *m_pShipModel = nullptr;
-	wolf::Texture *m_pShipTex = nullptr;
+	wolf::Model *m_shipModel = nullptr;
+	wolf::Texture *m_shipTex = nullptr;
 
-	Model *m_pFlashlight = nullptr;
-	Light *m_pSpotlight = nullptr;
+	Model *m_flashlight = nullptr;
+	Light *m_spotlight = nullptr;
 
-	wolf::SoundManager *m_pSoundManager = nullptr;
+	wolf::SoundManager *m_soundManager = nullptr;
 
 	const int m_gridSize = 20;
 
@@ -85,30 +83,27 @@ private:
 
 	GLfloat m_sunAngle = -60;
 
-	TerrainGenerator *m_pTerrainGenerator = 0;
-	std::vector<Terrain *> m_lTerrains;
+	TerrainGenerator *m_terrainGenerator = 0;
+	std::vector<Terrain *> m_terrains;
 
-	Skybox *m_pSkybox = 0;
+	Skybox *m_skybox = 0;
 
-	bool m_bKeyDown = false;
-	bool m_bFlashlightEquipped = false;
+	bool m_keyDown = false;
+	bool m_flashlightEquipped = false;
 
 	Font *m_font;
 	TextBox *m_hungerText;
 	TextBox *m_thirstText;
+	float m_hunger = 100;
+	float m_thirst = 100;
 
-	float m_fHunger = 100;
-	float m_fThirst = 100;
-	int m_iLights = 0;
+	int m_lightCount = 0;
 
 	// Water
-	Water *m_pWater = nullptr;
-
-	// For Flashlight Positioning (should be changed)
-	glm::vec3 m_vPrevCamRot;
+	Water *m_water = nullptr;
 
 	// Debug Menu
-	bool m_bDebug = true;
+	bool m_debug = true;
 
 	int m_terrainSize, m_terrainVerts, m_terrainOctaves;
 	float m_terrainAmplitude, m_terrainRoughness;

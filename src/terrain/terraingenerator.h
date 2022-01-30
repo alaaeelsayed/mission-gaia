@@ -1,6 +1,6 @@
 #pragma once
 #define _USE_MATH_DEFINES
-#include "../obj/shape.h"
+#include "../obj/node.h"
 #include "../../wolf/wolf.h"
 #include <random>
 #include <cmath>

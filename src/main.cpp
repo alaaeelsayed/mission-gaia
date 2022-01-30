@@ -18,12 +18,12 @@ public:
 
     void update(float dt) override
     {
-        m_gaia->update(dt);
+        m_gaia->Update(dt);
     }
 
     void render() override
     {
-        m_gaia->render(m_width, m_height);
+        m_gaia->Render(m_width, m_height);
     }
 
 private:

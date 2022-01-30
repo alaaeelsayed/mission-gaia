@@ -32,7 +32,6 @@ Water::~Water()
     wolf::ProgramManager::DestroyProgram(m_pButterflyProgram);
 
     delete m_pSurface;
-    delete m_pCamera;
     delete m_pEffect;
 
     // Debug
@@ -41,7 +40,7 @@ Water::~Water()
     ImGui::DestroyContext();
 }
 
-Water::Water()
+Water::Water() : Node(BoundingBox())
 {
     if (!m_bInitialized)
     {
@@ -96,7 +95,7 @@ Water::Water()
         _generateTwiddleFactors();
 
         // Initialize water surface
-        m_pSurface = new Plane(m_pRenderProgram, 512);
+        m_pSurface = new Plane(512);
 
         // Initialize rain effect
         m_pEffect = new Effect(m_sRainPath);
@@ -105,7 +104,7 @@ Water::Water()
     }
 }
 
-void Water::update(float dt)
+void Water::Update(float dt)
 {
     if (m_bRenderRain)
     {
@@ -129,12 +128,8 @@ void Water::update(float dt)
     _butterflyOperation(m_pH0Tdz, m_pDz);
 }
 
-void Water::render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, int height)
+void Water::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 {
-    // RENDER CALLS
-    glm::mat4 mWorld = glm::translate(glm::mat4(1.0f), m_vPosition);
-    mWorld *= glm::scale(glm::mat4(1.0f), m_vScale);
-
     // Bind Uniforms
     m_pRenderProgram->SetTexture("u_heightMap", m_pDy);
     m_pRenderProgram->SetTexture("u_choppyX", m_pDx);
@@ -147,7 +142,7 @@ void Water::render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, in
     m_pRenderProgram->SetUniform("u_waterColor", m_vWaterColor);
     m_pRenderProgram->SetUniform("u_ambientLight", glm::vec3(0.5f, 0.5f, 0.5f));
 
-    m_pSurface->render(mProj, mView, width, height);
+    m_pSurface->Render(mProj, mView);
 
     if (m_bRenderRain)
         m_pEffect->render(mProj, mView);

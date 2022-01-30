@@ -6,7 +6,7 @@ class Cube : public Node
 {
 public:
     Cube(const std::string &texturePath);
-    ~Cube() override;
+    virtual ~Cube();
 
     void Update(float dt) override;
     void Render(const glm::mat4 &mProj, const glm::mat4 &mView) override;
@@ -21,6 +21,8 @@ public:
 
 private:
     static const Vertex s_cubeVertices[36];
+
+    bool m_dirty;
 
     wolf::VertexBuffer *m_vb = 0;
     wolf::VertexDeclaration *m_decl = 0;

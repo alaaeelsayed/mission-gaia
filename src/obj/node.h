@@ -5,8 +5,9 @@
 
 struct Vertex
 {
-    GLfloat x, y, z;
-    GLfloat r, g, b, a;
+    GLfloat x, y, z;    // Position
+    GLfloat u, v;       // Texture Coordinates
+    GLfloat nX, nY, nZ; // Normals
 };
 
 class Node
@@ -48,7 +49,7 @@ private:
 
     std::string m_name;
 
-    glm::vec3 m_scale = glm::vec3(1.0f, 1.0f, 1.0f);
+    glm::vec3 m_scale;
     glm::vec3 m_rotation;
     glm::vec3 m_position;
     glm::mat4 m_transform;

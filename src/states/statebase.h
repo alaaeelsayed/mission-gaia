@@ -21,23 +21,23 @@ namespace Common
 		friend class StateMachine;
 
 	public:
-		StateBase() : m_pStateMachine(NULL) {}
+		StateBase() : m_stateMachine(NULL) {}
 		virtual ~StateBase() {}
 		virtual void Enter(std::string arg = "") = 0;
-		virtual void Update(float p_fDelta) = 0;
+		virtual void Update(float dt) = 0;
+		virtual void Render(const glm::mat4 &mProj, const glm::mat4 &mView) = 0;
 		virtual void Exit() = 0;
-		virtual void Render(const glm::mat4 mProj, const glm::mat4 mView, int width, int height) = 0;
-		void RegisterApp(wolf::App *pApp) { m_pApp = pApp; };
+		void RegisterApp(wolf::App *app) { m_app = app; };
 
 	private:
-		void SetStateMachineMembership(StateMachine *p_pStateMachine)
+		void SetStateMachineMembership(StateMachine *stateMachine)
 		{
-			m_pStateMachine = p_pStateMachine;
+			m_stateMachine = stateMachine;
 		}
 
 	protected:
-		StateMachine *m_pStateMachine;
-		wolf::App *m_pApp;
+		StateMachine *m_stateMachine;
+		wolf::App *m_app;
 	};
 }
 

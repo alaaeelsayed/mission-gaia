@@ -3,8 +3,8 @@
 BoundingBox::BoundingBox(const glm::vec3 &min, const glm::vec3 &max)
     : m_min(min), m_max(max)
 {
-    _RecalculateCenter();
-    _RecalculateDimensions();
+    _recalculateCenter();
+    _recalculateDimensions();
 }
 
 BoundingBox::BoundingBox()
@@ -25,8 +25,8 @@ void BoundingBox::Extend(const BoundingBox &child)
     m_min = glm::min(m_min, otherMin);
     m_max = glm::max(m_max, otherMax);
 
-    _RecalculateCenter();
-    _RecalculateDimensions();
+    _recalculateCenter();
+    _recalculateDimensions();
 }
 
 bool BoundingBox::InBounds(const BoundingBox &otherBox)
@@ -47,16 +47,16 @@ void BoundingBox::SetMin(const glm::vec3 &min)
 {
     m_min = min;
 
-    _RecalculateCenter();
-    _RecalculateDimensions();
+    _recalculateCenter();
+    _recalculateDimensions();
 }
 
 void BoundingBox::SetMax(const glm::vec3 &max)
 {
     m_max = max;
 
-    _RecalculateCenter();
-    _RecalculateDimensions();
+    _recalculateCenter();
+    _recalculateDimensions();
 }
 
 void BoundingBox::SetWidth(float width)
@@ -68,7 +68,7 @@ void BoundingBox::SetWidth(float width)
     m_max.x += width - m_dimensions.x;
     m_dimensions.x = width;
 
-    _RecalculateCenter();
+    _recalculateCenter();
 }
 
 void BoundingBox::SetHeight(float height)
@@ -79,7 +79,7 @@ void BoundingBox::SetHeight(float height)
     m_max.y += height - m_dimensions.y;
     m_dimensions.y = height;
 
-    _RecalculateCenter();
+    _recalculateCenter();
 }
 
 void BoundingBox::SetDepth(float depth)
@@ -90,7 +90,7 @@ void BoundingBox::SetDepth(float depth)
     m_max.z += depth - m_dimensions.z;
     m_dimensions.z = depth;
 
-    _RecalculateCenter();
+    _recalculateCenter();
 }
 
 glm::vec3 BoundingBox::GetMin() const

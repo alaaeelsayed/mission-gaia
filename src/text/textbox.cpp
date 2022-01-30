@@ -1,6 +1,6 @@
 #include "textbox.h"
 
-TextBox::TextBox(float width, float height) : m_width(width), m_height(height)
+TextBox::TextBox(float width, float height) : Node(BoundingBox()), m_width(width), m_height(height)
 {
     GLfloat gs_outlineVertices[] = {
         -0.5f,
@@ -255,13 +255,6 @@ float TextBox::_getCurrentHeight()
     return height;
 }
 
-void TextBox::SetPos(float x, float y, float z)
-{
-    m_x = x;
-    m_y = y;
-    m_z = z;
-}
-
 void TextBox::SetColor(float r, float g, float b, float a)
 {
     m_colorR = r;
@@ -301,7 +294,7 @@ void TextBox::AddText(const Font *font, const char *text, ...)
 
     _addText(font, str);
     // Only recalculate if using the public AddText method
-    // in case we may need to add intermediate text and recalculate the verties in bulk
+    // in case we may need to add intermediate text and recalculate the vertices in bulk
     _calculateVertices();
 }
 
@@ -344,11 +337,6 @@ void TextBox::SetOutlined(bool outlined)
     m_outlined = outlined;
 }
 
-glm::vec2 TextBox::GetPos() const
-{
-    return glm::vec2(m_x, m_y);
-}
-
 float TextBox::GetWidth() const
 {
     return m_width;
@@ -362,8 +350,6 @@ float TextBox::GetHeight() const
 // 1 draw call per texture (aka 1 call per fontsheet)
 void TextBox::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 {
-    glm::mat4 mWorld = glm::mat4(1.0f);
-    mWorld = glm::translate(mWorld, glm::vec3(m_x, m_y, m_z));
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     for (auto it = m_vertices.begin(); it != m_vertices.end(); ++it)
@@ -373,7 +359,7 @@ void TextBox::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 
         m_program->SetUniform("projection", mProj);
         m_program->SetUniform("view", mView);
-        m_program->SetUniform("world", mWorld);
+        m_program->SetUniform("world", GetWorldTransform());
 
         m_program->SetUniform("u_color", glm::vec4(m_colorR, m_colorG, m_colorB, m_colorA));
         m_program->SetTexture("u_tex", texture);

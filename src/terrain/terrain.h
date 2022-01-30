@@ -1,16 +1,17 @@
 #pragma once
 #include "../../wolf/wolf.h"
-#include "../obj/shape.h"
+#include "../obj/node.h"
 #include "terraingenerator.h"
 #include "../text/textbox.h"
 
-class Terrain
+class Terrain : public Node
 {
 public:
     Terrain(int x, int z, TerrainGenerator *terrainGenerator);
     ~Terrain();
 
-    void Render(const glm::mat4 &mProj, const glm::mat4 &mView);
+    void Update(float dt) override;
+    void Render(const glm::mat4 &mProj, const glm::mat4 &mView) override;
 
 private:
     int m_x, m_z;

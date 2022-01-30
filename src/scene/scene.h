@@ -2,7 +2,7 @@
 
 #include "../../wolf/wolf.h"
 #include "../camera/camera.h"
-#include "../node.h"
+#include "../obj/node.h"
 #include "quadtree.h"
 
 class Scene

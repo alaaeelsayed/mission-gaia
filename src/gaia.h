@@ -11,15 +11,14 @@ public:
     Gaia(wolf::App *pApp);
     ~Gaia();
 
-    void init();
-    void update(float dt);
-    void render(int width, int height);
+    void Init();
+    void Update(float dt);
+    void Render(int width, int height);
 
 private:
-    Camera *m_camera = nullptr;
     wolf::App *m_app = nullptr;
-    bool m_bKeyDown = false;
-    bool m_bDebugKeyDown = false;
-    bool m_bDebugMode = false;
-    Common::StateMachine *m_pStateMachine = 0;
+    bool m_keyDown = false;
+    bool m_debugKeyDown = false;
+    bool m_debugMode = false;
+    Common::StateMachine *m_stateMachine = 0;
 };

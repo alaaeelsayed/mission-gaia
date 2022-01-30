@@ -3,8 +3,9 @@
 #include "font.h"
 #include "line.h"
 #include <stdarg.h>
+#include "../obj/node.h"
 
-class TextBox
+class TextBox : public Node
 {
 public:
     enum Alignment
@@ -19,8 +20,6 @@ public:
     TextBox(float width, float height);
     ~TextBox();
 
-    void SetPos(float x, float y, float z);
-
     void SetColor(float r, float g, float b, float a);
 
     void SetText(const Font *font, const char *text, ...);
@@ -31,11 +30,11 @@ public:
 
     void SetOutlined(bool outlined);
 
-    glm::vec2 GetPos() const;
     float GetWidth() const;
     float GetHeight() const;
 
-    void Render(const glm::mat4 &mProj, const glm::mat4 &mView);
+    void Update(float dt) override {};
+    void Render(const glm::mat4 &mProj, const glm::mat4 &mView) override;
 
 private:
     void _clearLines();
@@ -46,7 +45,6 @@ private:
 
     float _getCurrentHeight();
 
-    float m_x, m_y, m_z = 0.0f;
     float m_colorR = 1.0f, m_colorG = 0.0f, m_colorB = 0.0f, m_colorA = 1.0f;
     float m_width, m_height;
     bool m_outlined = false;

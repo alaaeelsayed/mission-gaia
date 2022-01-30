@@ -100,7 +100,7 @@ void Model::update(float fDelta)
 {
     if (m_pLight)
     {
-        m_pLight->vPosRange = glm::vec4(m_vPosition.x, m_vPosition.y, m_vPosition.z, m_pLight->vPosRange.w);
+        m_pLight->posRange = glm::vec4(m_vPosition.x, m_vPosition.y, m_vPosition.z, m_pLight->posRange.w);
     }
 }
 

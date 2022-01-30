@@ -13,30 +13,31 @@ namespace Common
 		StateMachine();
 		~StateMachine();
 
-		void RegisterState(int p_iState, StateBase *p_pstate);
-		void GoToState(int p_iState, std::string arg = "");
-		void PushState(int p_iState);
+		void RegisterState(int state, StateBase *stateBase);
+		void GoToState(int state, std::string arg = "");
+		void PushState(int state);
 		void PopState();
-		void Update(float p_fDelta);
-		void Render(const glm::mat4 mProj, const glm::mat4 mView, int width, int height);
 
-		int GetCurrentState() { return m_iCurrentState; }
-		float GetCurrentStateTime() { return m_fCurrentStateTime; }
+		void Update(float dt);
+		void Render(const glm::mat4 &mProj, const glm::mat4 &mView);
 
-		void SetStateMachineOwner(void *p_pOwner) { m_pOwner = p_pOwner; }
-		void *GetStateMachineOwner() { return m_pOwner; }
+		int GetCurrentState() { return m_currentState; }
+		float GetCurrentStateTime() { return m_currentStateTime; }
+
+		void SetStateMachineOwner(void *owner) { m_owner = owner; }
+		void *GetStateMachineOwner() { return m_owner; }
 
 	private:
 		typedef std::map<int, StateBase *> StateMap;
 
-		StateMap m_mStateMap;
+		StateMap m_stateMap;
 
-		int m_iCurrentState;
-		StateBase *m_pCurrentState;
+		int m_currentState;
+		StateBase *m_currentStateBase;
 
-		float m_fCurrentStateTime;
+		float m_currentStateTime;
 
-		void *m_pOwner;
+		void *m_owner;
 	};
 }
 #endif

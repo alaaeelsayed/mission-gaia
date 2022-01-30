@@ -6,31 +6,16 @@
 #include "../misc/imgui/imgui.h"
 #include "../misc/imgui/imgui_impl_glfw.h"
 #include "../misc/imgui/imgui_impl_opengl3.h"
-#include "../particle-system/effect.h"
+#include "../particles/effect.h"
+#include "node.h"
 
-class Water
+class Water : public Node
 {
 public:
     Water();
     virtual ~Water();
-    void update(float dt);
-    void render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, int height);
-    void setPosition(const glm::vec3 &vPosition)
-    {
-        m_vPosition = vPosition;
-        m_pSurface->setPosition(vPosition);
-    };
-    void setScale(const glm::vec3 &vScale)
-    {
-        m_vScale = vScale;
-        m_pSurface->setWidth(vScale.x);
-        m_pSurface->setHeight(vScale.y);
-        m_pSurface->setDepth(vScale.z);
-    }
-    void setCamera(Camera *p_pCamera)
-    {
-        m_pCamera = p_pCamera;
-    }
+    void Update(float dt) override;
+    void Render(const glm::mat4 &mProj, const glm::mat4 &mView) override;
 
 private:
     void _calculateH0K();
@@ -41,8 +26,6 @@ private:
     void _generateIndices();
     unsigned long _reverseBits(unsigned long word, unsigned char maxLength);
 
-    glm::vec3 m_vPosition = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 m_vScale = glm::vec3(1.0f, 1.0f, 1.0f);
     wolf::ShaderStorageBuffer *m_pIndices = 0;
 
     wolf::Program *m_pRenderProgram = 0;
@@ -83,9 +66,6 @@ private:
     wolf::Texture *m_pNoise01 = nullptr;
     wolf::Texture *m_pNoise02 = nullptr;
     wolf::Texture *m_pNoise03 = nullptr;
-
-    // Camera for underwater flag
-    Camera *m_pCamera = nullptr;
 
     // Rain Effect for cloud configuration (fun)
     Effect *m_pEffect = nullptr;

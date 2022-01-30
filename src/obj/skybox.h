@@ -7,7 +7,7 @@ class Skybox : public Node
 {
 public:
     Skybox(const std::string &texturePath);
-    ~Skybox() override;
+    virtual ~Skybox();
 
     void Update(float dt) override;
     void Render(const glm::mat4 &mProj, const glm::mat4 &mView) override;

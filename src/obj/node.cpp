@@ -3,7 +3,7 @@
 int Node::s_nodeCounter = 0;
 
 Node::Node(const BoundingBox &boundingBox)
-    : m_boundingBox(boundingBox), m_scale(0.0f), m_position(0.0f), m_rotation(0.0f), m_dirty(true)
+    : m_boundingBox(boundingBox), m_scale(1.0f, 1.0f, 1.0f), m_position(0.0f), m_rotation(0.0f), m_dirty(true)
 {
     m_name = "Node" + std::to_string(s_nodeCounter);
     s_nodeCounter++;

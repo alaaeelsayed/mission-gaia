@@ -21,27 +21,25 @@ public:
 
 	// Overridden from StateBase
 	virtual void Enter(std::string arg = "");
-	virtual void Update(float p_fDelta);
+	virtual void Update(float dt);
+	virtual void Render(const glm::mat4 &mProj, const glm::mat4 &mView);
 	virtual void Exit();
-	virtual void Render(const glm::mat4 mProj, const glm::mat4 mView, int width, int height);
-	void RegisterCamera(Camera *pCam);
 
 private:
 	int _randomNum(int lowerBound, int upperBound);
 
-	Camera *m_pCam = 0;
 	const std::string m_groundTexPath = "data/textures/ground/ground.png";
 	const std::string m_skyboxPath = "data/textures/skybox/skybox.png";
 
-	wolf::Program *m_pWorldProgram = 0;
+	wolf::Program *m_worldProgram = 0;
 	glm::vec3 m_sunDirection = glm::vec3(10.0f, 10.0f, 20.0f);
 
-	Skybox *m_pSkybox = 0;
+	Skybox *m_skybox = 0;
 
 	Font *m_font;
-	TextBox *m_pPauseMenu = nullptr;
-	TextBox *m_pResumeGame = nullptr;
-	TextBox *m_pQuitGame = nullptr;
+	TextBox *m_pauseMenu = nullptr;
+	TextBox *m_resumeGame = nullptr;
+	TextBox *m_quitGame = nullptr;
 
 	wolf::FrameBuffer *m_frameBuffer;
 };

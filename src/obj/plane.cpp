@@ -1,6 +1,6 @@
 #include "plane.h"
 
-const Vertex Plane::gs_planeVertices[6] = {
+const Vertex Plane::s_planeVertices[6] = {
     {-0.5f, 0.0f, 0.5f, 0, 1, 0.0f, 1.0f, 0.0f},
     {0.5f, 0.0f, 0.5f, 1, 1, 0.0f, 1.0f, 0.0f},
     {0.5f, 0.0f, -0.5f, 1, 0, 0.0f, 1.0f, 0.0f},
@@ -11,33 +11,36 @@ const Vertex Plane::gs_planeVertices[6] = {
 
 Plane::~Plane()
 {
-    delete m_pDecl;
-    wolf::BufferManager::DestroyBuffer(m_pVB);
-    wolf::TextureManager::DestroyTexture(m_pTexture);
+    delete m_decl;
+    wolf::BufferManager::DestroyBuffer(m_vb);
+    wolf::TextureManager::DestroyTexture(m_texture);
+    wolf::MaterialManager::DestroyMaterial(m_material);
 }
 
-Plane::Plane(wolf::Program *m_pProgram, const std::string &texturePath)
-    : Shape(m_pProgram, texturePath)
+Plane::Plane(const std::string &texturePath)
+    : Node(BoundingBox())
 {
-    this->m_pProgram = m_pProgram;
+    m_vb = wolf::BufferManager::CreateVertexBuffer(s_planeVertices, sizeof(Vertex) * 6);
+    m_texture = wolf::TextureManager::CreateTexture(texturePath);
 
-    m_pVB = wolf::BufferManager::CreateVertexBuffer(gs_planeVertices, sizeof(Vertex) * 6);
-    m_pTexture = wolf::TextureManager::CreateTexture(texturePath);
+    // Material should be unique to a texture
+    m_material = wolf::MaterialManager::CreateMaterial(texturePath);
+    m_material->SetProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
+    m_material->SetTexture("u_texture", m_texture);
 
-    m_pDecl = new wolf::VertexDeclaration();
-    m_pDecl->Begin();
-    m_pDecl->AppendAttribute(wolf::AT_Position, 3, wolf::CT_Float);
-    m_pDecl->AppendAttribute(wolf::AT_TexCoord1, 2, wolf::CT_Float);
-    m_pDecl->AppendAttribute(wolf::AT_Normal, 3, wolf::CT_Float);
-    m_pDecl->SetVertexBuffer(m_pVB);
-    m_pDecl->End();
+    m_decl = new wolf::VertexDeclaration();
+    m_decl->Begin();
+    m_decl->AppendAttribute(wolf::AT_Position, 3, wolf::CT_Float);
+    m_decl->AppendAttribute(wolf::AT_TexCoord1, 2, wolf::CT_Float);
+    m_decl->AppendAttribute(wolf::AT_Normal, 3, wolf::CT_Float);
+    m_decl->SetVertexBuffer(m_vb);
+    m_decl->End();
 }
 
-Plane::Plane(wolf::Program *m_pProgram, int subdivisions) : Shape(m_pProgram, "")
+Plane::Plane(int subdivisions) : Node(BoundingBox())
 {
-    this->m_pProgram = m_pProgram;
-    m_iNumSegments = subdivisions * subdivisions;
-    Vertex *pAllVerts = new Vertex[m_iNumSegments * 6];
+    m_numSegments = subdivisions * subdivisions;
+    Vertex *pAllVerts = new Vertex[m_numSegments * 6];
     float curx = -0.5f;
     float y = 0;
     float curz = -0.5f;
@@ -58,9 +61,9 @@ Plane::Plane(wolf::Program *m_pProgram, int subdivisions) : Shape(m_pProgram, ""
 
             for (int i = 0; i < 6; ++i)
             {
-                pAllVerts[vertIdx].x = (glm::vec3(curx, 0.0f, curz) + glm::vec3(gs_planeVertices[i].x, gs_planeVertices[i].y, gs_planeVertices[i].z) * quadSize).x;
-                pAllVerts[vertIdx].y = (glm::vec3(curx, 0.0f, curz) + glm::vec3(gs_planeVertices[i].x, gs_planeVertices[i].y, gs_planeVertices[i].z) * quadSize).y;
-                pAllVerts[vertIdx].z = (glm::vec3(curx, 0.0f, curz) + glm::vec3(gs_planeVertices[i].x, gs_planeVertices[i].y, gs_planeVertices[i].z) * quadSize).z;
+                pAllVerts[vertIdx].x = (glm::vec3(curx, 0.0f, curz) + glm::vec3(s_planeVertices[i].x, s_planeVertices[i].y, s_planeVertices[i].z) * quadSize).x;
+                pAllVerts[vertIdx].y = (glm::vec3(curx, 0.0f, curz) + glm::vec3(s_planeVertices[i].x, s_planeVertices[i].y, s_planeVertices[i].z) * quadSize).y;
+                pAllVerts[vertIdx].z = (glm::vec3(curx, 0.0f, curz) + glm::vec3(s_planeVertices[i].x, s_planeVertices[i].y, s_planeVertices[i].z) * quadSize).z;
 
                 if (i == 0 || i == 5)
                 {
@@ -83,9 +86,9 @@ Plane::Plane(wolf::Program *m_pProgram, int subdivisions) : Shape(m_pProgram, ""
                     pAllVerts[vertIdx].v = z * quadSize;
                 }
 
-                pAllVerts[vertIdx].nX = gs_planeVertices[i].nX;
-                pAllVerts[vertIdx].nY = gs_planeVertices[i].nY;
-                pAllVerts[vertIdx].nZ = gs_planeVertices[i].nZ;
+                pAllVerts[vertIdx].nX = s_planeVertices[i].nX;
+                pAllVerts[vertIdx].nY = s_planeVertices[i].nY;
+                pAllVerts[vertIdx].nZ = s_planeVertices[i].nZ;
                 vertIdx++;
             }
             curx += quadSize;
@@ -94,124 +97,39 @@ Plane::Plane(wolf::Program *m_pProgram, int subdivisions) : Shape(m_pProgram, ""
         curx = -0.5f;
     }
 
-    m_pVB = wolf::BufferManager::CreateVertexBuffer(pAllVerts, sizeof(Vertex) * 6 * m_iNumSegments);
-    m_pDecl = new wolf::VertexDeclaration();
-    m_pDecl->Begin();
-    m_pDecl->AppendAttribute(wolf::AT_Position, 3, wolf::CT_Float);
-    m_pDecl->AppendAttribute(wolf::AT_TexCoord1, 2, wolf::CT_Float);
-    m_pDecl->AppendAttribute(wolf::AT_Normal, 3, wolf::CT_Float);
-    m_pDecl->SetVertexBuffer(m_pVB);
-    m_pDecl->End();
+    m_vb = wolf::BufferManager::CreateVertexBuffer(pAllVerts, sizeof(Vertex) * 6 * m_numSegments);
+
+    // Material should be unique to a texture
+    m_material = wolf::MaterialManager::CreateMaterial("water");
+    m_material->SetProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
+    m_material->SetTexture("u_texture", m_texture);
+
+    m_decl = new wolf::VertexDeclaration();
+    m_decl->Begin();
+    m_decl->AppendAttribute(wolf::AT_Position, 3, wolf::CT_Float);
+    m_decl->AppendAttribute(wolf::AT_TexCoord1, 2, wolf::CT_Float);
+    m_decl->AppendAttribute(wolf::AT_Normal, 3, wolf::CT_Float);
+    m_decl->SetVertexBuffer(m_vb);
+    m_decl->End();
 
     delete[] pAllVerts;
 }
 
-void Plane::update(float dt)
+void Plane::Update(float dt)
 {
 }
 
-void Plane::setPosition(const glm::vec3 &position)
+void Plane::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 {
-    this->m_position = position;
-    this->x = m_position.x;
-    this->y = m_position.y;
-    this->z = m_position.z;
-}
+    m_material->SetUniform("projection", mProj);
+    m_material->SetUniform("view", mView);
+    m_material->SetUniform("world", GetWorldTransform());
+    m_material->Apply();
 
-void Plane::setScale(float scale)
-{
-    this->m_height *= scale;
-    this->m_width *= scale;
-    this->m_depth *= scale;
-}
+    if (m_texture)
+        m_texture->Bind();
 
-glm::vec3 Plane::getPosition() const
-{
-    return m_position;
-}
+    m_decl->Bind();
 
-void Plane::setHeight(float height)
-{
-    this->m_height = height;
-}
-
-void Plane::setWidth(float width)
-{
-    this->m_width = width;
-}
-
-void Plane::setDepth(float depth)
-{
-    this->m_depth = depth;
-}
-
-void Plane::setX(float x)
-{
-    this->x = x;
-};
-void Plane::setY(float y)
-{
-    this->y = y;
-};
-void Plane::setZ(float z)
-{
-    this->z = z;
-};
-
-float Plane::getHeight() const
-{
-    return m_height;
-}
-
-float Plane::getWidth() const
-{
-    return m_width;
-}
-
-float Plane::getDepth() const
-{
-    return m_depth;
-}
-
-float Plane::getX() const
-{
-    return x;
-}
-float Plane::getY() const
-{
-    return y;
-}
-float Plane::getZ() const
-{
-    return z;
-}
-
-void Plane::render(const glm::mat4 &mProj, const glm::mat4 &mView, int width, int height)
-{
-    m_position = glm::vec3(x, y, z);
-    glm::mat4 mWorld = glm::translate(glm::mat4(1.0f), m_position);
-    mWorld *= glm::scale(glm::mat4(1.0f), glm::vec3(m_width, m_height, m_depth));
-
-    // Use Texture
-    if (m_pTexture)
-    {
-        m_pTexture->SetFilterMode(wolf::Texture::FM_TrilinearMipmap, wolf::Texture::FM_TrilinearMipmap);
-        m_pTexture->SetWrapMode(wolf::Texture::WM_Repeat);
-        m_pTexture->Bind();
-    }
-
-    // Bind Uniforms
-    m_pProgram->SetUniform("projection", mProj);
-    m_pProgram->SetUniform("view", mView);
-    m_pProgram->SetUniform("world", mWorld);
-    m_pProgram->SetUniform("worldIT", glm::transpose(glm::inverse(mWorld)));
-
-    // Use Shader Program
-    m_pProgram->Bind();
-
-    // Set up source data
-    m_pDecl->Bind();
-
-    // Draw!
-    glDrawArrays(GL_TRIANGLES, 0, 6 * m_iNumSegments);
+    glDrawArrays(GL_TRIANGLES, 0, 6 * 3 * 2);
 }
