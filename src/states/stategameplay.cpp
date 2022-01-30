@@ -173,6 +173,7 @@ void StateGameplay::Enter(std::string arg)
 			m_pCreature->setTexture("data/textures/gimpy_diffuse.tga");
 			m_pCreature->setNormal("data/textures/gimpy_normal.tga");
 			m_pCreature->setOffset(m_pCreature->getModel()->getAABBMin());
+			// m_pCreature->attachRigidBody("data/physics/creature.rigid");
 
 			Light *pPointLight = new Light();
 			float r = _randomFloat(0.0001f, 0.0018f);
@@ -185,11 +186,15 @@ void StateGameplay::Enter(std::string arg)
 			m_pCreature->attachLight(pPointLight);
 			int scale = _randomNum(2, 5);
 			float rotation = (float)_randomNum(-60, 60);
-			int x = _randomNum(200, 600);
-			int z = _randomNum(200, 600);
+			int x = _randomNum(0, m_pTerrainGenerator->GetSize());
+
+			int z = _randomNum(0, m_pTerrainGenerator->GetSize());
 
 			m_pCreature->setScale(glm::vec3(scale, scale, scale));
-			m_pCreature->translate(glm::vec3(x, 0.0f, z));
+
+			// float height = m_pTerrainGenerator->GenerateHeight(x, z, 0.0f, 0.0f);
+
+			m_pCreature->translate(glm::vec3(x, 5.0f, z));
 			m_pCreature->setRotation(rotation, glm::vec3(0.0f, 1.0f, 0.0f));
 			m_lModels.push_back(m_pCreature);
 		}
@@ -208,8 +213,7 @@ void StateGameplay::Enter(std::string arg)
 
 			m_pBush->setScale(glm::vec3(0.01f, 0.01f, 0.01f));
 
-			float height = m_pTerrainGenerator->GenerateHeight(x % m_pTerrainGenerator->GetSize(), z % m_pTerrainGenerator->GetSize(), x / m_pTerrainGenerator->GetSize(), z / m_pTerrainGenerator->GetSize());
-			m_pBush->translate(glm::vec3(x, height, z));
+			m_pBush->translate(glm::vec3(x, 0.0f, z));
 			m_pBush->setRotation(rotation, glm::vec3(0.0f, 1.0f, 0.0f));
 			m_lModels.push_back(m_pBush);
 		}
@@ -317,6 +321,7 @@ void StateGameplay::Update(float p_fDelta)
 	m_bNearFood = false;
 	for (Model *pModel : m_lModels)
 	{
+
 		if (pModel->getTag().compare("enemy") == 0)
 		{
 			// Model is an enemy

@@ -25,6 +25,10 @@ void Gaia::init()
     pGameplay->RegisterApp(m_app);
     pGameplay->RegisterMachine(m_pStateMachine);
 
+    StateMainMenu *pMainMenu = new StateMainMenu();
+    pMainMenu->RegisterCamera(m_camera);
+    pMainMenu->RegisterApp(m_app);
+
     StatePauseMenu *pPauseMenu = new StatePauseMenu();
     pPauseMenu->RegisterCamera(m_camera);
     pPauseMenu->RegisterApp(m_app);
@@ -35,16 +39,18 @@ void Gaia::init()
     pRespawn->RegisterGameplay(pGameplay);
 
     m_pStateMachine->RegisterState(eStateGameplay_Gameplay, pGameplay);
+    m_pStateMachine->RegisterState(eStateGameplay_MainMenu, pMainMenu);
+
     m_pStateMachine->RegisterState(eStateGameplay_Respawn, pRespawn);
     m_pStateMachine->RegisterState(eStateGameplay_PauseMenu, pPauseMenu);
-    m_pStateMachine->GoToState(eStateGameplay_Gameplay);
+    m_pStateMachine->GoToState(eStateGameplay_MainMenu);
 
     printf("Successfully initialized Gaia\n");
 }
 
 void Gaia::update(float dt)
 {
-    if (m_app->isKeyDown(GLFW_KEY_ESCAPE) && !m_bKeyDown && m_pStateMachine->GetCurrentState() != eStateGameplay_Respawn)
+    if (m_app->isKeyDown(GLFW_KEY_ESCAPE) && !m_bKeyDown && m_pStateMachine->GetCurrentState() != eStateGameplay_Respawn && m_pStateMachine->GetCurrentState() != eStateGameplay_MainMenu)
     {
         if (m_pStateMachine->GetCurrentState() == eStateGameplay_PauseMenu)
         {
@@ -60,7 +66,7 @@ void Gaia::update(float dt)
     if (!m_app->isKeyDown(GLFW_KEY_ESCAPE))
         m_bKeyDown = false;
 
-    if (m_pStateMachine->GetCurrentState() != eStateGameplay_PauseMenu && m_pStateMachine->GetCurrentState() != eStateGameplay_Respawn && !m_bDebugMode)
+    if (m_pStateMachine->GetCurrentState() != eStateGameplay_PauseMenu && m_pStateMachine->GetCurrentState() != eStateGameplay_Respawn && m_pStateMachine->GetCurrentState() != eStateGameplay_MainMenu && !m_bDebugMode)
         m_camera->update(dt);
 
     if (!m_app->isKeyDown('M'))
@@ -74,7 +80,7 @@ void Gaia::update(float dt)
         m_bDebugMode = !m_bDebugMode;
     }
 
-    if (m_bDebugMode || m_pStateMachine->GetCurrentState() == eStateGameplay_PauseMenu || m_pStateMachine->GetCurrentState() == eStateGameplay_Respawn)
+    if (m_bDebugMode || m_pStateMachine->GetCurrentState() == eStateGameplay_PauseMenu || m_pStateMachine->GetCurrentState() == eStateGameplay_Respawn || m_pStateMachine->GetCurrentState() == eStateGameplay_MainMenu)
     {
         m_app->setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
