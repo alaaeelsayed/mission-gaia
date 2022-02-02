@@ -42,6 +42,8 @@ void Gaia::Init()
     m_stateMachine->RegisterState(eStateGameplay_Respawn, respawn);
     m_stateMachine->GoToState(eStateGameplay_MainMenu);
 
+    Scene::Instance()->SetStateMachine(m_stateMachine);
+
     printf("Successfully initialized Gaia\n");
 }
 

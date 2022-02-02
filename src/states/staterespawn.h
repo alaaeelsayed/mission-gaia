@@ -29,7 +29,6 @@ public:
 private:
 	int _randomNum(int lowerBound, int upperBound);
 
-	Camera *m_pCam = 0;
 	const std::string m_groundTexPath = "data/textures/ground/ground.png";
 	const std::string m_skyboxPath = "data/textures/skybox/skybox.png";
 

@@ -3,6 +3,8 @@
 #include "../../wolf/wolf.h"
 #include "../camera/camera.h"
 #include "../obj/node.h"
+#include "../states/statebase.h"
+#include "../states/statemachine.h"
 #include "quadtree.h"
 
 class Scene
@@ -18,6 +20,9 @@ public:
 
     void SetActiveCamera(Camera *camera);
     Camera *GetActiveCamera();
+
+    void SetStateMachine(Common::StateMachine *stateMachine);
+    Common::StateMachine *GetStateMachine();
 
     void BuildQuadtree();
 
@@ -47,5 +52,6 @@ private:
     std::vector<Node *> m_nodes;
     std::vector<Node *> m_objectsToRender;
 
+    Common::StateMachine *m_stateMachine;
     Camera *m_activeCamera;
 };

@@ -386,7 +386,7 @@ void StateGameplay::Update(float p_fDelta)
 
 	if (m_hunger <= 0.0f && m_thirst <= 0.0f)
 	{
-		m_stateMachine->GoToState(eStateGameplay_Respawn);
+		Scene::Instance()->GetStateMachine()->GoToState(eStateGameplay_Respawn);
 	}
 
 	if (m_app->isKeyDown('Z') && !m_debugDown)
