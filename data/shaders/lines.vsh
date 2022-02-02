@@ -1,4 +1,3 @@
-#version 150
 uniform mat4 projection;
 uniform mat4 view;
 in vec4 a_position;

@@ -115,6 +115,20 @@ void Model::update(float fDelta)
     }
 }
 
+void Model::damage(float hp)
+{
+    m_health -= hp;
+    if (m_health <= 0.0f)
+    {
+        m_isDestroyed = true;
+    }
+}
+
+bool Model::isDestroyed()
+{
+    return m_isDestroyed;
+}
+
 void Model::render(const glm::mat4 &mProj, const glm::mat4 &mView, const glm::vec3 &mViewPos)
 {
     glm::quat radRotation = glm::quat(glm::vec3(DEG_TO_RAD(m_vRotation.x), DEG_TO_RAD(m_vRotation.y), DEG_TO_RAD(m_vRotation.z)));

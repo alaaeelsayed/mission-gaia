@@ -29,6 +29,8 @@ public:
     Model(const std::string &modelPath, const std::string &matName);
     virtual ~Model();
 
+    void damage(float hp);
+
     void setTexture(const char *texPath);
     void setNormal(const char *normalPath);
     void setPosition(const glm::vec3 &vPosition);
@@ -57,8 +59,12 @@ public:
 
     glm::vec3 getPosition();
     void render(const glm::mat4 &mProj, const glm::mat4 &mView, const glm::vec3 &mViewPos = glm::vec3(0.0f, 0.0f, 0.0f));
+    bool isDestroyed();
 
 private:
+    float m_health = 100.0f;
+    float m_isDestroyed = false;
+
     glm::vec3 m_vPosition = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 m_vRotation = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 m_vScale = glm::vec3(1.0f, 1.0f, 1.0f);
