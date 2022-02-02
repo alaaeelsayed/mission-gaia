@@ -159,6 +159,16 @@ void StateGameplay::Enter(std::string arg)
 		m_terrainRoughness = m_terrainGenerator->GetRoughness();
 		m_terrainAmplitude = m_terrainGenerator->GetAmplitude();
 
+		for (int i = 0; i < 4; i++)
+		{
+			for (int j = 0; j < 4; j++)
+			{
+				Terrain *terrain = new Terrain(i, j, m_terrainGenerator);
+				m_terrains.push_back(terrain);
+				Scene::Instance()->AddNode(terrain);
+			}
+		}
+
 		for (int i = 0; i < 30; i++)
 		{
 			Model *m_pCreature = new Model("data/models/low_poly_spitter.obj", "skinned");
@@ -179,12 +189,18 @@ void StateGameplay::Enter(std::string arg)
 			m_pCreature->attachLight(pointLight);
 			int scale = _randomNum(2, 5);
 			float rotation = (float)_randomNum(-60, 60);
-			int x = _randomNum(0, m_terrainSize);
 
-			int z = _randomNum(0, m_terrainSize);
+			int fullX = _randomNum(0, m_terrainSize * 4);
+			int fullZ = _randomNum(0, m_terrainSize * 4);
+
+			int x = fullX % m_terrainSize;
+			int z = fullZ % m_terrainSize;
+
+			int xOff = fullX / m_terrainSize;
+			int zOff = fullZ / m_terrainSize;
 
 			m_pCreature->setScale(glm::vec3(scale, scale, scale));
-			m_pCreature->translate(glm::vec3(x, 0.0f, z));
+			m_pCreature->setPosition(glm::vec3(fullX, m_terrainGenerator->GenerateHeight(z, x, xOff, zOff), fullZ));
 			m_pCreature->setRotation(glm::vec3(0.0f, rotation, 0.0f));
 			m_models.push_back(m_pCreature);
 		}
@@ -221,16 +237,6 @@ void StateGameplay::Enter(std::string arg)
 		ImGui_ImplOpenGL3_Init("#version 430 core");
 
 		m_worldProgram = wolf::ProgramManager::CreateProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
-
-		for (int i = 0; i < 4; i++)
-		{
-			for (int j = 0; j < 4; j++)
-			{
-				Terrain *terrain = new Terrain(i, j, m_terrainGenerator);
-				m_terrains.push_back(terrain);
-				Scene::Instance()->AddNode(terrain);
-			}
-		}
 
 		// Water
 
