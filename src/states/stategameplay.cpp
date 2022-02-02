@@ -132,7 +132,7 @@ void StateGameplay::Enter(std::string arg)
 		m_drinkText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
 
 		m_eatText = new TextBox(700.0f, 200.0f);
-		m_eatText->SetPos(glm::vec3(400.0f, 50.0f, 0.0f));
+		m_eatText->SetPos(glm::vec3(400.0f, 200.0f, 0.0f));
 
 		m_eatText->SetText(m_font, m_eatPrompt.c_str());
 		m_eatText->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -233,9 +233,10 @@ void StateGameplay::Enter(std::string arg)
 		}
 
 		// Water
+
 		m_water = new Water();
-		m_water->SetScale(glm::vec3(500.0f, 500.0f, 500.0f));
-		m_water->SetPos(glm::vec3(300.0f, 5.0f, 300.0f));
+		m_water->SetScale(glm::vec3(2000.0f, 2000.0f, 2000.0f));
+		m_water->SetPos(glm::vec3(1000.0f, 5.0f, -1000.0f));
 		Scene::Instance()->AddNode(m_water);
 		m_soundManager->Play3D("Water", m_waterSoundPath, m_water->GetPos(), 10.0f, true);
 
@@ -357,7 +358,7 @@ void StateGameplay::Update(float p_fDelta)
 	}
 
 	// CHECK IF NEAR WATER
-	m_nearWater = Util::inProximity(m_water->GetPos(), camera->GetPosition(), m_water->GetScale());
+	m_nearWater = Util::inProximity(m_water->GetPos(), camera->GetPosition(), glm::vec3(m_water->GetScale().x, 5.0f, m_water->GetScale().z));
 
 	if (m_nearWater && m_app->isKeyDown('E') && !m_drinking)
 	{
