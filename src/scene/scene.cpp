@@ -56,6 +56,16 @@ Camera *Scene::GetActiveCamera()
     return m_activeCamera;
 }
 
+void Scene::SetStateMachine(Common::StateMachine *stateMachine)
+{
+    m_stateMachine = stateMachine;
+}
+
+Common::StateMachine *Scene::GetStateMachine()
+{
+    return m_stateMachine;
+}
+
 void Scene::BuildQuadtree()
 {
     if (m_quadtree)
@@ -80,7 +90,7 @@ void Scene::SetHeight(int height)
 
 glm::vec3 Scene::GetLightDirection()
 {
-    return glm::mat3(cos(m_rotation), 0.0f, sin(m_rotation), 0.0f, 1.0f, 0.0f, -sin(m_rotation), 0.0f, cos(m_rotation)) * glm::vec3(0, -500.0f, -500.0f);
+    return glm::mat3(glm::rotate(m_rotation, glm::vec3(1.0f, 0.0f, 0.0f))) * glm::vec3(-10000, 10000, 10000);
 }
 
 void Scene::Render()
@@ -114,7 +124,7 @@ void Scene::Update(float dt)
 
     m_objectsToRender = m_nodes;
 
-    m_rotation += dt * 3.0f;
+    m_rotation += dt * 0.06f;
 }
 
 void Scene::ToggleDebug()
