@@ -142,7 +142,7 @@ void StateGameplay::Enter(std::string arg)
 
 		m_spotlight = new Light();
 		m_spotlight->posRange = glm::vec4(0.0f, 0.0f, 0.0f, 100.0f);
-		m_spotlight->color = glm::vec3(0.005f, 0.005f, 0.005f);
+		m_spotlight->color = glm::vec3(0.45f, 0.54f, 0.4f);
 		m_spotlight->attenuation = glm::vec3(0.0f, 0.5f, 0.0f);
 		m_spotlight->lightSpot = glm::vec4(2.0f, 2.0f, 2.0f, 0.8f);
 		m_spotlight->enabled = false;

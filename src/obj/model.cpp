@@ -18,7 +18,7 @@ Model::Model(const std::string &modelPath, const std::string &matName)
     m_pMat->SetDepthWrite(true);
 
     m_pMat->SetUniform("u_lightDir", Scene::Instance()->GetLightDirection());
-    m_pMat->SetUniform("u_ambientLight", glm::vec3(0.5f, 0.5f, 0.5f));
+    m_pMat->SetUniform("u_ambientLight", glm::vec3(0.3f, 0.21f, 0.11f));
     m_pMat->SetUniform("u_specularColor", glm::vec3(0.3f, 0.3f, 0.3f));
     m_pMat->SetUniform("u_shininess", 0.4f);
 

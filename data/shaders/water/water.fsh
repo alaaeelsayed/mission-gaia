@@ -14,7 +14,7 @@ void main()
 {
     float height = texture(u_heightMap, v_uv1).g * 0.02f;
     vec3 n = normalize(v_normal.xyz);
-    vec3 diffuseLight = vec3(0.8f, 0.8f, 0.8f) * max(0, dot(v_normal.xyz, u_lightDir));
+    vec3 diffuseLight = vec3(0.45f, 0.54f, 0.4f) * max(0, dot(v_normal.xyz, u_lightDir));
     if(u_invertColors)
         PixelColor.rgb = (u_waterColor.rgb + height*20) * (diffuseLight + u_ambientLight);
     else

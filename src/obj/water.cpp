@@ -152,7 +152,7 @@ void Water::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
     m_pRenderProgram->SetUniform("u_lightDir", Scene::Instance()->GetLightDirection());
     m_pRenderProgram->SetUniform("u_lightColor", glm::vec3(0.4f, 0.4f, 0.4f));
     m_pRenderProgram->SetUniform("u_waterColor", m_vWaterColor);
-    m_pRenderProgram->SetUniform("u_ambientLight", glm::vec3(0.5f, 0.5f, 0.5f));
+    m_pRenderProgram->SetUniform("u_ambientLight", glm::vec3(0.3f, 0.21f, 0.11f));
 
     m_pSurface->Render(mProj, mView);
 

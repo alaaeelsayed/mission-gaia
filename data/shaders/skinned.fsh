@@ -87,7 +87,7 @@ vec3 calc_point_lighting(vec4 lightPosRange, vec3 lightColor, vec3 lightAttenuat
 void main()
 {
     vec3 diffuseMat = texture(u_diffuseTex, v_uv1).rgb;  
-	vec3 diffuseLight = vec3(0.005f, 0.005f, 0.005f) * max(0, dot(v_normal.xyz, u_lightDir));
+	vec3 diffuseLight = vec3(0.45f, 0.54f, 0.4f) * max(0, dot(v_normal.xyz, u_lightDir));
 
     vec3 n = normalize(v_normal.xyz);
 	
