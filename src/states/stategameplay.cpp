@@ -209,7 +209,6 @@ void StateGameplay::Enter(std::string arg)
 		m_soundManager = new wolf::SoundManager();
 		m_soundManager->CreateSoundSystem();
 		m_soundManager->Play2D("Nature", m_natureSoundPath, true);
-		m_soundManager->Play3D("Water", m_waterSoundPath, glm::vec3(0.0f, 0.0f, 0.0f), 10.0f, true);
 
 		// Debug Menu
 		IMGUI_CHECKVERSION();
@@ -238,6 +237,7 @@ void StateGameplay::Enter(std::string arg)
 		m_water->SetScale(glm::vec3(500.0f, 500.0f, 500.0f));
 		m_water->SetPos(glm::vec3(300.0f, 5.0f, 300.0f));
 		Scene::Instance()->AddNode(m_water);
+		m_soundManager->Play3D("Water", m_waterSoundPath, m_water->GetPos(), 10.0f, true);
 
 		m_skybox = new Skybox(m_skyboxPath);
 		Scene::Instance()->AddNode(m_skybox);
@@ -429,6 +429,25 @@ void StateGameplay::Update(float p_fDelta)
 		glm::vec3 velocity = camRotation * 50.0f * p_fDelta;
 		bullet->SetPosition(bullet->GetPosition() + velocity);
 		bullet->Update(p_fDelta);
+	}
+
+	// Check collision
+	int index = 0;
+	for (Sphere *bullet : m_bullets)
+	{
+		for (Model *model : m_models)
+		{
+			if (model->getTag() == "enemy")
+			{
+				if (Util::inProximity(model->getPosition(), bullet->GetPosition(), glm::vec3(5.0f, 5.0f, 5.0f)))
+				{
+					m_bullets.erase(m_bullets.begin() + index);
+					model->damage(30.0f);
+					m_soundManager->Play3D("death", m_creatureGrowlPath, model->getPosition(), 10.0f);
+				}
+			}
+		}
+		index++;
 	}
 }
 
