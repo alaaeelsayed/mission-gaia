@@ -61,7 +61,7 @@ void Terrain::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
     m_program->SetUniform("u_spotLightAttenuation", glm::vec3(0.0f, 0.3f, 0.0f));
     m_program->SetUniform("u_spotLightSpot", glm::vec3(0.2f, 0.2f, 0.2f));
 
-    m_program->SetUniform("u_lightPos", glm::vec3(-4000, 3000, 4000));
+    m_program->SetUniform("u_lightPos", Scene::Instance()->GetLightDirection());
     m_program->SetUniform("u_viewPos", glm::vec3(0.0f, 0.0f, 0.0f));
     // 158, 108, 56
     m_program->SetUniform("u_ambientLight", glm::vec3(0.3f, 0.21f, 0.11f));

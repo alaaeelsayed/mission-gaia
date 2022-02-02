@@ -3,6 +3,7 @@
 #include "../obj/node.h"
 #include "terraingenerator.h"
 #include "../text/textbox.h"
+#include "../scene/scene.h"
 
 class Terrain : public Node
 {

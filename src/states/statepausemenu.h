@@ -9,6 +9,7 @@
 #include "../obj/model.h"
 #include "../text/textbox.h"
 #include "../../wolf/wolf.h"
+#include "../scene/scene.h"
 
 class StatePauseMenu : public Common::StateBase
 {

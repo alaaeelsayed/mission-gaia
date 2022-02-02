@@ -3,6 +3,7 @@
 #include "../camera/camera.h"
 #include "../states/stategameplay.h"
 #include "../physics/rigidBody.h"
+#include "../scene/scene.h"
 
 class SingleMaterialProvider : public wolf::Model::MaterialProvider
 {

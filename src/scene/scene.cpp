@@ -78,6 +78,11 @@ void Scene::SetHeight(int height)
     m_height = height;
 }
 
+glm::vec3 Scene::GetLightDirection()
+{
+    return glm::mat3(cos(m_rotation), 0.0f, sin(m_rotation), 0.0f, 1.0f, 0.0f, -sin(m_rotation), 0.0f, cos(m_rotation)) * glm::vec3(0, -500.0f, -500.0f);
+}
+
 void Scene::Render()
 {
     if (m_activeCamera == NULL)
@@ -108,6 +113,8 @@ void Scene::Update(float dt)
     const glm::mat4 &mView = m_activeCamera->GetViewMatrix();
 
     m_objectsToRender = m_nodes;
+
+    m_rotation += dt * 3.0f;
 }
 
 void Scene::ToggleDebug()

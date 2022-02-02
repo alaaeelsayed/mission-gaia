@@ -107,7 +107,7 @@ void StateRespawn::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 	glClearColor(0.3f, 0.3f, 0.3f, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	m_pWorldProgram->SetUniform("u_lightDir", m_sunDirection);
+	m_pWorldProgram->SetUniform("u_lightDir", Scene::Instance()->GetLightDirection());
 
 	m_pSkybox->Render(mProj, mView);
 

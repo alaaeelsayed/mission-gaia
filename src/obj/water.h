@@ -7,6 +7,7 @@
 #include "../misc/imgui/imgui_impl_glfw.h"
 #include "../misc/imgui/imgui_impl_opengl3.h"
 #include "../particles/effect.h"
+#include "../scene/scene.h"
 #include "node.h"
 
 class Water : public Node

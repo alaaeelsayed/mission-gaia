@@ -80,6 +80,7 @@ Skybox::Skybox(const std::string &texturePath) : Node(BoundingBox())
 
 void Skybox::Update(float dt)
 {
+    Rotate(glm::vec3(dt * 3.0f, 0.0f, 0.0f));
 }
 
 void Skybox::Render(const glm::mat4 &mProj, const glm::mat4 &mView)

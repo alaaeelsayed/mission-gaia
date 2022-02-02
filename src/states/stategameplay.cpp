@@ -396,7 +396,7 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 
 	Camera *camera = Scene::Instance()->GetActiveCamera();
 
-	m_worldProgram->SetUniform("u_lightDir", m_sunDirection);
+	m_worldProgram->SetUniform("u_lightDir", Scene::Instance()->GetLightDirection());
 	m_worldProgram->SetUniform("u_viewPos", camera->GetViewDirection());
 
 	m_hungerText->Render(glm::ortho(0.0f, (float)dimensions.x, (float)dimensions.y, 0.0f), glm::mat4(1.0f));

@@ -28,6 +28,7 @@ public:
     void Update(float dt);
 
     void ToggleDebug();
+    glm::vec3 GetLightDirection();
 
 private:
     Scene();
@@ -39,6 +40,7 @@ private:
     int m_width, m_height;
 
     bool m_renderDebug = false;
+    float m_rotation = 0.0f;
 
     Quadtree *m_quadtree = 0;
 

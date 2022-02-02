@@ -17,7 +17,7 @@ Model::Model(const std::string &modelPath, const std::string &matName)
     m_pMat->SetDepthTest(true);
     m_pMat->SetDepthWrite(true);
 
-    m_pMat->SetUniform("u_lightDir", glm::vec3(10.0f, 500.0f, 500.0f));
+    m_pMat->SetUniform("u_lightDir", Scene::Instance()->GetLightDirection());
     m_pMat->SetUniform("u_ambientLight", glm::vec3(0.5f, 0.5f, 0.5f));
     m_pMat->SetUniform("u_specularColor", glm::vec3(0.3f, 0.3f, 0.3f));
     m_pMat->SetUniform("u_shininess", 0.4f);
@@ -117,8 +117,10 @@ void Model::update(float fDelta)
 
 void Model::render(const glm::mat4 &mProj, const glm::mat4 &mView, const glm::vec3 &mViewPos)
 {
+    glm::quat radRotation = glm::quat(glm::vec3(DEG_TO_RAD(m_vRotation.x), DEG_TO_RAD(m_vRotation.y), DEG_TO_RAD(m_vRotation.z)));
+
     glm::mat4 mWorld = glm::translate(glm::mat4(1.0f), m_vPosition - m_vOffset) *
-                       glm::mat4_cast(glm::quat(m_vRotation)) * glm::scale(m_vScale);
+                       glm::mat4_cast(radRotation) * glm::scale(m_vScale);
 
     m_pMat->SetUniform("u_viewPos", mViewPos);
     m_pModel->Render(mWorld, mView, mProj);
