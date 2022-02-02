@@ -6,7 +6,7 @@ class Plane : public Node
 {
 public:
     Plane(const std::string &texturePath);
-    Plane(int subdivisions = 0);
+    Plane(wolf::Program *program, int subdivisions = 0);
 
     virtual ~Plane();
 
@@ -21,5 +21,5 @@ private:
     wolf::VertexBuffer *m_vb = 0;
     wolf::VertexDeclaration *m_decl = 0;
     wolf::Texture *m_texture = 0;
-    wolf::Material *m_material = 0;
+    wolf::Program *m_program = 0;
 };

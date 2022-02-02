@@ -45,19 +45,19 @@ void StatePauseMenu::Enter(std::string arg)
 
 		m_pauseMenu = new TextBox(500.0f, 100.0f);
 		m_pauseMenu->SetText(m_font, "Pause Menu");
-		m_pauseMenu->SetColor(0.0f, 0.2f, 0.2f, 1.0f);
+		m_pauseMenu->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		m_pauseMenu->SetHorizontalAlignment(TextBox::Alignment::AL_Center);
 		m_pauseMenu->SetVerticalAlignment(TextBox::Alignment::AL_Center);
 
 		m_resumeGame = new TextBox(500.0f, 100.0f);
 		m_resumeGame->SetText(m_font, "Resume Game");
-		m_resumeGame->SetColor(0.0f, 0.2f, 0.2f, 1.0f);
+		m_resumeGame->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		m_resumeGame->SetHorizontalAlignment(TextBox::Alignment::AL_Center);
 		m_resumeGame->SetVerticalAlignment(TextBox::Alignment::AL_Center);
 
 		m_quitGame = new TextBox(500.0f, 100.0f);
 		m_quitGame->SetText(m_font, "Quit Game");
-		m_quitGame->SetColor(0.0f, 0.2f, 0.2f, 1.0f);
+		m_quitGame->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		m_quitGame->SetHorizontalAlignment(TextBox::Alignment::AL_Center);
 		m_quitGame->SetVerticalAlignment(TextBox::Alignment::AL_Center);
 	}

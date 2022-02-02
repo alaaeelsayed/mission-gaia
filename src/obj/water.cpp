@@ -95,7 +95,7 @@ Water::Water() : Node(BoundingBox())
         _generateTwiddleFactors();
 
         // Initialize water surface
-        m_pSurface = new Plane(512);
+        m_pSurface = new Plane(m_pRenderProgram, 512);
 
         // Initialize rain effect
         m_pEffect = new Effect(m_sRainPath);
@@ -126,6 +126,18 @@ void Water::Update(float dt)
     _butterflyOperation(m_pH0Tdy, m_pDy);
     _butterflyOperation(m_pH0Tdx, m_pDx);
     _butterflyOperation(m_pH0Tdz, m_pDz);
+}
+
+void Water::SetScale(const glm::vec3 &scale)
+{
+    m_pSurface->SetScale(scale);
+    Node::SetScale(scale);
+}
+
+void Water::SetPos(const glm::vec3 &position)
+{
+    m_pSurface->SetPos(position);
+    Node::SetPos(position);
 }
 
 void Water::Render(const glm::mat4 &mProj, const glm::mat4 &mView)

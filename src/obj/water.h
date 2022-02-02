@@ -16,6 +16,8 @@ public:
     virtual ~Water();
     void Update(float dt) override;
     void Render(const glm::mat4 &mProj, const glm::mat4 &mView) override;
+    virtual void SetScale(const glm::vec3 &scale);
+    virtual void SetPos(const glm::vec3 &position);
 
 private:
     void _calculateH0K();

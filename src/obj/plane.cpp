@@ -14,7 +14,7 @@ Plane::~Plane()
     delete m_decl;
     wolf::BufferManager::DestroyBuffer(m_vb);
     wolf::TextureManager::DestroyTexture(m_texture);
-    wolf::MaterialManager::DestroyMaterial(m_material);
+    wolf::ProgramManager::DestroyProgram(m_program);
 }
 
 Plane::Plane(const std::string &texturePath)
@@ -24,9 +24,11 @@ Plane::Plane(const std::string &texturePath)
     m_texture = wolf::TextureManager::CreateTexture(texturePath);
 
     // Material should be unique to a texture
-    m_material = wolf::MaterialManager::CreateMaterial(texturePath);
-    m_material->SetProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
-    m_material->SetTexture("u_texture", m_texture);
+    // m_material = wolf::MaterialManager::CreateMaterial(texturePath);
+    // m_material->SetProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
+    // m_material->SetTexture("u_texture", m_texture);
+    m_program = wolf::ProgramManager::CreateProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
+    m_program->SetTexture("u_texture", m_texture);
 
     m_decl = new wolf::VertexDeclaration();
     m_decl->Begin();
@@ -37,7 +39,7 @@ Plane::Plane(const std::string &texturePath)
     m_decl->End();
 }
 
-Plane::Plane(int subdivisions) : Node(BoundingBox())
+Plane::Plane(wolf::Program *program, int subdivisions) : Node(BoundingBox())
 {
     m_numSegments = subdivisions * subdivisions;
     Vertex *pAllVerts = new Vertex[m_numSegments * 6];
@@ -100,9 +102,10 @@ Plane::Plane(int subdivisions) : Node(BoundingBox())
     m_vb = wolf::BufferManager::CreateVertexBuffer(pAllVerts, sizeof(Vertex) * 6 * m_numSegments);
 
     // Material should be unique to a texture
-    m_material = wolf::MaterialManager::CreateMaterial("water");
-    m_material->SetProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
-    m_material->SetTexture("u_texture", m_texture);
+    // m_material = wolf::MaterialManager::CreateMaterial("water");
+    // m_material->SetProgram("data/shaders/water/water.vsh", "data/shaders/water/water.fsh");
+    // m_material->SetTexture("u_texture", m_texture);
+    m_program = program;
 
     m_decl = new wolf::VertexDeclaration();
     m_decl->Begin();
@@ -121,15 +124,17 @@ void Plane::Update(float dt)
 
 void Plane::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 {
-    m_material->SetUniform("projection", mProj);
-    m_material->SetUniform("view", mView);
-    m_material->SetUniform("world", GetWorldTransform());
-    m_material->Apply();
+    m_program->SetUniform("projection", mProj);
+    m_program->SetUniform("view", mView);
+    m_program->SetUniform("world", GetWorldTransform());
+    m_program->SetUniform("worldIT", glm::transpose(glm::inverse(GetWorldTransform())));
+
+    m_program->Bind();
 
     if (m_texture)
         m_texture->Bind();
 
     m_decl->Bind();
 
-    glDrawArrays(GL_TRIANGLES, 0, 6 * 3 * 2);
+    glDrawArrays(GL_TRIANGLES, 0, 6 * m_numSegments);
 }
