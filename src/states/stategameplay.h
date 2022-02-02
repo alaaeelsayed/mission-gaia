@@ -15,6 +15,7 @@
 #include "../misc/imgui/imgui_impl_opengl3.h"
 #include "../misc/util.h"
 #include "./statemachine.h"
+#include "../../samplefw/Sphere.h"
 
 #include "../../irrklang/include/irrKlang.h"
 
@@ -99,6 +100,7 @@ private:
 	Skybox *m_skybox = 0;
 
 	bool m_keyDown = false;
+	bool m_debugDown = false;
 	bool m_flashlightEquipped = false;
 	bool m_drinking = false;
 	bool m_eating = false;
@@ -123,7 +125,6 @@ private:
 
 	// Debug Menu
 	bool m_debug = true;
-
 	bool m_walking = true;
 	bool m_running = true;
 
@@ -133,6 +134,10 @@ private:
 	float m_enemySpeed = 0.08f;
 	glm::vec3 m_enemyRange = glm::vec3(70.0f, 20.0f, 70.0f);
 	glm::vec3 m_foodRange = glm::vec3(20.0f, 20.0f, 20.0f);
+
+	// Bullets
+	std::vector<Sphere *> m_bullets;
+	bool m_rightMouseDown = false;
 
 	Common::StateMachine *m_stateMachine = nullptr;
 };

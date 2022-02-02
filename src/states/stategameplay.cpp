@@ -166,7 +166,7 @@ void StateGameplay::Enter(std::string arg)
 			m_pCreature->setTexture("data/textures/gimpy_diffuse.tga");
 			m_pCreature->setNormal("data/textures/gimpy_normal.tga");
 			m_pCreature->setOffset(m_pCreature->getModel()->getAABBMin());
-			// m_pCreature->attachRigidBody("data/physics/creature.rigid");
+			m_pCreature->attachRigidBody("data/physics/creature.rigid");
 
 			Light *pointLight = new Light();
 			float r = _randomFloat(0.0001f, 0.0018f);
@@ -287,6 +287,8 @@ void StateGameplay::Update(float p_fDelta)
 
 	for (Model *model : m_models)
 	{
+		if (model->isDestroyed())
+			continue;
 		model->update(p_fDelta);
 	}
 
@@ -386,6 +388,48 @@ void StateGameplay::Update(float p_fDelta)
 	{
 		m_stateMachine->GoToState(eStateGameplay_Respawn);
 	}
+
+	if (m_app->isKeyDown('Z') && !m_debugDown)
+	{
+
+		wolf::BulletPhysicsManager::Instance()->ToggleDebugRendering();
+		m_debugDown = true;
+	}
+
+	if (!m_app->isKeyDown('Z'))
+	{
+		m_debugDown = false;
+	}
+
+	// Bullets
+	if (m_app->isLMBDown() && !m_rightMouseDown)
+	{
+		if (m_bullets.size() >= 5.0f)
+		{
+			m_bullets.pop_back();
+		}
+		Sphere *bullet = new Sphere(1.0f);
+		bullet->SetPosition(camera->GetPosition());
+		bullet->attachRigidBody("data/physics/bullet.rigid");
+		bullet->setTag("projectile");
+		m_bullets.push_back(bullet);
+		m_rightMouseDown = true;
+	}
+
+	if (!m_app->isLMBDown())
+	{
+		m_rightMouseDown = false;
+	}
+
+	// Update bullets
+	for (Sphere *bullet : m_bullets)
+	{
+		glm::vec3 camRotation = camera->GetViewDirection();
+		// glm::quat radRotation = glm::quat(glm::vec3(DEG_TO_RAD(camRotation.x), DEG_TO_RAD(camRotation.y), DEG_TO_RAD(camRotation.z)));
+		glm::vec3 velocity = camRotation * 50.0f * p_fDelta;
+		bullet->SetPosition(bullet->GetPosition() + velocity);
+		bullet->Update(p_fDelta);
+	}
 }
 
 void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
@@ -404,6 +448,8 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 
 	for (Model *model : m_models)
 	{
+		if (model->isDestroyed())
+			continue;
 
 		std::sort(m_lights.begin(), m_lights.end(), [this, model](const Light *lhs, const Light *rhs) -> bool
 				  { return _isEffectiveLight(lhs, rhs, model); });
@@ -447,6 +493,14 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 			model->getMaterial()->SetUniform("u_lightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
 		}
 		model->render(mProj, mView, camera->GetViewDirection());
+	}
+
+	wolf::BulletPhysicsManager::Instance()->Render(mProj, mView);
+
+	// Render bullets
+	for (Sphere *bullet : m_bullets)
+	{
+		bullet->Render(glm::mat4(1.0f), mView, mProj);
 	}
 
 	// if (m_pCam)

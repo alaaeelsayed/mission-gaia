@@ -141,16 +141,16 @@ void RigidBody::Update(float p_fDelta, const glm::vec3 &p_vPosition)
         switch (m_eShape)
         {
         case Capsule:
-            Init(new btCapsuleShape(m_fRadius, m_fHeight), m_sMaterial, m_fMass, m_vOffset, m_bKinematic);
+            Init(p_vPosition, new btCapsuleShape(m_fRadius, m_fHeight), m_sMaterial, m_fMass, m_vOffset, m_bKinematic);
             break;
         case Box:
-            Init(new btBoxShape(m_vExtents), m_sMaterial, m_fMass, m_vOffset, m_bKinematic);
+            Init(p_vPosition, new btBoxShape(m_vExtents), m_sMaterial, m_fMass, m_vOffset, m_bKinematic);
             break;
         case Plane:
-            Init(new btStaticPlaneShape(m_vPlaneNormal, m_fPlaneConstant), m_sMaterial, m_fMass, m_vOffset, m_bKinematic);
+            Init(p_vPosition, new btStaticPlaneShape(m_vPlaneNormal, m_fPlaneConstant), m_sMaterial, m_fMass, m_vOffset, m_bKinematic);
             break;
         case Sphere:
-            Init(new btSphereShape(m_fRadius), m_sMaterial, m_fMass, m_vOffset, m_bKinematic);
+            Init(p_vPosition, new btSphereShape(m_fRadius), m_sMaterial, m_fMass, m_vOffset, m_bKinematic);
             break;
         }
         m_bReadyToInit = false;
@@ -185,7 +185,7 @@ void RigidBody::Update(float p_fDelta, const glm::vec3 &p_vPosition)
     }
 }
 
-void RigidBody::Init(btCollisionShape *p_pCollisionShape, const std::string &p_strMaterial, float p_fMass, const glm::vec3 &p_vOffset, bool p_bIsKinematic)
+void RigidBody::Init(const glm::vec3 &p_vPosition, btCollisionShape *p_pCollisionShape, const std::string &p_strMaterial, float p_fMass, const glm::vec3 &p_vOffset, bool p_bIsKinematic)
 {
     m_pCollisionShape = p_pCollisionShape;
     m_bKinematic = p_bIsKinematic;
@@ -201,34 +201,34 @@ void RigidBody::Init(btCollisionShape *p_pCollisionShape, const std::string &p_s
     }
 
     // Set initial transform
-    // Transform &transform = this->GetGameObject()->GetTransform();
-    // btTransform startTransform;
-    // startTransform.setIdentity();
-    // startTransform.setOrigin(btVector3(transform.GetTranslation().x, transform.GetTranslation().y, transform.GetTranslation().z));
+    btTransform startTransform;
+    startTransform.setIdentity();
+    startTransform.setOrigin(btVector3(p_vPosition.x, p_vPosition.y, p_vPosition.z));
 
-    // // Setup the motion state
-    // btDefaultMotionState *myMotionState = new btDefaultMotionState(startTransform);
-    // btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, m_pCollisionShape, localInertia);
+    // Setup the motion state
+    btDefaultMotionState *myMotionState = new btDefaultMotionState(startTransform);
+    btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, m_pCollisionShape, localInertia);
 
-    // // Material specific properties
-    // BulletPhysicsMaterialManager::PhysicsMaterial *pMaterial = BulletPhysicsManager::Instance()->GetMaterial(p_strMaterial);
-    // if (pMaterial)
-    // {
-    //     rbInfo.m_restitution = pMaterial->restitution;
-    //     rbInfo.m_friction = pMaterial->friction;
-    // }
+    // Material specific properties
 
-    // m_pBody = new btRigidBody(rbInfo);
+    wolf::BulletPhysicsMaterialManager::PhysicsMaterial *pMaterial = wolf::BulletPhysicsManager::Instance()->GetMaterial(p_strMaterial);
+    if (pMaterial)
+    {
+        rbInfo.m_restitution = pMaterial->restitution;
+        rbInfo.m_friction = pMaterial->friction;
+    }
+
+    m_pBody = new btRigidBody(rbInfo);
     // m_pBody->setUserPointer(this->GetGameObject());
 
-    // // Set kinematic flags if this rigid body is manually positioned
-    // if (m_bKinematic)
-    // {
-    //     m_pBody->setCollisionFlags(m_pBody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
-    //     m_pBody->setActivationState(DISABLE_DEACTIVATION);
-    // }
-    // // Add rigid body to the world
-    // BulletPhysicsManager::Instance()->GetWorld()->addRigidBody(m_pBody);
+    // Set kinematic flags if this rigid body is manually positioned
+    if (m_bKinematic)
+    {
+        m_pBody->setCollisionFlags(m_pBody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+        m_pBody->setActivationState(DISABLE_DEACTIVATION);
+    }
+    // Add rigid body to the world
+    wolf::BulletPhysicsManager::Instance()->GetWorld()->addRigidBody(m_pBody);
 }
 
 void RigidBody::InitValues(std::string p_sMaterial, bool p_bKinematic, float p_fMass,

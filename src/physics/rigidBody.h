@@ -20,7 +20,7 @@ public:
     //------------------------------------------------------------------------------
     // Public methods for "GOC_RigidBody" family of components
     //------------------------------------------------------------------------------
-    void Init(btCollisionShape *p_pCollisionShape, const std::string &p_strMaterial, float p_fMass, const glm::vec3 &p_vOffset, bool p_bIsKinematic = false);
+    void Init(const glm::vec3 &p_vPosition, btCollisionShape *p_pCollisionShape, const std::string &p_strMaterial, float p_fMass, const glm::vec3 &p_vOffset, bool p_bIsKinematic = false);
     void InitValues(std::string p_sMaterial, bool p_bKinematic, float p_fMass,
                     const glm::vec3 &p_vOffset, float p_fRadius = 0.0f, float p_fHeight = 0.0f,
                     const btVector3 &p_vExtents = btVector3(0.0f, 0.0f, 0.0f), const btVector3 &p_vPlaneNormal = btVector3(0.0f, 0.0f, 0.0f),
