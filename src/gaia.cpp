@@ -30,16 +30,24 @@ void Gaia::Init()
     StatePauseMenu *pauseMenu = new StatePauseMenu();
     pauseMenu->RegisterApp(m_app);
 
+    StateMainMenu *mainMenu = new StateMainMenu();
+    mainMenu->RegisterApp(m_app);
+
+    StateRespawn *respawn = new StateRespawn();
+    respawn->RegisterApp(m_app);
+
     m_stateMachine->RegisterState(eStateGameplay_Gameplay, gameplay);
     m_stateMachine->RegisterState(eStateGameplay_PauseMenu, pauseMenu);
-    m_stateMachine->GoToState(eStateGameplay_Gameplay);
+    m_stateMachine->RegisterState(eStateGameplay_MainMenu, mainMenu);
+    m_stateMachine->RegisterState(eStateGameplay_Respawn, respawn);
+    m_stateMachine->GoToState(eStateGameplay_MainMenu);
 
     printf("Successfully initialized Gaia\n");
 }
 
 void Gaia::Update(float dt)
 {
-    if (m_app->isKeyDown(GLFW_KEY_ESCAPE) && !m_keyDown)
+    if (m_app->isKeyDown(GLFW_KEY_ESCAPE) && !m_keyDown && !(m_stateMachine->GetCurrentState() == eStateGameplay_Respawn || m_stateMachine->GetCurrentState() == eStateGameplay_MainMenu))
     {
         if (m_stateMachine->GetCurrentState() == eStateGameplay_PauseMenu)
         {
@@ -55,7 +63,7 @@ void Gaia::Update(float dt)
     if (!m_app->isKeyDown(GLFW_KEY_ESCAPE))
         m_keyDown = false;
 
-    if (m_stateMachine->GetCurrentState() != eStateGameplay_PauseMenu && !m_debugMode)
+    if (m_stateMachine->GetCurrentState() != eStateGameplay_PauseMenu && m_stateMachine->GetCurrentState() != eStateGameplay_MainMenu && m_stateMachine->GetCurrentState() != eStateGameplay_Respawn && !m_debugMode)
         Scene::Instance()->GetActiveCamera()->Update(dt);
 
     if (!m_app->isKeyDown('M'))
@@ -69,7 +77,7 @@ void Gaia::Update(float dt)
         m_debugMode = !m_debugMode;
     }
 
-    if (m_debugMode || m_stateMachine->GetCurrentState() == eStateGameplay_PauseMenu)
+    if (m_debugMode || m_stateMachine->GetCurrentState() == eStateGameplay_PauseMenu || m_stateMachine->GetCurrentState() == eStateGameplay_Respawn || m_stateMachine->GetCurrentState() == eStateGameplay_MainMenu)
     {
         m_app->setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }

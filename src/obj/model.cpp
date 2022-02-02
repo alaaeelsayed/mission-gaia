@@ -5,6 +5,7 @@ Model::~Model()
     delete m_pModel;
     delete m_pLight;
     wolf::MaterialManager::DestroyMaterial(m_pMat);
+    delete m_pRigidBody;
 }
 
 Model::Model(const std::string &modelPath, const std::string &matName)
@@ -23,6 +24,11 @@ Model::Model(const std::string &modelPath, const std::string &matName)
 
     SingleMaterialProvider matProvider(MATNAME);
     m_pModel = new wolf::Model(modelPath, matProvider);
+}
+
+void Model::attachRigidBody(const std::string &p_sConfiguration)
+{
+    m_pRigidBody = new RigidBody(p_sConfiguration);
 }
 
 void Model::attachLight(StateGameplay::Light *pLight)
@@ -98,6 +104,11 @@ glm::vec3 Model::getScale()
 
 void Model::update(float fDelta)
 {
+    if (m_pRigidBody)
+    {
+        m_pRigidBody->Update(fDelta, m_vPosition);
+    }
+
     if (m_pLight)
     {
         m_pLight->posRange = glm::vec4(m_vPosition.x, m_vPosition.y, m_vPosition.z, m_pLight->posRange.w);

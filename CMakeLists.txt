@@ -65,7 +65,7 @@ include_directories(
     thirdparty/glm 
     thirdparty/glew/include 
     thirdparty/assimp/include 
-    thirdparty/bullet/include
+    thirdparty/bullet/src
     irrklang/include
     ${OPENGL_INCLUDE_DIRS})
 

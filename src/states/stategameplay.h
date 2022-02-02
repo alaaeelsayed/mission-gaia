@@ -13,6 +13,8 @@
 #include "../misc/imgui/imgui.h"
 #include "../misc/imgui/imgui_impl_glfw.h"
 #include "../misc/imgui/imgui_impl_opengl3.h"
+#include "../misc/util.h"
+#include "./statemachine.h"
 
 #include "../../irrklang/include/irrKlang.h"
 
@@ -57,6 +59,14 @@ private:
 	const std::string m_natureSoundPath = "data/sounds/ambient.ogg";
 	const std::string m_waterSoundPath = "data/sounds/ocean.wav";
 	const std::string m_creatureGrowlPath = "data/sounds/creature_growl.wav";
+	const std::string m_flashlightSoundPath = "data/sounds/flashlight.ogg";
+	const std::string m_runningSoundPath = "data/sounds/running.ogg";
+	const std::string m_walkingSoundPath = "data/sounds/walking.ogg";
+	const std::string m_drinkingSoundPath = "data/sounds/drinking.ogg";
+	const std::string m_eatingSoundPath = "data/sounds/eating.ogg";
+
+	const std::string m_drinkPrompt = "Press E to drink";
+	const std::string m_eatPrompt = "Press E to eat";
 
 	std::vector<Light *> m_lights;
 	wolf::Program *m_worldProgram = 0;
@@ -90,12 +100,21 @@ private:
 
 	bool m_keyDown = false;
 	bool m_flashlightEquipped = false;
+	bool m_drinking = false;
+	bool m_eating = false;
 
 	Font *m_font;
 	TextBox *m_hungerText;
 	TextBox *m_thirstText;
+
 	float m_hunger = 100;
 	float m_thirst = 100;
+
+	TextBox *m_drinkText;
+	TextBox *m_eatText;
+
+	bool m_nearWater = false;
+	bool m_nearFood = false;
 
 	int m_lightCount = 0;
 
@@ -105,8 +124,17 @@ private:
 	// Debug Menu
 	bool m_debug = true;
 
+	bool m_walking = true;
+	bool m_running = true;
+
 	int m_terrainSize, m_terrainVerts, m_terrainOctaves;
 	float m_terrainAmplitude, m_terrainRoughness;
+
+	float m_enemySpeed = 0.08f;
+	glm::vec3 m_enemyRange = glm::vec3(70.0f, 20.0f, 70.0f);
+	glm::vec3 m_foodRange = glm::vec3(20.0f, 20.0f, 20.0f);
+
+	Common::StateMachine *m_stateMachine = nullptr;
 };
 
 #endif

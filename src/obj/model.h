@@ -2,6 +2,7 @@
 #include "../../wolf/wolf.h"
 #include "../camera/camera.h"
 #include "../states/stategameplay.h"
+#include "../physics/rigidBody.h"
 
 class SingleMaterialProvider : public wolf::Model::MaterialProvider
 {
@@ -49,6 +50,8 @@ public:
         return m_sTag;
     }
 
+    void attachRigidBody(const std::string &p_sConfiguration);
+
     wolf::Material *getMaterial();
 
     glm::vec3 getPosition();
@@ -68,4 +71,6 @@ private:
 
     StateGameplay::Light *m_pLight = nullptr;
     std::string m_sTag = "";
+
+    RigidBody *m_pRigidBody = nullptr;
 };

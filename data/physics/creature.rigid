@@ -1,0 +1,8 @@
+<rigid_body Shape="Capsule">
+    <Radius value="2.0f"/>
+    <Height value="8.0f"/>
+    <Material name="Normal"/>
+    <Mass value="50.0f"/>
+    <Offset x="0.0f" y="-3.0f" z="0.0f"/>
+    <Kinematic value="false"/>
+</rigid_body>

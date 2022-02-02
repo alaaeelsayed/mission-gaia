@@ -3,7 +3,9 @@
 
 enum States
 {
-	eStateGameplay_PauseMenu = 0,
+	eStateGameplay_MainMenu = 0,
+	eStateGameplay_PauseMenu,
+	eStateGameplay_Respawn,
 	eStateGameplay_Gameplay
 };
 

@@ -49,4 +49,18 @@ namespace Util
 
         return glm::vec4(x, y, z, w);
     }
+
+    static bool inProximity(const glm::vec3 &p_vPos, const glm::vec3 &p_vPos2, const glm::vec3 &p_vRange)
+    {
+        float xDist = std::abs(p_vPos.x - p_vPos2.x);
+        float yDist = std::abs(p_vPos.y - p_vPos2.y);
+        float zDist = std::abs(p_vPos.z - p_vPos2.z);
+        return xDist <= p_vRange.x && yDist <= p_vRange.y && zDist <= p_vRange.z;
+    }
+
+    static bool randBool()
+    {
+        const int shift = static_cast<int>(std::log2(RAND_MAX));
+        return (rand() >> shift) & 1;
+    }
 };
