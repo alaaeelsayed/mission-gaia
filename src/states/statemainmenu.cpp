@@ -39,10 +39,7 @@ void StateMainMenu::Enter(std::string arg)
 
 		m_pWorldProgram = wolf::ProgramManager::CreateProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
 
-		if (m_pCam)
-		{
-			m_pSkybox = new Skybox(m_skyboxPath);
-		}
+		m_pSkybox = new Skybox(m_skyboxPath);
 
 		// Menu
 

@@ -151,6 +151,14 @@ void StateGameplay::Enter(std::string arg)
 		m_flashlight->setTexture("data/textures/flashlight.png");
 		m_models.push_back(m_flashlight);
 
+		m_terrainGenerator = new TerrainGenerator();
+
+		m_terrainSize = m_terrainGenerator->GetSize();
+		m_terrainVerts = m_terrainGenerator->GetVertexCount();
+		m_terrainOctaves = m_terrainGenerator->GetOctaves();
+		m_terrainRoughness = m_terrainGenerator->GetRoughness();
+		m_terrainAmplitude = m_terrainGenerator->GetAmplitude();
+
 		for (int i = 0; i < 30; i++)
 		{
 			Model *m_pCreature = new Model("data/models/low_poly_spitter.obj", "skinned");
@@ -171,9 +179,9 @@ void StateGameplay::Enter(std::string arg)
 			m_pCreature->attachLight(pointLight);
 			int scale = _randomNum(2, 5);
 			float rotation = (float)_randomNum(-60, 60);
-			int x = _randomNum(0, m_terrainGenerator->GetSize());
+			int x = _randomNum(0, m_terrainSize);
 
-			int z = _randomNum(0, m_terrainGenerator->GetSize());
+			int z = _randomNum(0, m_terrainSize);
 
 			m_pCreature->setScale(glm::vec3(scale, scale, scale));
 			m_pCreature->translate(glm::vec3(x, 0.0f, z));
@@ -214,14 +222,6 @@ void StateGameplay::Enter(std::string arg)
 		ImGui_ImplOpenGL3_Init("#version 430 core");
 
 		m_worldProgram = wolf::ProgramManager::CreateProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
-
-		m_terrainGenerator = new TerrainGenerator();
-
-		m_terrainSize = m_terrainGenerator->GetSize();
-		m_terrainVerts = m_terrainGenerator->GetVertexCount();
-		m_terrainOctaves = m_terrainGenerator->GetOctaves();
-		m_terrainRoughness = m_terrainGenerator->GetRoughness();
-		m_terrainAmplitude = m_terrainGenerator->GetAmplitude();
 
 		for (int i = 0; i < 4; i++)
 		{
@@ -362,9 +362,7 @@ void StateGameplay::Update(float p_fDelta)
 		m_drinking = true;
 		m_soundManager->Play2D("drinking", m_drinkingSoundPath, false, true);
 
-		m_thirst += 10.0f;
-		if (m_thirst > 100.0f)
-			m_thirst = 100.0f;
+		m_thirst = glm::min(100.0f, m_thirst + 10.0f);
 	}
 
 	if (!m_app->isKeyDown('E'))
@@ -375,7 +373,7 @@ void StateGameplay::Update(float p_fDelta)
 		m_eating = true;
 		m_soundManager->Play2D("eating", m_eatingSoundPath, false, true);
 
-		m_hunger = wolf::max(100.0f, m_hunger + 10.0f);
+		m_hunger = glm::min(100.0f, m_hunger + 10.0f);
 	}
 
 	if (!m_app->isKeyDown('E'))
