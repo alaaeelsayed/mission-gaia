@@ -568,23 +568,24 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 	// ImGui::Render();
 	// ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-	// if (m_app->isKeyDown('F') && !m_bKeyDown)
-	// {
-	// 	m_bKeyDown = true;
-	// 	m_bFlashlightEquipped = !m_bFlashlightEquipped;
-	// 	m_spotlight->bEnabled = !m_spotlight->bEnabled;
-	// 	if (!m_spotlight->bEnabled)
-	// 	{
-	// 		m_spotlight->vAttenuation = glm::vec3(1.0f, 1.0f, 1.0f);
-	// 	}
-	// 	else
-	// 	{
-	// 		m_spotlight->vAttenuation = glm::vec3(0.0f, 0.5f, 0.0f);
-	// 	}
-	// }
+	if (m_app->isKeyDown('F') && !m_keyDown)
+	{
+		m_keyDown = true;
+		m_flashlightEquipped = !m_flashlightEquipped;
 
-	// if (!m_app->isKeyDown('F'))
-	// 	m_bKeyDown = false;
+		m_spotlight->enabled = !m_spotlight->enabled;
+		if (!m_spotlight->enabled)
+		{
+			m_spotlight->attenuation = glm::vec3(1.0f, 1.0f, 1.0f);
+		}
+		else
+		{
+			m_spotlight->attenuation = glm::vec3(0.0f, 0.5f, 0.0f);
+		}
+	}
+
+	if (!m_app->isKeyDown('F'))
+		m_keyDown = false;
 
 	if (m_app->isKeyDown('W') || m_app->isKeyDown('A') || m_app->isKeyDown('D') || m_app->isKeyDown('S'))
 	{
