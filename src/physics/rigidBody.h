@@ -1,5 +1,6 @@
 #pragma once
 #include "../../wolf/wolf.h"
+#include "../../thirdparty/bullet/src/BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h"
 
 class RigidBody
 {
@@ -9,13 +10,18 @@ public:
         Capsule,
         Box,
         Plane,
-        Sphere
+        Sphere,
+        Terrain,
+        ConvexHull
     };
 
     RigidBody(const std::string &pConfiguration);
+    RigidBody(int heightStickWidth, int heightStickLength, void *heightfieldData, btScalar heightScale, btScalar minHeight, btScalar maxHeight, int upAxis, PHY_ScalarType hdt, bool flipQuadEdges);
+    RigidBody(btConvexHullShape *pMesh);
+
     ~RigidBody();
 
-    void Update(float p_fDelta, const glm::vec3 &p_vPosition);
+    glm::vec3 Update(float p_fDelta, const glm::vec3 &p_vPosition);
 
     //------------------------------------------------------------------------------
     // Public methods for "GOC_RigidBody" family of components
@@ -30,9 +36,28 @@ public:
         return m_pBody;
     };
 
+    bool isKinematic() const
+    {
+        return m_bKinematic;
+    }
+
+    void setPosition(const glm::vec3 &vPosition)
+    {
+        if (m_pBody == nullptr)
+            return;
+        btTransform trans;
+        m_pBody->getMotionState()->getWorldTransform(trans);
+
+        m_vPosition = btVector3(vPosition.x, vPosition.y, vPosition.z) - btVector3(m_vOffset.x, m_vOffset.y, m_vOffset.z);
+        trans.setOrigin(m_vPosition);
+        m_pBody->getMotionState()->setWorldTransform(trans);
+    }
+
 private:
     // Bullet physics rigid body
     btRigidBody *m_pBody = nullptr;
+
+    btVector3 m_vPosition;
 
     // Collision shape
     btCollisionShape *m_pCollisionShape = nullptr;
@@ -52,4 +77,18 @@ private:
     btVector3 m_vExtents;
     btVector3 m_vPlaneNormal;
     float m_fPlaneConstant;
+
+    // Terrain Shape
+    int m_heightStickWidth;
+    int m_heightStickLength;
+    void *m_heightfieldData;
+    btScalar m_heightScale;
+    btScalar m_minHeight;
+    btScalar m_maxHeight;
+    int m_upAxis;
+    PHY_ScalarType m_hdt;
+    bool m_flipQuadEdges;
+
+    // Convex Hull
+    btConvexHullShape *m_convexHull;
 };

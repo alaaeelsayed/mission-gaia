@@ -1,0 +1,8 @@
+<GOC_RigidBody Shape="StaticPlane">
+    <PlaneNormal x="0.0f" y="1.0f" z="0.0f" />
+    <PlaneConstant value="0.0f" />
+    <Material name="Normal" />
+    <Mass value="0.0f" />
+    <Offset x="0.0f" y="-5.0f" z="0.0f" />
+    <Kinematic value="true" />
+</GOC_RigidBody>

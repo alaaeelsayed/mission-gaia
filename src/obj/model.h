@@ -53,6 +53,11 @@ public:
         return m_sTag;
     }
 
+    RigidBody *getRigidBody() const
+    {
+        return m_pRigidBody;
+    }
+
     void attachRigidBody(const std::string &p_sConfiguration);
 
     wolf::Material *getMaterial();
@@ -60,10 +65,15 @@ public:
     glm::vec3 getPosition();
     void render(const glm::mat4 &mProj, const glm::mat4 &mView, const glm::vec3 &mViewPos = glm::vec3(0.0f, 0.0f, 0.0f));
     bool isDestroyed();
+    void setChasing(bool isChasing)
+    {
+        m_isChasing = isChasing;
+    }
 
 private:
     float m_health = 100.0f;
     float m_isDestroyed = false;
+    bool m_isChasing = false;
 
     glm::vec3 m_vPosition = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 m_vRotation = glm::vec3(0.0f, 0.0f, 0.0f);

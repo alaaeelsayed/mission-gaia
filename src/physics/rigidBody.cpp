@@ -3,6 +3,7 @@
 
 RigidBody::~RigidBody()
 {
+    delete m_convexHull;
 }
 
 RigidBody::RigidBody(const std::string &pConfiguration)
@@ -134,7 +135,48 @@ RigidBody::RigidBody(const std::string &pConfiguration)
     }
 }
 
-void RigidBody::Update(float p_fDelta, const glm::vec3 &p_vPosition)
+RigidBody::RigidBody(int heightStickWidth, int heightStickLength, void *heightfieldData, btScalar heightScale, btScalar minHeight, btScalar maxHeight, int upAxis, PHY_ScalarType hdt, bool flipQuadEdges)
+{
+
+    std::string sMaterial;
+    bool bKinematic = true;
+    float fMass = 0.0f;
+    glm::vec3 vOffset = glm::vec3(0.0f, 0.0f, 0.0f);
+    float fRadius = 0.0f;
+    float fHeight = 0.0f;
+    btVector3 vExtents = btVector3(0.0f, 0.0f, 0.0f);
+    btVector3 vPlaneNormal = btVector3(0.0f, 0.0f, 0.0f);
+    float fPlaneConstant = 0.0f;
+
+    m_heightStickWidth = heightStickWidth;
+    m_heightStickLength = heightStickLength;
+    m_heightfieldData = heightfieldData;
+    m_heightScale = heightScale;
+    m_minHeight = minHeight;
+    m_maxHeight = maxHeight;
+    m_upAxis = upAxis;
+    m_hdt = hdt;
+    m_flipQuadEdges = flipQuadEdges;
+    m_eShape = Terrain;
+}
+
+RigidBody::RigidBody(btConvexHullShape *pMesh)
+{
+    std::string sMaterial;
+    bool bKinematic = true;
+    float fMass = 0.0f;
+    glm::vec3 vOffset = glm::vec3(0.0f, 0.0f, 0.0f);
+    float fRadius = 0.0f;
+    float fHeight = 0.0f;
+    btVector3 vExtents = btVector3(0.0f, 0.0f, 0.0f);
+    btVector3 vPlaneNormal = btVector3(0.0f, 0.0f, 0.0f);
+    float fPlaneConstant = 0.0f;
+
+    m_convexHull = pMesh;
+    m_eShape = ConvexHull;
+}
+
+glm::vec3 RigidBody::Update(float p_fDelta, const glm::vec3 &p_vPosition)
 {
     if (m_bReadyToInit)
     {
@@ -152,6 +194,12 @@ void RigidBody::Update(float p_fDelta, const glm::vec3 &p_vPosition)
         case Sphere:
             Init(p_vPosition, new btSphereShape(m_fRadius), m_sMaterial, m_fMass, m_vOffset, m_bKinematic);
             break;
+        case Terrain:
+            Init(p_vPosition, new btHeightfieldTerrainShape(m_heightStickWidth, m_heightStickLength, m_heightfieldData, m_heightScale, m_minHeight, m_maxHeight, m_upAxis, m_hdt, m_flipQuadEdges), m_sMaterial, m_fMass, m_vOffset, m_bKinematic);
+            break;
+        case ConvexHull:
+            Init(p_vPosition, m_convexHull, m_sMaterial, m_fMass, m_vOffset, m_bKinematic);
+            break;
         }
         m_bReadyToInit = false;
     }
@@ -163,7 +211,8 @@ void RigidBody::Update(float p_fDelta, const glm::vec3 &p_vPosition)
 
         // Apply to the rigid body
         // const glm::quat &qRotation = this->GetGameObject()->GetTransform().GetRotation();
-        trans.setOrigin(btVector3(p_vPosition.x, p_vPosition.y, p_vPosition.z) - btVector3(m_vOffset.x, m_vOffset.y, m_vOffset.z));
+        m_vPosition = btVector3(p_vPosition.x, p_vPosition.y, p_vPosition.z) - btVector3(m_vOffset.x, m_vOffset.y, m_vOffset.z);
+        trans.setOrigin(m_vPosition);
         // trans.setRotation(btQuaternion(qRotation.x, qRotation.y, qRotation.z, qRotation.w));
         m_pBody->getMotionState()->setWorldTransform(trans);
     }
@@ -182,7 +231,9 @@ void RigidBody::Update(float p_fDelta, const glm::vec3 &p_vPosition)
         // Transform &transform = this->GetGameObject()->GetTransform();
         // transform.SetTranslation(vPos + vOffset);
         // transform.SetRotation(qRot);
+        return vPos + vOffset;
     }
+    return glm::vec3(0.0f, 0.0f, 0.0f);
 }
 
 void RigidBody::Init(const glm::vec3 &p_vPosition, btCollisionShape *p_pCollisionShape, const std::string &p_strMaterial, float p_fMass, const glm::vec3 &p_vOffset, bool p_bIsKinematic)

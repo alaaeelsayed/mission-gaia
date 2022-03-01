@@ -4,6 +4,7 @@
 #include "terraingenerator.h"
 #include "../text/textbox.h"
 #include "../scene/scene.h"
+#include "../physics/rigidBody.h"
 
 class Terrain : public Node
 {
@@ -23,4 +24,7 @@ private:
     wolf::Program *m_program = nullptr;
     wolf::VertexBuffer *m_vb;
     wolf::VertexDeclaration *m_decl;
+
+    // Rigid Body for collision
+    RigidBody *m_rigidBody = nullptr;
 };

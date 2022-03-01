@@ -45,6 +45,10 @@ public:
     float GetAmplitude() const;
     int GetOctaves() const;
     float GetRoughness() const;
+    std::vector<Vertex> getVertices();
+    std::vector<float> getRawVertices();
+    std::vector<float> getHeights();
+    btConvexHullShape *getConvexHull();
 
 private:
     float _generateHeight(int x, int z, int xOff, int zOff);
@@ -65,4 +69,10 @@ private:
     int m_octaves = OCTAVES;
     float m_amplitude = AMPLITUDE, m_roughness = ROUGHNESS;
     int m_seed;
+
+    // For rigid body
+    btConvexHullShape *m_convexHull;
+    std::vector<Vertex> m_vertices;
+    std::vector<float> m_rawVertices;
+    std::vector<float> m_heights;
 };

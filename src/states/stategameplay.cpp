@@ -200,7 +200,7 @@ void StateGameplay::Enter(std::string arg)
 			int zOff = fullZ / m_terrainSize;
 
 			m_pCreature->setScale(glm::vec3(scale, scale, scale));
-			m_pCreature->setPosition(glm::vec3(fullX, m_terrainGenerator->GenerateHeight(z, x, xOff, zOff), fullZ));
+			m_pCreature->setPosition(glm::vec3(fullX, m_terrainGenerator->GenerateHeight(x, z, xOff, zOff), fullZ));
 			m_pCreature->setRotation(glm::vec3(0.0f, rotation, 0.0f));
 			m_models.push_back(m_pCreature);
 		}
@@ -224,7 +224,7 @@ void StateGameplay::Enter(std::string arg)
 		}
 		m_soundManager = new wolf::SoundManager();
 		m_soundManager->CreateSoundSystem();
-		m_soundManager->Play2D("Nature", m_natureSoundPath, true);
+		// m_soundManager->Play2D("Nature", m_natureSoundPath, true);
 
 		// Debug Menu
 		IMGUI_CHECKVERSION();
@@ -260,8 +260,8 @@ void StateGameplay::Update(float p_fDelta)
 
 	wolf::BulletPhysicsManager::Instance()->Update(p_fDelta);
 
-	m_hunger = glm::max(m_hunger - (p_fDelta * (rand() % 3 + 2)), 0.0f);
-	m_thirst = glm::max(m_thirst - p_fDelta * (rand() % 2 + 1), 0.0f);
+	m_hunger = glm::max(m_hunger - (p_fDelta * (rand() % 2)), 0.0f);
+	m_thirst = glm::max(m_thirst - p_fDelta * (rand() % 2), 0.0f);
 
 	int hunger = (int)m_hunger;
 	int thirst = (int)m_thirst;
@@ -302,7 +302,7 @@ void StateGameplay::Update(float p_fDelta)
 	if (m_app->isKeyDown('F') && !m_keyDown)
 	{
 		m_keyDown = true;
-		m_soundManager->Play2D("flashlight", m_flashlightSoundPath, false, true);
+		// m_soundManager->Play2D("flashlight", m_flashlightSoundPath, false, true);
 		m_flashlightEquipped = !m_flashlightEquipped;
 		m_spotlight->enabled = !m_spotlight->enabled;
 		if (!m_spotlight->enabled)
@@ -332,13 +332,14 @@ void StateGameplay::Update(float p_fDelta)
 			{
 				float xDist = playerPos.x - modelPos.x;
 				float zDist = playerPos.z - modelPos.z;
+				model->setChasing(true);
 				model->setPosition(modelPos + glm::vec3(xDist * p_fDelta * m_enemySpeed, 0.0f, zDist * p_fDelta * m_enemySpeed));
-
 				// Rotate in direction of player
 				model->setRotation(glm::vec3(0.0f, glm::degrees(atan2(-zDist, xDist)) + 90.0f, 0.0f));
 			}
 			else
 			{
+				model->setChasing(false);
 				bool rand_bool = Util::randBool();
 				if (rand_bool)
 				{
@@ -380,7 +381,7 @@ void StateGameplay::Update(float p_fDelta)
 	if (m_nearFood && m_app->isKeyDown('E') && !m_eating)
 	{
 		m_eating = true;
-		m_soundManager->Play2D("eating", m_eatingSoundPath, false, true);
+		// m_soundManager->Play2D("eating", m_eatingSoundPath, false, true);
 
 		m_hunger = glm::min(100.0f, m_hunger + 10.0f);
 	}
@@ -591,13 +592,13 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 	{
 		if (!m_walking && !m_running)
 		{
-			m_soundManager->Play2D("walking", m_walkingSoundPath, true, true);
+			// m_soundManager->Play2D("walking", m_walkingSoundPath, true, true);
 			m_walking = true;
 		}
 
 		if (m_app->isKeyDown(GLFW_KEY_LEFT_CONTROL) && !m_running)
 		{
-			m_soundManager->Play2D("running", m_runningSoundPath, true, true);
+			// m_soundManager->Play2D("running", m_runningSoundPath, true, true);
 			m_walking = false;
 			m_running = true;
 		}
