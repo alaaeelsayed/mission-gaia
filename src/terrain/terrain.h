@@ -15,6 +15,11 @@ public:
     void Update(float dt) override;
     void Render(const glm::mat4 &mProj, const glm::mat4 &mView) override;
 
+    wolf::Program *getProgram() const
+    {
+        return m_program;
+    }
+
 private:
     int m_x, m_z;
 

@@ -121,7 +121,7 @@ void StateGameplay::Enter(std::string arg)
 
 		m_flashlight = new Model("data/models/flashlight.fbx", "dim");
 		m_flashlight->setPosition(glm::vec3(80, -50, -200));
-		m_flashlight->setRotation(glm::vec3(0.0f, DEG_TO_RAD(180), 0.0f));
+		m_flashlight->setRotation(glm::vec3(0.0f, 180, 0.0f));
 
 		m_drinkText = new TextBox(700.0f, 200.0f);
 		m_drinkText->SetPos(glm::vec3(400.0f, 50.0f, 0.0f));
@@ -149,7 +149,6 @@ void StateGameplay::Enter(std::string arg)
 
 		m_flashlight->attachLight(m_spotlight);
 		m_flashlight->setTexture("data/textures/flashlight.png");
-		m_models.push_back(m_flashlight);
 
 		m_terrainGenerator = new TerrainGenerator();
 
@@ -217,7 +216,7 @@ void StateGameplay::Enter(std::string arg)
 		}
 		m_soundManager = new wolf::SoundManager();
 		m_soundManager->CreateSoundSystem();
-		// m_soundManager->Play2D("Nature", m_natureSoundPath, true);
+		m_soundManager->Play2D("Nature", m_natureSoundPath, true);
 
 		// Debug Menu
 		IMGUI_CHECKVERSION();
@@ -254,6 +253,8 @@ void StateGameplay::Update(float p_fDelta)
 	float camZ = camera->GetPosition().z;
 
 	camera->SetPosition(glm::vec3(camX, m_terrainGenerator->GetHeight(int(camX), int(camZ)) + 5.0f, camZ));
+
+	// Attach flashlight
 
 	glm::vec3 lightspot = glm::normalize(camera->GetViewDirection() - glm::vec3(m_spotlight->posRange.x, m_spotlight->posRange.y, m_spotlight->posRange.z));
 	m_spotlight->lightSpot = glm::vec4(lightspot, 0.2f);
@@ -350,7 +351,7 @@ void StateGameplay::Update(float p_fDelta)
 	if (m_app->isKeyDown('F') && !m_keyDown)
 	{
 		m_keyDown = true;
-		// m_soundManager->Play2D("flashlight", m_flashlightSoundPath, false, true);
+		m_soundManager->Play2D("flashlight", m_flashlightSoundPath, false, true);
 		m_flashlightEquipped = !m_flashlightEquipped;
 		m_spotlight->enabled = !m_spotlight->enabled;
 		if (!m_spotlight->enabled)
@@ -385,7 +386,7 @@ void StateGameplay::Update(float p_fDelta)
 	if (m_nearFood && m_app->isKeyDown('E') && !m_eating)
 	{
 		m_eating = true;
-		// m_soundManager->Play2D("eating", m_eatingSoundPath, false, true);
+		m_soundManager->Play2D("eating", m_eatingSoundPath, false, true);
 
 		m_hunger = glm::min(100.0f, m_hunger + 10.0f);
 	}
@@ -512,6 +513,14 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 			model->getMaterial()->SetUniform("u_lightColor", m_spotlight->color);
 			model->getMaterial()->SetUniform("u_lightSpot", m_spotlight->lightSpot);
 			model->getMaterial()->SetUniform("u_lightAttenuation", m_spotlight->attenuation);
+
+			for (Terrain *terrain : m_terrains)
+			{
+				terrain->getProgram()->SetUniform("u_spotLightPosRange", m_spotlight->posRange);
+				terrain->getProgram()->SetUniform("u_spotLightColor", m_spotlight->color);
+				terrain->getProgram()->SetUniform("u_spotLightSpot", m_spotlight->lightSpot);
+				terrain->getProgram()->SetUniform("u_spotLightAttenuation", m_spotlight->attenuation);
+			}
 		}
 		else
 		{
@@ -522,6 +531,13 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 			model->getMaterial()->SetUniform("u_lightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
 			model->getMaterial()->SetUniform("u_lightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
 			model->getMaterial()->SetUniform("u_lightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
+
+			for (Terrain *terrain : m_terrains)
+			{
+				terrain->getProgram()->SetUniform("u_spotLightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+				terrain->getProgram()->SetUniform("u_spotLightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+				terrain->getProgram()->SetUniform("u_spotLightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
+			}
 		}
 		model->render(mProj, mView, camera->GetViewDirection());
 	}
@@ -533,45 +549,6 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 	{
 		bullet->Render(glm::mat4(1.0f), mView, mProj);
 	}
-
-	// if (m_pCam)
-	// 	m_skybox->Render(mProj, mView, width, height);
-
-	// m_water->render(mProj, mView, width, height);
-
-	// for (Terrain *terrain : m_terrains)
-	// {
-	// 	terrain->Render(mProj, mView);
-	// }
-
-	// ImGui_ImplOpenGL3_NewFrame();
-	// ImGui_ImplGlfw_NewFrame();
-	// ImGui::NewFrame();
-	// ImGui::Begin("Terrain Debug Menu");
-	// ImGui::SetWindowSize(ImVec2(400.0f, 400.0f), true);
-	// ImGui::SliderInt("Size", &m_terrainSize, 0, 1600);
-	// ImGui::SliderInt("Vertex Count", &m_terrainVerts, 0, 1024);
-	// ImGui::SliderInt("Octaves", &m_terrainOctaves, 0, 10);
-	// ImGui::SliderFloat("Amplitude", &m_terrainAmplitude, 0, 200.0f);
-	// ImGui::SliderFloat("Roughness", &m_terrainRoughness, 0, 2.0f);
-	// if (ImGui::Button("Rerender"))
-	// {
-	// 	_renderTerrain();
-	// }
-	// if (ImGui::Button("Generate New Terrain"))
-	// {
-	// 	delete m_terrainGenerator;
-	// 	m_terrainGenerator = new TerrainGenerator();
-	// 	m_terrainGenerator->SetSize(m_terrainSize);
-	// 	m_terrainGenerator->SetAmplitude(m_terrainAmplitude);
-	// 	m_terrainGenerator->SetOctaves(m_terrainOctaves);
-	// 	m_terrainGenerator->SetVertexCount(m_terrainVerts);
-	// 	m_terrainGenerator->SetRoughness(m_terrainRoughness);
-	// 	_renderTerrain();
-	// }
-	// ImGui::End();
-	// ImGui::Render();
-	// ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 	if (m_app->isKeyDown('F') && !m_keyDown)
 	{
@@ -596,13 +573,13 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 	{
 		if (!m_walking && !m_running)
 		{
-			// m_soundManager->Play2D("walking", m_walkingSoundPath, true, true);
+			m_soundManager->Play2D("walking", m_walkingSoundPath, true, true);
 			m_walking = true;
 		}
 
 		if (m_app->isKeyDown(GLFW_KEY_LEFT_CONTROL) && !m_running)
 		{
-			// m_soundManager->Play2D("running", m_runningSoundPath, true, true);
+			m_soundManager->Play2D("running", m_runningSoundPath, true, true);
 			m_walking = false;
 			m_running = true;
 		}
@@ -620,9 +597,6 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 			m_soundManager->PauseSound("running");
 	}
 
-	if (m_flashlightEquipped)
-		m_flashlight->render(mProj, mView);
-
 	m_hungerText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
 	m_thirstText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
 	if (m_nearWater)
@@ -632,6 +606,14 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 	if (m_nearFood)
 	{
 		m_eatText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
+	}
+
+	if (m_flashlightEquipped)
+	{
+		glDisable(GL_DEPTH_TEST);
+
+		m_flashlight->render(mProj, glm::mat4(1.0f));
+		glEnable(GL_DEPTH_TEST);
 	}
 }
 
