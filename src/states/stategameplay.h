@@ -16,6 +16,7 @@
 #include "../misc/util.h"
 #include "./statemachine.h"
 #include "../../samplefw/Sphere.h"
+#include "../particles/effect.h"
 
 #include "../../irrklang/include/irrKlang.h"
 
@@ -140,6 +141,13 @@ private:
 	bool m_rightMouseDown = false;
 
 	Common::StateMachine *m_stateMachine = nullptr;
+
+	// Effects
+	std::vector<Effect *> m_effects;
+	std::string m_firepath = "data/effects/fire.pfx";
+	std::string m_forcefieldPath = "data/effects/forcefield.pfx";
+
+	std::string m_fireSound = "data/sounds/fire-sound.ogg";
 };
 
 #endif

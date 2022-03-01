@@ -147,7 +147,7 @@ void StateGameplay::Enter(std::string arg)
 		m_spotlight->lightSpot = glm::vec4(2.0f, 2.0f, 2.0f, 0.8f);
 		m_spotlight->enabled = false;
 
-		m_flashlight->attachLight(m_spotlight);
+		// m_flashlight->attachLight(m_spotlight);
 		m_flashlight->setTexture("data/textures/flashlight.png");
 
 		m_terrainGenerator = new TerrainGenerator();
@@ -197,6 +197,40 @@ void StateGameplay::Enter(std::string arg)
 			m_pCreature->setRotation(glm::vec3(0.0f, rotation, 0.0f));
 			m_models.push_back(m_pCreature);
 		}
+
+		// Ship and ship parts
+		Model *m_ship = new Model("data/models/ships/ship3.obj", "skinned");
+		m_ship->setTag("ship");
+		m_ship->setScale(glm::vec3(20.0f, 20.0f, 20.0f));
+		m_ship->setTexture("data/textures/ship-texture.png");
+
+		glm::vec3 shipPosition = Scene::Instance()->GetActiveCamera()->GetPosition() + glm::vec3(-10.0f, 0.0f, 0.0f);
+		m_ship->setPosition(glm::vec3(shipPosition.x, m_terrainGenerator->GetHeight(int(shipPosition.x), int(shipPosition.z)), shipPosition.z));
+
+		m_soundManager->Play3D("fire", m_fireSound, Scene::Instance()->GetActiveCamera()->GetPosition() + glm::vec3(-10.0f, 0.0f, 0.0f), 100.0f, true);
+
+		Effect *fire1 = new Effect(m_firepath);
+		Effect *fire2 = new Effect(m_firepath);
+		Effect *fire3 = new Effect(m_firepath);
+		Effect *fire4 = new Effect(m_firepath);
+		Effect *fire5 = new Effect(m_firepath);
+		for (int i = 0; i < 7; i++)
+		{
+			Effect *fire = new Effect(m_firepath);
+
+			int xOff = _randomNum(-5, 10);
+			int yOff = _randomNum(0, 7);
+			int zOff = _randomNum(-10, 10);
+			fire->setPos(m_ship->getPosition() + glm::vec3(xOff, yOff, zOff));
+			m_effects.push_back(fire);
+		}
+		Effect *forcefield = new Effect(m_forcefieldPath);
+		forcefield->setPos(m_ship->getPosition() + glm::vec3(0.0f, 0.0f, 0.0f));
+		m_effects.push_back(forcefield);
+		m_models.push_back(m_ship);
+
+		// Ship Parts
+
 		for (int i = 0; i < 10; i++)
 		{
 			Model *bush = new Model("data/models/shrub.fbx", "skinned");
@@ -231,7 +265,6 @@ void StateGameplay::Enter(std::string arg)
 		m_worldProgram = wolf::ProgramManager::CreateProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
 
 		// Water
-
 		m_water = new Water();
 		m_water->SetScale(glm::vec3(2000.0f, 2000.0f, 2000.0f));
 		m_water->SetPos(glm::vec3(1000.0f, 5.0f, -1000.0f));
@@ -250,11 +283,13 @@ void StateGameplay::Update(float p_fDelta)
 
 	// Set camera to floor
 	float camX = camera->GetPosition().x;
+	float camY = camera->GetPosition().y;
 	float camZ = camera->GetPosition().z;
 
 	camera->SetPosition(glm::vec3(camX, m_terrainGenerator->GetHeight(int(camX), int(camZ)) + 5.0f, camZ));
 
-	// Attach flashlight
+	// Attach spotlight
+	m_spotlight->posRange = glm::vec4(camX, camY, camZ, m_spotlight->posRange.w);
 
 	glm::vec3 lightspot = glm::normalize(camera->GetViewDirection() - glm::vec3(m_spotlight->posRange.x, m_spotlight->posRange.y, m_spotlight->posRange.z));
 	m_spotlight->lightSpot = glm::vec4(lightspot, 0.2f);
@@ -462,6 +497,12 @@ void StateGameplay::Update(float p_fDelta)
 		}
 		index++;
 	}
+
+	// Update Effects
+	for (Effect *effect : m_effects)
+	{
+		effect->update(p_fDelta);
+	}
 }
 
 void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
@@ -614,6 +655,12 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 
 		m_flashlight->render(mProj, glm::mat4(1.0f));
 		glEnable(GL_DEPTH_TEST);
+	}
+
+	// Render Effects
+	for (Effect *effect : m_effects)
+	{
+		// effect->render(mProj, mView);
 	}
 }
 
