@@ -131,7 +131,7 @@ private:
 	int m_terrainSize, m_terrainVerts, m_terrainOctaves;
 	float m_terrainAmplitude, m_terrainRoughness;
 
-	float m_enemySpeed = 0.08f;
+	float m_enemySpeed = 0.8f;
 	glm::vec3 m_enemyRange = glm::vec3(70.0f, 20.0f, 70.0f);
 	glm::vec3 m_foodRange = glm::vec3(20.0f, 20.0f, 20.0f);
 

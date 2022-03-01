@@ -175,8 +175,8 @@ void StateGameplay::Enter(std::string arg)
 			m_pCreature->setTag("enemy");
 			m_pCreature->setTexture("data/textures/gimpy_diffuse.tga");
 			m_pCreature->setNormal("data/textures/gimpy_normal.tga");
-			m_pCreature->setOffset(m_pCreature->getModel()->getAABBMin());
-			m_pCreature->attachRigidBody("data/physics/creature.rigid");
+			m_pCreature->setOffset(m_pCreature->getModel()->getAABBMin() + glm::vec3(0.0f, -3.0f, 0.0f));
+			// m_pCreature->attachRigidBody("data/physics/creature.rigid");
 
 			Light *pointLight = new Light();
 			float r = _randomFloat(0.0001f, 0.0018f);
@@ -194,11 +194,7 @@ void StateGameplay::Enter(std::string arg)
 			int z = _randomNum(0, m_terrainSize * 4);
 
 			m_pCreature->setScale(glm::vec3(scale, scale, scale));
-<<<<<<< HEAD
-			m_pCreature->setPosition(glm::vec3(fullX, m_terrainGenerator->GenerateHeight(x, z, xOff, zOff), fullZ));
-=======
 			m_pCreature->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
->>>>>>> 9eafa7a42c6b41bfecbe803a1dd6fb0963e563f2
 			m_pCreature->setRotation(glm::vec3(0.0f, rotation, 0.0f));
 			m_models.push_back(m_pCreature);
 		}
@@ -250,7 +246,14 @@ void StateGameplay::Enter(std::string arg)
 
 void StateGameplay::Update(float p_fDelta)
 {
+
 	Camera *camera = Scene::Instance()->GetActiveCamera();
+
+	// Set camera to floor
+	float camX = camera->GetPosition().x;
+	float camZ = camera->GetPosition().z;
+
+	camera->SetPosition(glm::vec3(camX, m_terrainGenerator->GetHeight(int(camX), int(camZ)) + 5.0f, camZ));
 
 	glm::vec3 lightspot = glm::normalize(camera->GetViewDirection() - glm::vec3(m_spotlight->posRange.x, m_spotlight->posRange.y, m_spotlight->posRange.z));
 	m_spotlight->lightSpot = glm::vec4(lightspot, 0.2f);
@@ -294,33 +297,15 @@ void StateGameplay::Update(float p_fDelta)
 		if (model->isDestroyed())
 			continue;
 		model->update(p_fDelta);
-	}
-
-	if (m_app->isKeyDown('F') && !m_keyDown)
-	{
-		m_keyDown = true;
-		// m_soundManager->Play2D("flashlight", m_flashlightSoundPath, false, true);
-		m_flashlightEquipped = !m_flashlightEquipped;
-		m_spotlight->enabled = !m_spotlight->enabled;
-		if (!m_spotlight->enabled)
-		{
-			m_spotlight->attenuation = glm::vec3(1.0f, 1.0f, 1.0f);
-		}
-		else
-		{
-			m_spotlight->attenuation = glm::vec3(0.0f, 0.5f, 0.0f);
-		}
-	}
-
-	if (!m_app->isKeyDown('F'))
-		m_keyDown = false;
-
-	m_nearFood = false;
-	for (Model *model : m_models)
-	{
 
 		if (model->getTag().compare("enemy") == 0)
 		{
+			// Set all enemies to floor
+			float modelX = model->getPosition().x;
+			float modelZ = model->getPosition().z;
+			model->setPosition(glm::vec3(modelX, m_terrainGenerator->GetHeight(int(modelX), int(modelZ)), modelZ));
+			float modelY = model->getPosition().y;
+
 			// Model is an enemy
 			glm::vec3 modelPos = model->getPosition();
 			glm::vec3 playerPos = camera->GetPosition();
@@ -330,6 +315,7 @@ void StateGameplay::Update(float p_fDelta)
 				float xDist = playerPos.x - modelPos.x;
 				float zDist = playerPos.z - modelPos.z;
 				model->setChasing(true);
+
 				model->setPosition(modelPos + glm::vec3(xDist * p_fDelta * m_enemySpeed, 0.0f, zDist * p_fDelta * m_enemySpeed));
 				// Rotate in direction of player
 				model->setRotation(glm::vec3(0.0f, glm::degrees(atan2(-zDist, xDist)) + 90.0f, 0.0f));
@@ -360,6 +346,27 @@ void StateGameplay::Update(float p_fDelta)
 			}
 		}
 	}
+
+	if (m_app->isKeyDown('F') && !m_keyDown)
+	{
+		m_keyDown = true;
+		// m_soundManager->Play2D("flashlight", m_flashlightSoundPath, false, true);
+		m_flashlightEquipped = !m_flashlightEquipped;
+		m_spotlight->enabled = !m_spotlight->enabled;
+		if (!m_spotlight->enabled)
+		{
+			m_spotlight->attenuation = glm::vec3(1.0f, 1.0f, 1.0f);
+		}
+		else
+		{
+			m_spotlight->attenuation = glm::vec3(0.0f, 0.5f, 0.0f);
+		}
+	}
+
+	if (!m_app->isKeyDown('F'))
+		m_keyDown = false;
+
+	m_nearFood = false;
 
 	// CHECK IF NEAR WATER
 	m_nearWater = Util::inProximity(m_water->GetPos(), camera->GetPosition(), glm::vec3(m_water->GetScale().x, 5.0f, m_water->GetScale().z));

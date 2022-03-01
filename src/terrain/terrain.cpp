@@ -12,9 +12,9 @@ Terrain::Terrain(int x, int z, TerrainGenerator *terrainGenerator) : Node(Boundi
     m_program = wolf::ProgramManager::CreateProgram("data/shaders/terrain.vsh", "data/shaders/terrain.fsh");
 
     m_decl = terrainGenerator->GenerateVertices(x, z);
-    float *data = &terrainGenerator->getHeights()[0];
-    int length = terrainGenerator->getHeights().size();
-    m_rigidBody = new RigidBody(terrainGenerator->GetVertexCount(), terrainGenerator->GetVertexCount(), data, 1, -3, 3, 1, PHY_FLOAT, false);
+    // float *data = &terrainGenerator->getHeights()[0];
+    // int length = terrainGenerator->getHeights().size();
+    // m_rigidBody = new RigidBody(terrainGenerator->GetVertexCount(), terrainGenerator->GetVertexCount(), data, 1, -3, 3, 1, PHY_FLOAT, false);
     m_terrainGenerator = terrainGenerator;
 }
 
@@ -23,12 +23,12 @@ Terrain::~Terrain()
     wolf::ProgramManager::DestroyProgram(m_program);
     m_decl->Clean();
     delete m_decl;
-    delete m_rigidBody;
+    // delete m_rigidBody;
 }
 
 void Terrain::Update(float dt)
 {
-    m_rigidBody->Update(dt, glm::vec3(m_x, 0.0f, m_z));
+    // m_rigidBody->Update(dt, glm::vec3(m_x, 0.0f, m_z));
 }
 
 void Terrain::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
