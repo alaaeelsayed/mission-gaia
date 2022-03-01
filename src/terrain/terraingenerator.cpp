@@ -13,9 +13,41 @@ TerrainGenerator::~TerrainGenerator()
 {
 }
 
-float TerrainGenerator::GenerateHeight(int x, int z, int xOff, int zOff)
+float TerrainGenerator::GetHeight(int x, int z)
 {
-	return _generateHeight(x, z, xOff, zOff);
+	int terrainX = x % m_size;
+	int terrainZ = z % m_size;
+
+	float gridSize = m_size / ((float)m_countVerts - 1);
+
+	int gridX = floor(terrainX / gridSize);
+	int gridZ = floor(terrainZ / gridSize);
+
+	float accX = (fmod(terrainX, gridSize)) / gridSize;
+	float accZ = (fmod(terrainZ, gridSize)) / gridSize;
+
+	int xOff = x / m_size;
+	int zOff = z / m_size;
+
+	xOff *= (m_countVerts - 1);
+	zOff *= (m_countVerts - 1);
+
+	float height;
+	if (accX <= (1 - accZ))
+	{
+		height = Util::barryCentric(glm::vec3(0, _generateHeight(gridX, gridZ, xOff, zOff), 0),
+									glm::vec3(1, _generateHeight(gridX + 1, gridZ, xOff, zOff), 0),
+									glm::vec3(0, _generateHeight(gridX, gridZ + 1, xOff, zOff), 1),
+									glm::vec2(accX, accZ));
+	}
+	else
+	{
+		height = Util::barryCentric(glm::vec3(1, _generateHeight(gridX + 1, gridZ, xOff, zOff), 0),
+									glm::vec3(1, _generateHeight(gridX + 1, gridZ + 1, xOff, zOff), 1),
+									glm::vec3(0, _generateHeight(gridX, gridZ + 1, xOff, zOff), 1),
+									glm::vec2(accX, accZ));
+	}
+	return height;
 }
 
 void TerrainGenerator::SetSize(int size)

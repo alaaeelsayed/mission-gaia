@@ -63,4 +63,13 @@ namespace Util
         const int shift = static_cast<int>(std::log2(RAND_MAX));
         return (rand() >> shift) & 1;
     }
+
+    static float barryCentric(const glm::vec3 &firstPos, const glm::vec3 &secondPos, const glm::vec3 &thirdPos, const glm::vec2 &position)
+    {
+        float det = (secondPos.z - thirdPos.z) * (firstPos.x - thirdPos.x) + (thirdPos.x - secondPos.x) * (firstPos.z - thirdPos.z);
+        float l1 = ((secondPos.z - thirdPos.z) * (position.x - thirdPos.x) + (thirdPos.x - secondPos.x) * (position.y - thirdPos.z)) / det;
+        float l2 = ((thirdPos.z - firstPos.z) * (position.x - thirdPos.x) + (firstPos.x - thirdPos.x) * (position.y - thirdPos.z)) / det;
+        float l3 = 1.0f - l1 - l2;
+        return l1 * firstPos.y + l2 * secondPos.y + l3 * thirdPos.y;
+    }
 };

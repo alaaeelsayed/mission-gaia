@@ -2,6 +2,7 @@
 #define _USE_MATH_DEFINES
 #include "../obj/node.h"
 #include "../../wolf/wolf.h"
+#include "../misc/util.h"
 #include <random>
 #include <cmath>
 
@@ -31,7 +32,7 @@ public:
     TerrainGenerator();
     ~TerrainGenerator();
 
-    float GenerateHeight(int x, int z, int xOff, int zOff);
+    float GetHeight(int x, int z);
     wolf::VertexDeclaration *GenerateVertices(int gridX, int gridZ);
 
     void SetSize(int size);

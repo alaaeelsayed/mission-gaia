@@ -190,17 +190,15 @@ void StateGameplay::Enter(std::string arg)
 			int scale = _randomNum(2, 5);
 			float rotation = (float)_randomNum(-60, 60);
 
-			int fullX = _randomNum(0, m_terrainSize * 4);
-			int fullZ = _randomNum(0, m_terrainSize * 4);
-
-			int x = fullX % m_terrainSize;
-			int z = fullZ % m_terrainSize;
-
-			int xOff = fullX / m_terrainSize;
-			int zOff = fullZ / m_terrainSize;
+			int x = _randomNum(0, m_terrainSize * 4);
+			int z = _randomNum(0, m_terrainSize * 4);
 
 			m_pCreature->setScale(glm::vec3(scale, scale, scale));
+<<<<<<< HEAD
 			m_pCreature->setPosition(glm::vec3(fullX, m_terrainGenerator->GenerateHeight(x, z, xOff, zOff), fullZ));
+=======
+			m_pCreature->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
+>>>>>>> 9eafa7a42c6b41bfecbe803a1dd6fb0963e563f2
 			m_pCreature->setRotation(glm::vec3(0.0f, rotation, 0.0f));
 			m_models.push_back(m_pCreature);
 		}
@@ -209,16 +207,15 @@ void StateGameplay::Enter(std::string arg)
 			Model *bush = new Model("data/models/shrub.fbx", "skinned");
 			bush->setTag("food");
 			bush->setTexture("data/textures/shrub.png");
-			bush->setOffset(bush->getModel()->getAABBMin());
+			// bush->setOffset(bush->getModel()->getAABBMin());
 
 			int scale = _randomNum(2, 5);
 			float rotation = (float)_randomNum(-60, 60);
-			int x = _randomNum(200, 600);
-			int z = _randomNum(200, 600);
+			int x = _randomNum(0, m_terrainSize * 4);
+			int z = _randomNum(0, m_terrainSize * 4);
 
 			bush->setScale(glm::vec3(0.01f, 0.01f, 0.01f));
-
-			bush->translate(glm::vec3(x, 0.0f, z));
+			bush->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
 			bush->setRotation(glm::vec3(0.0f, rotation, 0.0f));
 			m_models.push_back(bush);
 		}
