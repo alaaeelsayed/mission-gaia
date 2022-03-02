@@ -5,6 +5,8 @@ Terrain::Terrain(int x, int z, TerrainGenerator *terrainGenerator) : Node(Boundi
     m_x = x * terrainGenerator->GetSize();
     m_z = z * terrainGenerator->GetSize();
 
+    SetPos(glm::vec3(m_x, 0.0f, m_z));
+
     m_texture = wolf::TextureManager::CreateTexture("data/textures/ground/ground.png");
 
     m_texture->SetWrapMode(wolf::Texture::WM_Repeat);

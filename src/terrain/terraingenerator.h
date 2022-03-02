@@ -26,6 +26,10 @@
 #define ROUGHNESS 0.3f
 #endif
 
+#ifndef GRID_OFFSET
+#define GRID_OFFSET 10000
+#endif
+
 class TerrainGenerator
 {
 public:

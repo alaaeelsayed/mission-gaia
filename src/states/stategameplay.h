@@ -144,7 +144,7 @@ private:
 	int m_lightCount = 0;
 
 	// Water
-	Water *m_water = nullptr;
+	std::vector<Water *> m_waters;
 
 	// Debug Menu
 	bool m_debug = true;
@@ -154,7 +154,7 @@ private:
 	int m_terrainSize, m_terrainVerts, m_terrainOctaves;
 	float m_terrainAmplitude, m_terrainRoughness;
 
-	float m_enemySpeed = 0.8f;
+	float m_enemySpeed = 0.4f;
 	glm::vec3 m_enemyRange = glm::vec3(70.0f, 20.0f, 70.0f);
 	glm::vec3 m_foodRange = glm::vec3(20.0f, 20.0f, 20.0f);
 	glm::vec3 m_collectibleRange = glm::vec3(70.0f, 50.0f, 70.0f);
