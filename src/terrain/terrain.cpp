@@ -43,8 +43,8 @@ void Terrain::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
     m_program->SetUniform("world", mWorld);
     m_program->SetUniform("worldIT", glm::transpose(glm::inverse(mWorld)));
 
-    wolf::Texture *dirtTexture = wolf::TextureManager::CreateTexture("data/textures/ground/dirt.png");
-    wolf::Texture *grassTexture = wolf::TextureManager::CreateTexture("data/textures/ground/grass.png");
+    wolf::Texture *dirtTexture = wolf::TextureManager::CreateTexture("data/textures/ground/dirt1.png");
+    wolf::Texture *grassTexture = wolf::TextureManager::CreateTexture("data/textures/ground/grass4.png");
     wolf::Texture *rockTexture = wolf::TextureManager::CreateTexture("data/textures/ground/rock.png");
     wolf::Texture *snowTexture = wolf::TextureManager::CreateTexture("data/textures/ground/snow.png");
 

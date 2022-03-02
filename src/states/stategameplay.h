@@ -62,12 +62,17 @@ private:
 	const std::string m_waterSoundPath = "data/sounds/ocean.wav";
 	const std::string m_creatureGrowlPath = "data/sounds/creature_growl.wav";
 	const std::string m_flashlightSoundPath = "data/sounds/flashlight.ogg";
+	const std::string m_gravityGunSoundPath = "data/sounds/gravity-gun.wav";
+	const std::string m_gravityGunShutdownSoundPath = "data/sounds/gravity-gun-shutdown.wav";
+	const std::string m_gravityGunFaultyPath = "data/sounds/gravity-gun-faulty.wav";
+
 	const std::string m_runningSoundPath = "data/sounds/running.ogg";
 	const std::string m_walkingSoundPath = "data/sounds/walking.ogg";
 	const std::string m_drinkingSoundPath = "data/sounds/drinking.ogg";
 	const std::string m_eatingSoundPath = "data/sounds/eating.ogg";
 	const std::string m_pickupSoundPath = "data/sounds/pickup.wav";
 	const std::string m_repairSoundPath = "data/sounds/repair.wav";
+	const std::string m_painSoundPath = "data/sounds/pain.wav";
 
 	const std::string m_drinkPrompt = "Press E to drink";
 	const std::string m_eatPrompt = "Press E to eat";
@@ -87,6 +92,7 @@ private:
 	wolf::Texture *m_shipTex = nullptr;
 
 	Model *m_flashlight = nullptr;
+	Model *m_gravityGun = nullptr;
 	Light *m_spotlight = nullptr;
 
 	wolf::SoundManager *m_soundManager = nullptr;
@@ -106,8 +112,10 @@ private:
 	Skybox *m_skybox = 0;
 
 	bool m_keyDown = false;
+	bool m_gravityKeyDown = false;
 	bool m_debugDown = false;
 	bool m_flashlightEquipped = false;
+	bool m_gravityGunEqipped = false;
 	bool m_drinking = false;
 	bool m_eating = false;
 
@@ -120,6 +128,7 @@ private:
 	TextBox *m_collectMorePartsText;
 	TextBox *m_partsCollectedText;
 
+	float m_health = 100;
 	float m_hunger = 100;
 	float m_thirst = 100;
 	int m_numParts = 0;
@@ -148,14 +157,14 @@ private:
 	float m_enemySpeed = 0.8f;
 	glm::vec3 m_enemyRange = glm::vec3(70.0f, 20.0f, 70.0f);
 	glm::vec3 m_foodRange = glm::vec3(20.0f, 20.0f, 20.0f);
-	glm::vec3 m_collectibleRange = glm::vec3(5.0f, 5.0f, 5.0f);
+	glm::vec3 m_collectibleRange = glm::vec3(70.0f, 50.0f, 70.0f);
 
 	bool m_inventoryFull = false;
 	int m_repairedParts = 0;
 
 	// Bullets
 	std::vector<Sphere *> m_bullets;
-	bool m_rightMouseDown = false;
+	bool m_leftMouseDown = false;
 
 	Common::StateMachine *m_stateMachine = nullptr;
 

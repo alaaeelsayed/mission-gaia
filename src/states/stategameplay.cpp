@@ -11,6 +11,7 @@ StateGameplay::~StateGameplay()
 {
 	delete m_terrainGenerator;
 	delete m_flashlight;
+	delete m_gravityGun;
 	delete m_spotlight;
 	wolf::ProgramManager::DestroyProgram(m_worldProgram);
 	wolf::MaterialManager::DestroyMaterial(m_mat);
@@ -125,8 +126,13 @@ void StateGameplay::Enter(std::string arg)
 		m_flashlight->setPosition(glm::vec3(80, -50, -200));
 		m_flashlight->setRotation(glm::vec3(0.0f, 180, 0.0f));
 
+		m_gravityGun = new Model("data/models/gravity-gun.obj", "dim");
+		m_gravityGun->setPosition(glm::vec3(70, -50, -130));
+		m_gravityGun->setRotation(glm::vec3(0.0f, 90, 0.0f));
+		// m_gravityGun->setScale(glm::vec3(5.0f, 5.0f, 5.0f));
+
 		m_drinkText = new TextBox(700.0f, 200.0f);
-		m_drinkText->SetPos(glm::vec3(400.0f, 50.0f, 0.0f));
+		m_drinkText->SetPos(glm::vec3(50.0f, 50.0f, 0.0f));
 
 		m_drinkText->SetText(m_font, m_drinkPrompt.c_str());
 		m_drinkText->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -134,7 +140,7 @@ void StateGameplay::Enter(std::string arg)
 		m_drinkText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
 
 		m_eatText = new TextBox(700.0f, 200.0f);
-		m_eatText->SetPos(glm::vec3(400.0f, 200.0f, 0.0f));
+		m_eatText->SetPos(glm::vec3(50.0f, 200.0f, 0.0f));
 
 		m_eatText->SetText(m_font, m_eatPrompt.c_str());
 		m_eatText->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -209,7 +215,7 @@ void StateGameplay::Enter(std::string arg)
 			m_pCreature->setTag("enemy");
 			m_pCreature->setTexture("data/textures/gimpy_diffuse.tga");
 			m_pCreature->setNormal("data/textures/gimpy_normal.tga");
-			m_pCreature->setOffset(m_pCreature->getModel()->getAABBMin() + glm::vec3(0.0f, -3.0f, 0.0f));
+			m_pCreature->setOffset(m_pCreature->getModel()->getAABBMin() + glm::vec3(0.0f, -2.0f, 0.0f));
 			// m_pCreature->attachRigidBody("data/physics/creature.rigid");
 
 			Light *pointLight = new Light();
@@ -267,24 +273,24 @@ void StateGameplay::Enter(std::string arg)
 		Model *m_part1 = new Model("data/models/ships/ship-parts/part1-bearing.obj", "skinned");
 		m_part1->setTag("ship-part");
 		m_part1->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
-		m_part1->setOffset(m_part1->getModel()->getAABBMin());
+		// m_part1->setOffset(m_part1->getModel()->getAABBMin());
 		m_part1->setTexture("data/textures/ship-texture.png");
 
 		Model *m_part2 = new Model("data/models/ships/ship-parts/part2-tv.obj", "skinned");
 		m_part2->setTag("ship-part");
-		m_part2->setOffset(m_part2->getModel()->getAABBMin());
+		// m_part2->setOffset(m_part2->getModel()->getAABBMin());
 		m_part2->setTexture("data/textures/ship-texture.png");
 		m_part2->setScale(glm::vec3(0.1f, 0.1f, 0.1f));
 
 		Model *m_part3 = new Model("data/models/ships/ship-parts/part3-powerbank.obj", "skinned");
 		m_part3->setTag("ship-part");
-		m_part3->setOffset(m_part3->getModel()->getAABBMin());
+		// m_part3->setOffset(m_part3->getModel()->getAABBMin());
 		m_part3->setTexture("data/textures/ship-texture.png");
 		m_part3->setScale(glm::vec3(10.0f, 10.0f, 10.0f));
 
 		Model *m_part4 = new Model("data/models/ships/ship-parts/part4-box.obj", "skinned");
 		m_part4->setTag("ship-part");
-		m_part4->setOffset(m_part4->getModel()->getAABBMin());
+		// m_part4->setOffset(m_part4->getModel()->getAABBMin());
 		m_part4->setTexture("data/textures/ship-part-box.png");
 
 		m_numParts = 4;
@@ -380,7 +386,7 @@ void StateGameplay::Update(float p_fDelta)
 	// Attach spotlight
 	m_spotlight->posRange = glm::vec4(camX, camY, camZ, m_spotlight->posRange.w);
 
-	glm::vec3 lightspot = glm::normalize(camera->GetViewDirection() - glm::vec3(m_spotlight->posRange.x, m_spotlight->posRange.y, m_spotlight->posRange.z));
+	glm::vec3 lightspot = glm::normalize(camera->GetViewDirection() * glm::vec3(m_spotlight->posRange.x, m_spotlight->posRange.y, m_spotlight->posRange.z));
 	m_spotlight->lightSpot = glm::vec4(lightspot, 0.2f);
 
 	wolf::BulletPhysicsManager::Instance()->Update(p_fDelta);
@@ -436,11 +442,14 @@ void StateGameplay::Update(float p_fDelta)
 				std::string prompt = "Full Inventory";
 				m_collectText->SetText(m_font, prompt.c_str());
 			}
+			else
+			{
+				m_collectText->SetText(m_font, m_collectPrompt.c_str());
+			}
 
 			if (m_app->isKeyDown('E') && !m_inventoryFull)
 			{
 
-				m_collectText->SetText(m_font, m_collectPrompt.c_str());
 				m_models.erase(std::remove(m_models.begin(), m_models.end(), model), m_models.end());
 				delete model;
 				m_inventoryFull = true;
@@ -495,6 +504,13 @@ void StateGameplay::Update(float p_fDelta)
 				model->setPosition(modelPos + glm::vec3(xDist * p_fDelta * m_enemySpeed, 0.0f, zDist * p_fDelta * m_enemySpeed));
 				// Rotate in direction of player
 				model->setRotation(glm::vec3(0.0f, glm::degrees(atan2(-zDist, xDist)) + 90.0f, 0.0f));
+
+				if (Util::inProximity(modelPos, playerPos, glm::vec3(10.0f, 10.0f, 10.0f)))
+				{
+					m_soundManager->Play2D("pain", m_painSoundPath);
+					m_health -= 20.0f;
+					camera->SetPosition(modelPos + glm::vec3(20.0f, 0.0f, 0.0f));
+				}
 			}
 			else
 			{
@@ -527,6 +543,7 @@ void StateGameplay::Update(float p_fDelta)
 		m_keyDown = true;
 		m_soundManager->Play2D("flashlight", m_flashlightSoundPath, false, true);
 		m_flashlightEquipped = !m_flashlightEquipped;
+		m_gravityGunEqipped = false;
 		m_spotlight->enabled = !m_spotlight->enabled;
 		if (!m_spotlight->enabled)
 		{
@@ -540,6 +557,23 @@ void StateGameplay::Update(float p_fDelta)
 
 	if (!m_app->isKeyDown('F'))
 		m_keyDown = false;
+
+	if (m_app->isKeyDown('G') && !m_gravityKeyDown)
+	{
+		m_gravityKeyDown = true;
+		if (!m_gravityGunEqipped)
+			m_soundManager->Play2D("gravityGun", m_gravityGunSoundPath, false, true);
+		else
+		{
+			m_soundManager->Play2D("gravityShutdown", m_gravityGunShutdownSoundPath, false, true);
+		}
+		m_gravityGunEqipped = !m_gravityGunEqipped;
+		m_flashlightEquipped = false;
+		m_spotlight->enabled = false;
+	}
+
+	if (!m_app->isKeyDown('G'))
+		m_gravityKeyDown = false;
 
 	// CHECK IF NEAR WATER
 	for (Water *water : m_waters)
@@ -572,7 +606,7 @@ void StateGameplay::Update(float p_fDelta)
 		m_eating = false;
 	}
 
-	if (m_hunger <= 0.0f && m_thirst <= 0.0f)
+	if ((m_hunger <= 0.0f && m_thirst <= 0.0f) || m_health <= 0)
 	{
 		Scene::Instance()->GetStateMachine()->GoToState(eStateGameplay_Respawn);
 	}
@@ -590,53 +624,45 @@ void StateGameplay::Update(float p_fDelta)
 	}
 
 	// Bullets
-	if (m_app->isLMBDown() && !m_rightMouseDown)
+	if (m_app->isLMBDown() && !m_leftMouseDown && m_gravityGunEqipped)
 	{
-		if (m_bullets.size() >= 5.0f)
-		{
-			m_bullets.pop_back();
-		}
-		Sphere *bullet = new Sphere(1.0f);
-		bullet->SetPosition(camera->GetPosition());
-		bullet->attachRigidBody("data/physics/bullet.rigid");
-		bullet->setTag("projectile");
-		m_bullets.push_back(bullet);
-		m_rightMouseDown = true;
+		m_soundManager->Play2D("gravityGunFaulty", m_gravityGunFaultyPath, false, true);
+		m_leftMouseDown = true;
 	}
 
 	if (!m_app->isLMBDown())
 	{
-		m_rightMouseDown = false;
+		m_leftMouseDown = false;
 	}
 
 	// Update bullets
-	for (Sphere *bullet : m_bullets)
-	{
-		glm::vec3 camRotation = camera->GetViewDirection();
-		// glm::quat radRotation = glm::quat(glm::vec3(DEG_TO_RAD(camRotation.x), DEG_TO_RAD(camRotation.y), DEG_TO_RAD(camRotation.z)));
-		glm::vec3 velocity = camRotation * 50.0f * p_fDelta;
-		bullet->SetPosition(bullet->GetPosition() + velocity);
-		bullet->Update(p_fDelta);
-	}
+	// for (Sphere *bullet : m_bullets)
+	// {
+	// 	glm::vec3 camRotation = camera->GetViewDirection();
+	// 	// glm::quat radRotation = glm::quat(glm::vec3(DEG_TO_RAD(camRotation.x), DEG_TO_RAD(camRotation.y), DEG_TO_RAD(camRotation.z)));
+	// 	glm::vec3 velocity = camRotation * 50.0f * p_fDelta;
+	// 	bullet->SetPosition(bullet->GetPosition() + velocity);
+	// 	bullet->Update(p_fDelta);
+	// }
 
 	// Check collision
-	int index = 0;
-	for (Sphere *bullet : m_bullets)
-	{
-		for (Model *model : m_models)
-		{
-			if (model->getTag() == "enemy")
-			{
-				if (Util::inProximity(model->getPosition(), bullet->GetPosition(), glm::vec3(5.0f, 5.0f, 5.0f)))
-				{
-					m_bullets.erase(m_bullets.begin() + index);
-					model->damage(30.0f);
-					m_soundManager->Play3D("death", m_creatureGrowlPath, model->getPosition(), 10.0f);
-				}
-			}
-		}
-		index++;
-	}
+	// int index = 0;
+	// for (Sphere *bullet : m_bullets)
+	// {
+	// 	for (Model *model : m_models)
+	// 	{
+	// 		if (model->getTag() == "enemy")
+	// 		{
+	// 			if (Util::inProximity(model->getPosition(), bullet->GetPosition(), glm::vec3(5.0f, 5.0f, 5.0f)))
+	// 			{
+	// 				m_bullets.erase(m_bullets.begin() + index);
+	// 				model->damage(30.0f);
+	// 				m_soundManager->Play3D("death", m_creatureGrowlPath, model->getPosition(), 10.0f);
+	// 			}
+	// 		}
+	// 	}
+	// 	index++;
+	// }
 
 	// Update Effects
 	for (Effect *effect : m_effects)
@@ -811,6 +837,14 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 		glDisable(GL_DEPTH_TEST);
 
 		m_flashlight->render(mProj, glm::mat4(1.0f));
+		glEnable(GL_DEPTH_TEST);
+	}
+
+	if (m_gravityGunEqipped)
+	{
+		glDisable(GL_DEPTH_TEST);
+
+		m_gravityGun->render(mProj, glm::mat4(1.0f));
 		glEnable(GL_DEPTH_TEST);
 	}
 
