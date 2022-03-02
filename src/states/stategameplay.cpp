@@ -334,6 +334,23 @@ void StateGameplay::Enter(std::string arg)
 			bush->setRotation(glm::vec3(0.0f, rotation, 0.0f));
 			m_models.push_back(bush);
 		}
+
+		for (int i = 0; i < 10; i++)
+		{
+			Model *log = new Model("data/models/log.fbx", "skinned");
+			log->setTexture("data/textures/log.png");
+			// log->setOffset(log->getModel()->getAABBMin());
+
+			float rotation = (float)_randomNum(-60, 60);
+			int x = _randomNum(0, m_terrainSize * 4);
+			int z = _randomNum(0, m_terrainSize * 4);
+
+			// log->setScale(glm::vec3(0.01f, 0.01f, 0.01f));
+			log->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
+			log->setRotation(glm::vec3(0.0f, rotation, 0.0f));
+			m_models.push_back(log);
+		}
+
 		m_soundManager = new wolf::SoundManager();
 		m_soundManager->CreateSoundSystem();
 
@@ -355,7 +372,7 @@ void StateGameplay::Enter(std::string arg)
 		// Water
 		m_water = new Water();
 		m_water->SetScale(glm::vec3(2000.0f, 2000.0f, 2000.0f));
-		m_water->SetPos(glm::vec3(1000.0f, 5.0f, -1000.0f));
+		m_water->SetPos(glm::vec3(1300.0f, 5.0f, -1000.0f));
 		Scene::Instance()->AddNode(m_water);
 		m_soundManager->Play3D("Water", m_waterSoundPath, m_water->GetPos(), 10.0f, true);
 
@@ -572,7 +589,7 @@ void StateGameplay::Update(float p_fDelta)
 		m_gravityKeyDown = false;
 
 	// CHECK IF NEAR WATER
-	m_nearWater = Util::inProximity(m_water->GetPos(), camera->GetPosition(), glm::vec3(1000.0f, 5.0f, 1000.0f));
+	m_nearWater = Util::inProximity(m_water->GetPos(), camera->GetPosition(), glm::vec3(1000.0f, 50.0f, 1000.0f));
 
 	if (m_nearWater && m_app->isKeyDown('E') && !m_drinking)
 	{
