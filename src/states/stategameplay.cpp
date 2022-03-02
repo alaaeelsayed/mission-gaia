@@ -22,6 +22,10 @@ StateGameplay::~StateGameplay()
 	delete m_thirstText;
 	delete m_drinkText;
 	delete m_eatText;
+	delete m_collectText;
+	delete m_repairShipText;
+	delete m_collectMorePartsText;
+	delete m_partsCollectedText;
 	delete m_stateMachine;
 
 	delete m_soundManager;
@@ -138,6 +142,35 @@ void StateGameplay::Enter(std::string arg)
 		m_eatText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
 		// m_pFlashlight->setRotation(180, glm::vec3(0.0f, 1.0f, 0.0f));
 
+		m_collectText = new TextBox(1000.0f, 200.0f);
+		m_collectText->SetPos(glm::vec3(400.0f, 50.0f, 0.0f));
+		m_collectText->SetText(m_font, m_collectPrompt.c_str());
+		m_collectText->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		m_collectText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
+		m_collectText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
+
+		m_repairShipText = new TextBox(1000.0f, 200.0f);
+		m_repairShipText->SetPos(glm::vec3(100.0f, 50.0f, 0.0f));
+		m_repairShipText->SetText(m_font, m_repairPrompt.c_str());
+		m_repairShipText->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		m_repairShipText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
+		m_repairShipText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
+
+		m_collectMorePartsText = new TextBox(1000.0f, 200.0f);
+		m_collectMorePartsText->SetPos(glm::vec3(100.0f, 50.0f, 0.0f));
+		m_collectMorePartsText->SetText(m_font, m_noPartsPrompt.c_str());
+		m_collectMorePartsText->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
+		m_collectMorePartsText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
+		m_collectMorePartsText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
+
+		// m_partsCollected = new TextBox(1000.0f, 200.0f);
+		// m_partsCollected->SetPos(glm::vec3(100.0f, 50.0f, 0.0f));
+
+		// m_partsCollected->SetText(m_font, m_noPartsPrompt.c_str());
+		// m_partsCollected->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
+		// m_partsCollected->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
+		// m_partsCollected->SetVerticalAlignment(TextBox::Alignment::AL_Top);
+
 		m_spotlight = new Light();
 		m_spotlight->posRange = glm::vec4(0.0f, 0.0f, 0.0f, 100.0f);
 		m_spotlight->color = glm::vec3(0.45f, 0.54f, 0.4f);
@@ -200,10 +233,10 @@ void StateGameplay::Enter(std::string arg)
 		Model *m_ship = new Model("data/models/ships/ship3.obj", "skinned");
 		m_ship->setTag("ship");
 		m_ship->setScale(glm::vec3(10.0f, 10.0f, 10.0f));
-		m_ship->setOffset(m_ship->getModel()->getAABBMin());
+		m_ship->setOffset(m_ship->getModel()->getAABBMin() + glm::vec3(0.0f, -5.0f, 0.0f));
 		m_ship->setTexture("data/textures/ship-texture.png");
 
-		glm::vec3 shipPosition = Scene::Instance()->GetActiveCamera()->GetPosition() + glm::vec3(-10.0f, 0.0f, 0.0f);
+		glm::vec3 shipPosition = Scene::Instance()->GetActiveCamera()->GetPosition() + glm::vec3(-150.0f, 0.0f, 0.0f);
 		m_ship->setPosition(glm::vec3(shipPosition.x, m_terrainGenerator->GetHeight(int(shipPosition.x), int(shipPosition.z)), shipPosition.z));
 
 		Effect *fire1 = new Effect(m_firepath);
@@ -227,6 +260,49 @@ void StateGameplay::Enter(std::string arg)
 		m_models.push_back(m_ship);
 
 		// Ship Parts
+		Model *m_part1 = new Model("data/models/ships/ship-parts/part1-bearing.obj", "skinned");
+		m_part1->setTag("ship-part");
+		m_part1->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+		m_part1->setOffset(m_ship->getModel()->getAABBMin());
+		m_part1->setTexture("data/textures/ship-texture.png");
+
+		Model *m_part2 = new Model("data/models/ships/ship-parts/part2-tv.obj", "skinned");
+		m_part2->setTag("ship-part");
+		m_part2->setOffset(m_ship->getModel()->getAABBMin());
+		m_part2->setTexture("data/textures/ship-texture.png");
+		m_part2->setScale(glm::vec3(0.5f, 0.5f, 0.5f));
+
+		Model *m_part3 = new Model("data/models/ships/ship-parts/part3-powerbank.obj", "skinned");
+		m_part3->setTag("ship-part");
+		m_part3->setOffset(m_ship->getModel()->getAABBMin());
+		m_part3->setTexture("data/textures/ship-texture.png");
+		m_part2->setScale(glm::vec3(2.5f, 2.5f, 2.5f));
+
+		Model *m_part4 = new Model("data/models/ships/ship-parts/part4-box.obj", "skinned");
+		m_part4->setTag("ship-part");
+		m_part4->setOffset(m_ship->getModel()->getAABBMin());
+		m_part4->setTexture("data/textures/ship-part-box.png");
+
+		int x = _randomNum(0, m_terrainSize * 4);
+		int z = _randomNum(0, m_terrainSize * 4);
+		m_part1->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
+
+		x = _randomNum(0, m_terrainSize * 4);
+		z = _randomNum(0, m_terrainSize * 4);
+		m_part2->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
+
+		x = _randomNum(0, m_terrainSize * 4);
+		z = _randomNum(0, m_terrainSize * 4);
+		m_part3->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
+
+		x = _randomNum(0, m_terrainSize * 4);
+		z = _randomNum(0, m_terrainSize * 4);
+		m_part4->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
+
+		m_models.push_back(m_part1);
+		m_models.push_back(m_part2);
+		m_models.push_back(m_part3);
+		m_models.push_back(m_part4);
 
 		for (int i = 0; i < 40; i++)
 		{
@@ -250,7 +326,7 @@ void StateGameplay::Enter(std::string arg)
 
 		m_soundManager->Play3D("fire", m_fireSound, m_ship->getPosition(), 10.0f, true);
 
-		// m_soundManager->Play2D("Nature", m_natureSoundPath, true);
+		m_soundManager->Play2D("Nature", m_natureSoundPath, true);
 
 		// Debug Menu
 		IMGUI_CHECKVERSION();
@@ -281,8 +357,10 @@ void StateGameplay::Enter(std::string arg)
 void StateGameplay::Update(float p_fDelta)
 {
 
-	Camera *camera = Scene::Instance()->GetActiveCamera();
+	m_nearShip = false;
+	m_nearCollectible = false;
 
+	Camera *camera = Scene::Instance()->GetActiveCamera();
 	// Set camera to floor
 	float camX = camera->GetPosition().x;
 	float camY = camera->GetPosition().y;
@@ -332,9 +410,42 @@ void StateGameplay::Update(float p_fDelta)
 
 	for (Model *model : m_models)
 	{
+
 		if (model->isDestroyed())
 			continue;
 		model->update(p_fDelta);
+
+		if (model->getTag().compare("ship-part") == 0 && Util::inProximity(model->getPosition(), camera->GetPosition(), glm::vec3(30.0f, 30.0f, 30.0f)))
+		{
+			m_nearCollectible = true;
+			m_soundManager->Play3D("fire", m_fireSound, model->getPosition(), 30.0f, true);
+
+			m_nearFood = false;
+			m_nearWater = false;
+			if (m_app->isKeyDown('E'))
+			{
+				m_models.erase(std::remove(m_models.begin(), m_models.end(), model), m_models.end());
+				delete model;
+				m_collectedParts++;
+				m_soundManager->Play2D("collected", m_pickupSoundPath);
+				m_nearCollectible = false;
+				continue;
+			}
+		}
+
+		if (model->getTag().compare("ship") == 0 && Util::inProximity(model->getPosition(), camera->GetPosition(), glm::vec3(150.0f, 30.0f, 150.0f)))
+		{
+			m_nearShip = true;
+
+			m_nearFood = false;
+			m_nearWater = false;
+			if (m_app->isKeyDown('E') && m_collectedParts != 0)
+			{
+				m_collectedParts--;
+				m_soundManager->Play2D("repair", m_repairSoundPath);
+				m_nearCollectible = false;
+			}
+		}
 
 		if (model->getTag().compare("enemy") == 0)
 		{
@@ -343,16 +454,16 @@ void StateGameplay::Update(float p_fDelta)
 			float modelZ = model->getPosition().z;
 			model->setPosition(glm::vec3(modelX, m_terrainGenerator->GetHeight(int(modelX), int(modelZ)), modelZ));
 			float modelY = model->getPosition().y;
-
-			// Model is an enemy
 			glm::vec3 modelPos = model->getPosition();
 			glm::vec3 playerPos = camera->GetPosition();
 
 			if (Util::inProximity(modelPos, playerPos, m_enemyRange))
 			{
+
 				float xDist = playerPos.x - modelPos.x;
 				float zDist = playerPos.z - modelPos.z;
 				model->setChasing(true);
+				m_soundManager->Play3D("growl", m_creatureGrowlPath, modelPos, 10.0f);
 
 				model->setPosition(modelPos + glm::vec3(xDist * p_fDelta * m_enemySpeed, 0.0f, zDist * p_fDelta * m_enemySpeed));
 				// Rotate in direction of player
@@ -374,7 +485,7 @@ void StateGameplay::Update(float p_fDelta)
 		// CHECK IF NEAR FOOD
 		if (model->getTag().compare("food") == 0)
 		{
-			// Model is an enemy
+			// Model is food
 			glm::vec3 modelPos = model->getPosition();
 			glm::vec3 playerPos = camera->GetPosition();
 
@@ -405,9 +516,8 @@ void StateGameplay::Update(float p_fDelta)
 		m_keyDown = false;
 
 	m_nearFood = false;
-
 	// CHECK IF NEAR WATER
-	m_nearWater = Util::inProximity(m_water->GetPos(), camera->GetPosition(), glm::vec3(m_water->GetScale().x, 5.0f, m_water->GetScale().z));
+	m_nearWater = Util::inProximity(m_water->GetPos(), camera->GetPosition(), glm::vec3(1000.0f, 5.0f, 1000.0f));
 
 	if (m_nearWater && m_app->isKeyDown('E') && !m_drinking)
 	{
@@ -616,13 +726,13 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 	{
 		if (!m_walking && !m_running)
 		{
-			// m_soundManager->Play2D("walking", m_walkingSoundPath, true, true);
+			m_soundManager->Play2D("walking", m_walkingSoundPath, true, true);
 			m_walking = true;
 		}
 
 		if (m_app->isKeyDown(GLFW_KEY_LEFT_CONTROL) && !m_running)
 		{
-			// m_soundManager->Play2D("running", m_runningSoundPath, true, true);
+			m_soundManager->Play2D("running", m_runningSoundPath, true, true);
 			m_walking = false;
 			m_running = true;
 		}
@@ -649,6 +759,23 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 	if (m_nearFood)
 	{
 		m_eatText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
+	}
+
+	if (m_nearCollectible)
+	{
+		m_collectText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
+	}
+
+	if (m_nearShip)
+	{
+		if (m_collectedParts > 0)
+		{
+			m_repairShipText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
+		}
+		else
+		{
+			m_collectMorePartsText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
+		}
 	}
 
 	if (m_flashlightEquipped)

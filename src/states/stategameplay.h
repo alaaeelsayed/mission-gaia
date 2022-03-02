@@ -66,9 +66,15 @@ private:
 	const std::string m_walkingSoundPath = "data/sounds/walking.ogg";
 	const std::string m_drinkingSoundPath = "data/sounds/drinking.ogg";
 	const std::string m_eatingSoundPath = "data/sounds/eating.ogg";
+	const std::string m_pickupSoundPath = "data/sounds/pickup.wav";
+	const std::string m_repairSoundPath = "data/sounds/repair.wav";
 
 	const std::string m_drinkPrompt = "Press E to drink";
 	const std::string m_eatPrompt = "Press E to eat";
+	const std::string m_collectPrompt = "Press E to Collect";
+	const std::string m_repairPrompt = "Press E to Repair";
+	const std::string m_noPartsPrompt = "Collect parts to repair ship";
+	const std::string m_partsCollected = "";
 
 	std::vector<Light *> m_lights;
 	wolf::Program *m_worldProgram = 0;
@@ -110,6 +116,11 @@ private:
 	TextBox *m_hungerText;
 	TextBox *m_thirstText;
 
+	TextBox *m_collectText;
+	TextBox *m_repairShipText;
+	TextBox *m_collectMorePartsText;
+	TextBox *m_partsCollectedText;
+
 	float m_hunger = 100;
 	float m_thirst = 100;
 
@@ -118,6 +129,8 @@ private:
 
 	bool m_nearWater = false;
 	bool m_nearFood = false;
+	bool m_nearCollectible = false;
+	bool m_nearShip = false;
 
 	int m_lightCount = 0;
 
@@ -135,6 +148,10 @@ private:
 	float m_enemySpeed = 0.8f;
 	glm::vec3 m_enemyRange = glm::vec3(70.0f, 20.0f, 70.0f);
 	glm::vec3 m_foodRange = glm::vec3(20.0f, 20.0f, 20.0f);
+	glm::vec3 m_collectibleRange = glm::vec3(5.0f, 5.0f, 5.0f);
+
+	int m_collectedParts = 0;
+	int m_repairedParts = 0;
 
 	// Bullets
 	std::vector<Sphere *> m_bullets;
