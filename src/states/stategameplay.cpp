@@ -154,12 +154,12 @@ void StateGameplay::Enter(std::string arg)
 		m_repairShipText = new TextBox(1000.0f, 200.0f);
 		m_repairShipText->SetPos(glm::vec3(100.0f, 50.0f, 0.0f));
 		m_repairShipText->SetText(m_font, m_repairPrompt.c_str());
-		m_repairShipText->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		m_repairShipText->SetColor(0.0f, 1.0f, 0.0f, 1.0f);
 		m_repairShipText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
 		m_repairShipText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
 
-		m_collectMorePartsText = new TextBox(1000.0f, 200.0f);
-		m_collectMorePartsText->SetPos(glm::vec3(100.0f, 50.0f, 0.0f));
+		m_collectMorePartsText = new TextBox(500.0f, 200.0f);
+		m_collectMorePartsText->SetPos(glm::vec3(50.0f, 50.0f, 0.0f));
 		m_collectMorePartsText->SetText(m_font, m_noPartsPrompt.c_str());
 		m_collectMorePartsText->SetOutlined(true);
 		m_collectMorePartsText->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
@@ -282,7 +282,7 @@ void StateGameplay::Enter(std::string arg)
 
 		// parts collected label
 		m_partsCollectedText = new TextBox(500.0f, 200.0f);
-		m_partsCollectedText->SetPos(glm::vec3(800.0f, 500.0f, 0.0f));
+		m_partsCollectedText->SetPos(glm::vec3(850.0f, 50.0f, 0.0f));
 
 		std::string partsString = "Parts: " + std::to_string(m_collectedParts) + "/" + std::to_string(m_numParts);
 		m_partsCollectedText->SetText(m_font, partsString.c_str());
@@ -364,6 +364,7 @@ void StateGameplay::Update(float p_fDelta)
 
 	m_nearShip = false;
 	m_nearCollectible = false;
+	m_nearFood = false;
 
 	Camera *camera = Scene::Instance()->GetActiveCamera();
 	// Set camera to floor
@@ -415,6 +416,8 @@ void StateGameplay::Update(float p_fDelta)
 
 	for (Model *model : m_models)
 	{
+
+		glm::vec3 oldModelPos = model->getPosition();
 
 		if (model->isDestroyed())
 			continue;
@@ -491,10 +494,9 @@ void StateGameplay::Update(float p_fDelta)
 		if (model->getTag().compare("food") == 0)
 		{
 			// Model is food
-			glm::vec3 modelPos = model->getPosition();
 			glm::vec3 playerPos = camera->GetPosition();
 
-			if (Util::inProximity(modelPos, playerPos, m_foodRange))
+			if (Util::inProximity(oldModelPos, playerPos, m_foodRange))
 			{
 				m_nearFood = true;
 			}
@@ -520,7 +522,6 @@ void StateGameplay::Update(float p_fDelta)
 	if (!m_app->isKeyDown('F'))
 		m_keyDown = false;
 
-	m_nearFood = false;
 	// CHECK IF NEAR WATER
 	m_nearWater = Util::inProximity(m_water->GetPos(), camera->GetPosition(), glm::vec3(1000.0f, 5.0f, 1000.0f));
 
