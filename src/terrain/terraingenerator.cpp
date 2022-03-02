@@ -5,7 +5,7 @@ TerrainGenerator::TerrainGenerator()
 	std::random_device rd;
 	std::mt19937 mt(rd());
 	std::uniform_int_distribution<int> dist(0, 1000000000);
-
+	m_convexHull = new btConvexHullShape();
 	m_seed = dist(mt);
 }
 
@@ -83,6 +83,21 @@ int TerrainGenerator::GetSize() const
 	return m_size;
 }
 
+std::vector<Vertex> TerrainGenerator::getVertices()
+{
+	return m_vertices;
+}
+
+std::vector<float> TerrainGenerator::getRawVertices()
+{
+	return m_rawVertices;
+}
+
+std::vector<float> TerrainGenerator::getHeights()
+{
+	return m_heights;
+}
+
 int TerrainGenerator::GetVertexCount() const
 {
 	return m_countVerts;
@@ -111,6 +126,7 @@ wolf::VertexDeclaration *TerrainGenerator::GenerateVertices(int gridX, int gridZ
 	int count = m_countVerts * m_countVerts;
 
 	std::vector<Vertex> vertices(count);
+	m_rawVertices.reserve(count * 3);
 
 	int vertexOffset = 0;
 	for (int i = 0; i < m_countVerts; i++)
@@ -128,7 +144,17 @@ wolf::VertexDeclaration *TerrainGenerator::GenerateVertices(int gridX, int gridZ
 				normal.x,
 				normal.y,
 				normal.z};
+
+			if (i % 20 == 0)
+			{
+				m_convexHull->addPoint(btVector3(vertices[vertexOffset].x, vertices[vertexOffset].y, vertices[vertexOffset].z));
+			}
+
+			m_rawVertices.push_back((float)j / ((float)m_countVerts - 1) * m_size);
+			m_rawVertices.push_back(height);
+			m_rawVertices.push_back((float)i / ((float)m_countVerts - 1) * m_size);
 			vertexOffset++;
+			m_heights.push_back(height);
 		}
 	}
 
@@ -155,6 +181,8 @@ wolf::VertexDeclaration *TerrainGenerator::GenerateVertices(int gridX, int gridZ
 	wolf::VertexBuffer *vertexBuffer = wolf::BufferManager::CreateVertexBuffer(&vertices[0], sizeof(Vertex) * vertices.size());
 	wolf::IndexBuffer *indexBuffer = wolf::BufferManager::CreateIndexBuffer(&indices[0], sizeof(GLuint) * counter);
 
+	int length = m_rawVertices.size();
+
 	wolf::VertexDeclaration *vertexDeclaration = new wolf::VertexDeclaration();
 
 	vertexDeclaration->Begin();
@@ -165,7 +193,13 @@ wolf::VertexDeclaration *TerrainGenerator::GenerateVertices(int gridX, int gridZ
 	vertexDeclaration->SetIndexBuffer(indexBuffer);
 	vertexDeclaration->End();
 
+	m_vertices = vertices;
 	return vertexDeclaration;
+}
+
+btConvexHullShape *TerrainGenerator::getConvexHull()
+{
+	return m_convexHull;
 }
 
 glm::vec3 TerrainGenerator::_calculateNormal(int x, int z, int xOff, int zOff)

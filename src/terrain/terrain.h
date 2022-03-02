@@ -4,6 +4,7 @@
 #include "terraingenerator.h"
 #include "../text/textbox.h"
 #include "../scene/scene.h"
+#include "../physics/rigidBody.h"
 
 class Terrain : public Node
 {
@@ -14,6 +15,11 @@ public:
     void Update(float dt) override;
     void Render(const glm::mat4 &mProj, const glm::mat4 &mView) override;
 
+    wolf::Program *getProgram() const
+    {
+        return m_program;
+    }
+
 private:
     int m_x, m_z;
 
@@ -23,4 +29,7 @@ private:
     wolf::Program *m_program = nullptr;
     wolf::VertexBuffer *m_vb;
     wolf::VertexDeclaration *m_decl;
+
+    // Rigid Body for collision
+    RigidBody *m_rigidBody = nullptr;
 };

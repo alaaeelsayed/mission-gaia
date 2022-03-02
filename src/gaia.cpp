@@ -18,7 +18,7 @@ void Gaia::Init()
     Culling::CreateInstance();
 
     Camera *camera = new FreeRoamCamera(m_app);
-    camera->SetPosition(glm::vec3(10, 10, -20));
+    camera->SetPosition(glm::vec3(500, 0, 500));
 
     Scene::Instance()->SetActiveCamera(camera);
 

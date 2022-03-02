@@ -16,6 +16,7 @@
 #include "../misc/util.h"
 #include "./statemachine.h"
 #include "../../samplefw/Sphere.h"
+#include "../particles/effect.h"
 
 #include "../../irrklang/include/irrKlang.h"
 
@@ -131,7 +132,7 @@ private:
 	int m_terrainSize, m_terrainVerts, m_terrainOctaves;
 	float m_terrainAmplitude, m_terrainRoughness;
 
-	float m_enemySpeed = 0.08f;
+	float m_enemySpeed = 0.8f;
 	glm::vec3 m_enemyRange = glm::vec3(70.0f, 20.0f, 70.0f);
 	glm::vec3 m_foodRange = glm::vec3(20.0f, 20.0f, 20.0f);
 
@@ -140,6 +141,13 @@ private:
 	bool m_rightMouseDown = false;
 
 	Common::StateMachine *m_stateMachine = nullptr;
+
+	// Effects
+	std::vector<Effect *> m_effects;
+	std::string m_firepath = "data/effects/fire.pfx";
+	std::string m_forcefieldPath = "data/effects/forcefield.pfx";
+
+	std::string m_fireSound = "data/sounds/fire-sound.ogg";
 };
 
 #endif

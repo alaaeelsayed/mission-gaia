@@ -12,7 +12,9 @@ Terrain::Terrain(int x, int z, TerrainGenerator *terrainGenerator) : Node(Boundi
     m_program = wolf::ProgramManager::CreateProgram("data/shaders/terrain.vsh", "data/shaders/terrain.fsh");
 
     m_decl = terrainGenerator->GenerateVertices(x, z);
-
+    // float *data = &terrainGenerator->getHeights()[0];
+    // int length = terrainGenerator->getHeights().size();
+    // m_rigidBody = new RigidBody(terrainGenerator->GetVertexCount(), terrainGenerator->GetVertexCount(), data, 1, -3, 3, 1, PHY_FLOAT, false);
     m_terrainGenerator = terrainGenerator;
 }
 
@@ -21,10 +23,12 @@ Terrain::~Terrain()
     wolf::ProgramManager::DestroyProgram(m_program);
     m_decl->Clean();
     delete m_decl;
+    // delete m_rigidBody;
 }
 
 void Terrain::Update(float dt)
 {
+    // m_rigidBody->Update(dt, glm::vec3(m_x, 0.0f, m_z));
 }
 
 void Terrain::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
@@ -55,11 +59,6 @@ void Terrain::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
     m_program->SetUniform("region3.max", 2 * 22.0f);
     m_program->SetUniform("region4.min", 2 * 23.0f);
     m_program->SetUniform("region4.max", 2 * 73.0f);
-
-    m_program->SetUniform("u_spotLightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 100.0f));
-    m_program->SetUniform("u_spotLightColor", glm::vec3(0.0f, 0.0f, 0.0f));
-    m_program->SetUniform("u_spotLightAttenuation", glm::vec3(0.0f, 0.3f, 0.0f));
-    m_program->SetUniform("u_spotLightSpot", glm::vec3(0.2f, 0.2f, 0.2f));
 
     m_program->SetUniform("u_lightPos", Scene::Instance()->GetLightDirection());
     m_program->SetUniform("u_viewPos", glm::vec3(0.0f, 0.0f, 0.0f));

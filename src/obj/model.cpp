@@ -60,6 +60,10 @@ void Model::setNormal(const char *texPath)
 void Model::setPosition(const glm::vec3 &vPosition)
 {
     m_vPosition = vPosition;
+    if (m_pRigidBody)
+    {
+        m_pRigidBody->setPosition(vPosition);
+    }
 }
 
 glm::vec3 Model::getPosition()
@@ -106,7 +110,12 @@ void Model::update(float fDelta)
 {
     if (m_pRigidBody)
     {
-        m_pRigidBody->Update(fDelta, m_vPosition);
+        glm::vec3 newPos = m_pRigidBody->Update(fDelta, m_vPosition);
+
+        if (!m_pRigidBody->isKinematic() && !m_isChasing)
+        {
+            m_vPosition = newPos;
+        }
     }
 
     if (m_pLight)

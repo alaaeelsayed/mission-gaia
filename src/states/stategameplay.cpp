@@ -119,7 +119,7 @@ void StateGameplay::Enter(std::string arg)
 
 		m_flashlight = new Model("data/models/flashlight.fbx", "dim");
 		m_flashlight->setPosition(glm::vec3(80, -50, -200));
-		m_flashlight->setRotation(glm::vec3(0.0f, DEG_TO_RAD(180), 0.0f));
+		m_flashlight->setRotation(glm::vec3(0.0f, 180, 0.0f));
 
 		m_drinkText = new TextBox(700.0f, 200.0f);
 		m_drinkText->SetPos(glm::vec3(400.0f, 50.0f, 0.0f));
@@ -145,9 +145,8 @@ void StateGameplay::Enter(std::string arg)
 		m_spotlight->lightSpot = glm::vec4(2.0f, 2.0f, 2.0f, 0.8f);
 		m_spotlight->enabled = false;
 
-		m_flashlight->attachLight(m_spotlight);
+		// m_flashlight->attachLight(m_spotlight);
 		m_flashlight->setTexture("data/textures/flashlight.png");
-		m_models.push_back(m_flashlight);
 
 		m_terrainGenerator = new TerrainGenerator();
 
@@ -173,8 +172,8 @@ void StateGameplay::Enter(std::string arg)
 			m_pCreature->setTag("enemy");
 			m_pCreature->setTexture("data/textures/gimpy_diffuse.tga");
 			m_pCreature->setNormal("data/textures/gimpy_normal.tga");
-			m_pCreature->setOffset(m_pCreature->getModel()->getAABBMin());
-			m_pCreature->attachRigidBody("data/physics/creature.rigid");
+			m_pCreature->setOffset(m_pCreature->getModel()->getAABBMin() + glm::vec3(0.0f, -3.0f, 0.0f));
+			// m_pCreature->attachRigidBody("data/physics/creature.rigid");
 
 			Light *pointLight = new Light();
 			float r = _randomFloat(0.0001f, 0.0018f);
@@ -196,6 +195,40 @@ void StateGameplay::Enter(std::string arg)
 			m_pCreature->setRotation(glm::vec3(0.0f, rotation, 0.0f));
 			m_models.push_back(m_pCreature);
 		}
+
+		// Ship and ship parts
+		Model *m_ship = new Model("data/models/ships/ship3.obj", "skinned");
+		m_ship->setTag("ship");
+		m_ship->setScale(glm::vec3(20.0f, 20.0f, 20.0f));
+		m_ship->setTexture("data/textures/ship-texture.png");
+
+		glm::vec3 shipPosition = Scene::Instance()->GetActiveCamera()->GetPosition() + glm::vec3(-10.0f, 0.0f, 0.0f);
+		m_ship->setPosition(glm::vec3(shipPosition.x, m_terrainGenerator->GetHeight(int(shipPosition.x), int(shipPosition.z)), shipPosition.z));
+
+		m_soundManager->Play3D("fire", m_fireSound, Scene::Instance()->GetActiveCamera()->GetPosition() + glm::vec3(-10.0f, 0.0f, 0.0f), 100.0f, true);
+
+		Effect *fire1 = new Effect(m_firepath);
+		Effect *fire2 = new Effect(m_firepath);
+		Effect *fire3 = new Effect(m_firepath);
+		Effect *fire4 = new Effect(m_firepath);
+		Effect *fire5 = new Effect(m_firepath);
+		for (int i = 0; i < 7; i++)
+		{
+			Effect *fire = new Effect(m_firepath);
+
+			int xOff = _randomNum(-5, 10);
+			int yOff = _randomNum(0, 7);
+			int zOff = _randomNum(-10, 10);
+			fire->setPos(m_ship->getPosition() + glm::vec3(xOff, yOff, zOff));
+			m_effects.push_back(fire);
+		}
+		Effect *forcefield = new Effect(m_forcefieldPath);
+		forcefield->setPos(m_ship->getPosition() + glm::vec3(0.0f, 0.0f, 0.0f));
+		m_effects.push_back(forcefield);
+		m_models.push_back(m_ship);
+
+		// Ship Parts
+
 		for (int i = 0; i < 40; i++)
 		{
 			Model *bush = new Model("data/models/shrub.fbx", "skinned");
@@ -230,7 +263,6 @@ void StateGameplay::Enter(std::string arg)
 		m_worldProgram = wolf::ProgramManager::CreateProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
 
 		// Water
-
 		m_water = new Water();
 		m_water->SetScale(glm::vec3(2000.0f, 2000.0f, 2000.0f));
 		m_water->SetPos(glm::vec3(1000.0f, 5.0f, -1000.0f));
@@ -246,15 +278,26 @@ void StateGameplay::Enter(std::string arg)
 
 void StateGameplay::Update(float p_fDelta)
 {
+
 	Camera *camera = Scene::Instance()->GetActiveCamera();
+
+	// Set camera to floor
+	float camX = camera->GetPosition().x;
+	float camY = camera->GetPosition().y;
+	float camZ = camera->GetPosition().z;
+
+	camera->SetPosition(glm::vec3(camX, m_terrainGenerator->GetHeight(int(camX), int(camZ)) + 5.0f, camZ));
+
+	// Attach spotlight
+	m_spotlight->posRange = glm::vec4(camX, camY, camZ, m_spotlight->posRange.w);
 
 	glm::vec3 lightspot = glm::normalize(camera->GetViewDirection() - glm::vec3(m_spotlight->posRange.x, m_spotlight->posRange.y, m_spotlight->posRange.z));
 	m_spotlight->lightSpot = glm::vec4(lightspot, 0.2f);
 
 	wolf::BulletPhysicsManager::Instance()->Update(p_fDelta);
 
-	m_hunger = glm::max(m_hunger - (p_fDelta * (rand() % 3 + 2)), 0.0f);
-	m_thirst = glm::max(m_thirst - p_fDelta * (rand() % 2 + 1), 0.0f);
+	m_hunger = glm::max(m_hunger - (p_fDelta * (rand() % 2)), 0.0f);
+	m_thirst = glm::max(m_thirst - p_fDelta * (rand() % 2), 0.0f);
 
 	int hunger = (int)m_hunger;
 	int thirst = (int)m_thirst;
@@ -290,33 +333,15 @@ void StateGameplay::Update(float p_fDelta)
 		if (model->isDestroyed())
 			continue;
 		model->update(p_fDelta);
-	}
-
-	if (m_app->isKeyDown('F') && !m_keyDown)
-	{
-		m_keyDown = true;
-		m_soundManager->Play2D("flashlight", m_flashlightSoundPath, false, true);
-		m_flashlightEquipped = !m_flashlightEquipped;
-		m_spotlight->enabled = !m_spotlight->enabled;
-		if (!m_spotlight->enabled)
-		{
-			m_spotlight->attenuation = glm::vec3(1.0f, 1.0f, 1.0f);
-		}
-		else
-		{
-			m_spotlight->attenuation = glm::vec3(0.0f, 0.5f, 0.0f);
-		}
-	}
-
-	if (!m_app->isKeyDown('F'))
-		m_keyDown = false;
-
-	m_nearFood = false;
-	for (Model *model : m_models)
-	{
 
 		if (model->getTag().compare("enemy") == 0)
 		{
+			// Set all enemies to floor
+			float modelX = model->getPosition().x;
+			float modelZ = model->getPosition().z;
+			model->setPosition(glm::vec3(modelX, m_terrainGenerator->GetHeight(int(modelX), int(modelZ)), modelZ));
+			float modelY = model->getPosition().y;
+
 			// Model is an enemy
 			glm::vec3 modelPos = model->getPosition();
 			glm::vec3 playerPos = camera->GetPosition();
@@ -325,13 +350,15 @@ void StateGameplay::Update(float p_fDelta)
 			{
 				float xDist = playerPos.x - modelPos.x;
 				float zDist = playerPos.z - modelPos.z;
-				model->setPosition(modelPos + glm::vec3(xDist * p_fDelta * m_enemySpeed, 0.0f, zDist * p_fDelta * m_enemySpeed));
+				model->setChasing(true);
 
+				model->setPosition(modelPos + glm::vec3(xDist * p_fDelta * m_enemySpeed, 0.0f, zDist * p_fDelta * m_enemySpeed));
 				// Rotate in direction of player
 				model->setRotation(glm::vec3(0.0f, glm::degrees(atan2(-zDist, xDist)) + 90.0f, 0.0f));
 			}
 			else
 			{
+				model->setChasing(false);
 				bool rand_bool = Util::randBool();
 				if (rand_bool)
 				{
@@ -355,6 +382,27 @@ void StateGameplay::Update(float p_fDelta)
 			}
 		}
 	}
+
+	if (m_app->isKeyDown('F') && !m_keyDown)
+	{
+		m_keyDown = true;
+		m_soundManager->Play2D("flashlight", m_flashlightSoundPath, false, true);
+		m_flashlightEquipped = !m_flashlightEquipped;
+		m_spotlight->enabled = !m_spotlight->enabled;
+		if (!m_spotlight->enabled)
+		{
+			m_spotlight->attenuation = glm::vec3(1.0f, 1.0f, 1.0f);
+		}
+		else
+		{
+			m_spotlight->attenuation = glm::vec3(0.0f, 0.5f, 0.0f);
+		}
+	}
+
+	if (!m_app->isKeyDown('F'))
+		m_keyDown = false;
+
+	m_nearFood = false;
 
 	// CHECK IF NEAR WATER
 	m_nearWater = Util::inProximity(m_water->GetPos(), camera->GetPosition(), glm::vec3(m_water->GetScale().x, 5.0f, m_water->GetScale().z));
@@ -449,6 +497,12 @@ void StateGameplay::Update(float p_fDelta)
 		}
 		index++;
 	}
+
+	// Update Effects
+	for (Effect *effect : m_effects)
+	{
+		effect->update(p_fDelta);
+	}
 }
 
 void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
@@ -500,6 +554,14 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 			model->getMaterial()->SetUniform("u_lightColor", m_spotlight->color);
 			model->getMaterial()->SetUniform("u_lightSpot", m_spotlight->lightSpot);
 			model->getMaterial()->SetUniform("u_lightAttenuation", m_spotlight->attenuation);
+
+			for (Terrain *terrain : m_terrains)
+			{
+				terrain->getProgram()->SetUniform("u_spotLightPosRange", m_spotlight->posRange);
+				terrain->getProgram()->SetUniform("u_spotLightColor", m_spotlight->color);
+				terrain->getProgram()->SetUniform("u_spotLightSpot", m_spotlight->lightSpot);
+				terrain->getProgram()->SetUniform("u_spotLightAttenuation", m_spotlight->attenuation);
+			}
 		}
 		else
 		{
@@ -510,6 +572,13 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 			model->getMaterial()->SetUniform("u_lightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
 			model->getMaterial()->SetUniform("u_lightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
 			model->getMaterial()->SetUniform("u_lightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
+
+			for (Terrain *terrain : m_terrains)
+			{
+				terrain->getProgram()->SetUniform("u_spotLightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+				terrain->getProgram()->SetUniform("u_spotLightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+				terrain->getProgram()->SetUniform("u_spotLightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
+			}
 		}
 		model->render(mProj, mView, camera->GetViewDirection());
 	}
@@ -521,45 +590,6 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 	{
 		bullet->Render(glm::mat4(1.0f), mView, mProj);
 	}
-
-	// if (m_pCam)
-	// 	m_skybox->Render(mProj, mView, width, height);
-
-	// m_water->render(mProj, mView, width, height);
-
-	// for (Terrain *terrain : m_terrains)
-	// {
-	// 	terrain->Render(mProj, mView);
-	// }
-
-	// ImGui_ImplOpenGL3_NewFrame();
-	// ImGui_ImplGlfw_NewFrame();
-	// ImGui::NewFrame();
-	// ImGui::Begin("Terrain Debug Menu");
-	// ImGui::SetWindowSize(ImVec2(400.0f, 400.0f), true);
-	// ImGui::SliderInt("Size", &m_terrainSize, 0, 1600);
-	// ImGui::SliderInt("Vertex Count", &m_terrainVerts, 0, 1024);
-	// ImGui::SliderInt("Octaves", &m_terrainOctaves, 0, 10);
-	// ImGui::SliderFloat("Amplitude", &m_terrainAmplitude, 0, 200.0f);
-	// ImGui::SliderFloat("Roughness", &m_terrainRoughness, 0, 2.0f);
-	// if (ImGui::Button("Rerender"))
-	// {
-	// 	_renderTerrain();
-	// }
-	// if (ImGui::Button("Generate New Terrain"))
-	// {
-	// 	delete m_terrainGenerator;
-	// 	m_terrainGenerator = new TerrainGenerator();
-	// 	m_terrainGenerator->SetSize(m_terrainSize);
-	// 	m_terrainGenerator->SetAmplitude(m_terrainAmplitude);
-	// 	m_terrainGenerator->SetOctaves(m_terrainOctaves);
-	// 	m_terrainGenerator->SetVertexCount(m_terrainVerts);
-	// 	m_terrainGenerator->SetRoughness(m_terrainRoughness);
-	// 	_renderTerrain();
-	// }
-	// ImGui::End();
-	// ImGui::Render();
-	// ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 	if (m_app->isKeyDown('F') && !m_keyDown)
 	{
@@ -608,9 +638,6 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 			m_soundManager->PauseSound("running");
 	}
 
-	if (m_flashlightEquipped)
-		m_flashlight->render(mProj, mView);
-
 	m_hungerText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
 	m_thirstText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
 	if (m_nearWater)
@@ -620,6 +647,20 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 	if (m_nearFood)
 	{
 		m_eatText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
+	}
+
+	if (m_flashlightEquipped)
+	{
+		glDisable(GL_DEPTH_TEST);
+
+		m_flashlight->render(mProj, glm::mat4(1.0f));
+		glEnable(GL_DEPTH_TEST);
+	}
+
+	// Render Effects
+	for (Effect *effect : m_effects)
+	{
+		// effect->render(mProj, mView);
 	}
 }
 
