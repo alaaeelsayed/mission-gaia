@@ -62,6 +62,10 @@ private:
 	const std::string m_waterSoundPath = "data/sounds/ocean.wav";
 	const std::string m_creatureGrowlPath = "data/sounds/creature_growl.wav";
 	const std::string m_flashlightSoundPath = "data/sounds/flashlight.ogg";
+	const std::string m_gravityGunSoundPath = "data/sounds/gravity-gun.wav";
+	const std::string m_gravityGunShutdownSoundPath = "data/sounds/gravity-gun-shutdown.wav";
+	const std::string m_gravityGunFaultyPath = "data/sounds/gravity-gun-faulty.wav";
+
 	const std::string m_runningSoundPath = "data/sounds/running.ogg";
 	const std::string m_walkingSoundPath = "data/sounds/walking.ogg";
 	const std::string m_drinkingSoundPath = "data/sounds/drinking.ogg";
@@ -88,6 +92,7 @@ private:
 	wolf::Texture *m_shipTex = nullptr;
 
 	Model *m_flashlight = nullptr;
+	Model *m_gravityGun = nullptr;
 	Light *m_spotlight = nullptr;
 
 	wolf::SoundManager *m_soundManager = nullptr;
@@ -107,8 +112,10 @@ private:
 	Skybox *m_skybox = 0;
 
 	bool m_keyDown = false;
+	bool m_gravityKeyDown = false;
 	bool m_debugDown = false;
 	bool m_flashlightEquipped = false;
+	bool m_gravityGunEqipped = false;
 	bool m_drinking = false;
 	bool m_eating = false;
 
@@ -157,7 +164,7 @@ private:
 
 	// Bullets
 	std::vector<Sphere *> m_bullets;
-	bool m_rightMouseDown = false;
+	bool m_leftMouseDown = false;
 
 	Common::StateMachine *m_stateMachine = nullptr;
 

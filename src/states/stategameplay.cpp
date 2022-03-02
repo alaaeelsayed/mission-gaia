@@ -11,6 +11,7 @@ StateGameplay::~StateGameplay()
 {
 	delete m_terrainGenerator;
 	delete m_flashlight;
+	delete m_gravityGun;
 	delete m_spotlight;
 	wolf::ProgramManager::DestroyProgram(m_worldProgram);
 	wolf::MaterialManager::DestroyMaterial(m_mat);
@@ -126,6 +127,11 @@ void StateGameplay::Enter(std::string arg)
 		m_flashlight = new Model("data/models/flashlight.fbx", "dim");
 		m_flashlight->setPosition(glm::vec3(80, -50, -200));
 		m_flashlight->setRotation(glm::vec3(0.0f, 180, 0.0f));
+
+		m_gravityGun = new Model("data/models/gravity-gun.obj", "dim");
+		m_gravityGun->setPosition(glm::vec3(70, -50, -150));
+		m_gravityGun->setRotation(glm::vec3(0.0f, 180, 0.0f));
+		// m_gravityGun->setScale(glm::vec3(5.0f, 5.0f, 5.0f));
 
 		m_drinkText = new TextBox(700.0f, 200.0f);
 		m_drinkText->SetPos(glm::vec3(400.0f, 50.0f, 0.0f));
@@ -533,6 +539,7 @@ void StateGameplay::Update(float p_fDelta)
 		m_keyDown = true;
 		m_soundManager->Play2D("flashlight", m_flashlightSoundPath, false, true);
 		m_flashlightEquipped = !m_flashlightEquipped;
+		m_gravityGunEqipped = false;
 		m_spotlight->enabled = !m_spotlight->enabled;
 		if (!m_spotlight->enabled)
 		{
@@ -546,6 +553,23 @@ void StateGameplay::Update(float p_fDelta)
 
 	if (!m_app->isKeyDown('F'))
 		m_keyDown = false;
+
+	if (m_app->isKeyDown('G') && !m_gravityKeyDown)
+	{
+		m_gravityKeyDown = true;
+		if (!m_gravityGunEqipped)
+			m_soundManager->Play2D("gravityGun", m_gravityGunSoundPath, false, true);
+		else
+		{
+			m_soundManager->Play2D("gravityShutdown", m_gravityGunShutdownSoundPath, false, true);
+		}
+		m_gravityGunEqipped = !m_gravityGunEqipped;
+		m_flashlightEquipped = false;
+		m_spotlight->enabled = false;
+	}
+
+	if (!m_app->isKeyDown('G'))
+		m_gravityKeyDown = false;
 
 	// CHECK IF NEAR WATER
 	m_nearWater = Util::inProximity(m_water->GetPos(), camera->GetPosition(), glm::vec3(1000.0f, 5.0f, 1000.0f));
@@ -593,24 +617,16 @@ void StateGameplay::Update(float p_fDelta)
 	}
 
 	// Bullets
-	// if (m_app->isLMBDown() && !m_rightMouseDown)
-	// {
-	// 	if (m_bullets.size() >= 5.0f)
-	// 	{
-	// 		m_bullets.pop_back();
-	// 	}
-	// 	Sphere *bullet = new Sphere(1.0f);
-	// 	bullet->SetPosition(camera->GetPosition());
-	// 	bullet->attachRigidBody("data/physics/bullet.rigid");
-	// 	bullet->setTag("projectile");
-	// 	m_bullets.push_back(bullet);
-	// 	m_rightMouseDown = true;
-	// }
+	if (m_app->isLMBDown() && !m_leftMouseDown && m_gravityGunEqipped)
+	{
+		m_soundManager->Play2D("gravityGunFaulty", m_gravityGunFaultyPath, false, true);
+		m_leftMouseDown = true;
+	}
 
-	// if (!m_app->isLMBDown())
-	// {
-	// 	m_rightMouseDown = false;
-	// }
+	if (!m_app->isLMBDown())
+	{
+		m_leftMouseDown = false;
+	}
 
 	// Update bullets
 	// for (Sphere *bullet : m_bullets)
@@ -814,6 +830,14 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 		glDisable(GL_DEPTH_TEST);
 
 		m_flashlight->render(mProj, glm::mat4(1.0f));
+		glEnable(GL_DEPTH_TEST);
+	}
+
+	if (m_gravityGunEqipped)
+	{
+		glDisable(GL_DEPTH_TEST);
+
+		m_gravityGun->render(mProj, glm::mat4(1.0f));
 		glEnable(GL_DEPTH_TEST);
 	}
 
