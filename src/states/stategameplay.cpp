@@ -199,13 +199,12 @@ void StateGameplay::Enter(std::string arg)
 		// Ship and ship parts
 		Model *m_ship = new Model("data/models/ships/ship3.obj", "skinned");
 		m_ship->setTag("ship");
-		m_ship->setScale(glm::vec3(20.0f, 20.0f, 20.0f));
+		m_ship->setScale(glm::vec3(10.0f, 10.0f, 10.0f));
+		m_ship->setOffset(m_ship->getModel()->getAABBMin());
 		m_ship->setTexture("data/textures/ship-texture.png");
 
 		glm::vec3 shipPosition = Scene::Instance()->GetActiveCamera()->GetPosition() + glm::vec3(-10.0f, 0.0f, 0.0f);
 		m_ship->setPosition(glm::vec3(shipPosition.x, m_terrainGenerator->GetHeight(int(shipPosition.x), int(shipPosition.z)), shipPosition.z));
-
-		m_soundManager->Play3D("fire", m_fireSound, Scene::Instance()->GetActiveCamera()->GetPosition() + glm::vec3(-10.0f, 0.0f, 0.0f), 100.0f, true);
 
 		Effect *fire1 = new Effect(m_firepath);
 		Effect *fire2 = new Effect(m_firepath);
@@ -248,7 +247,10 @@ void StateGameplay::Enter(std::string arg)
 		}
 		m_soundManager = new wolf::SoundManager();
 		m_soundManager->CreateSoundSystem();
-		m_soundManager->Play2D("Nature", m_natureSoundPath, true);
+
+		m_soundManager->Play3D("fire", m_fireSound, m_ship->getPosition(), 10.0f, true);
+
+		// m_soundManager->Play2D("Nature", m_natureSoundPath, true);
 
 		// Debug Menu
 		IMGUI_CHECKVERSION();
@@ -614,13 +616,13 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 	{
 		if (!m_walking && !m_running)
 		{
-			m_soundManager->Play2D("walking", m_walkingSoundPath, true, true);
+			// m_soundManager->Play2D("walking", m_walkingSoundPath, true, true);
 			m_walking = true;
 		}
 
 		if (m_app->isKeyDown(GLFW_KEY_LEFT_CONTROL) && !m_running)
 		{
-			m_soundManager->Play2D("running", m_runningSoundPath, true, true);
+			// m_soundManager->Play2D("running", m_runningSoundPath, true, true);
 			m_walking = false;
 			m_running = true;
 		}
