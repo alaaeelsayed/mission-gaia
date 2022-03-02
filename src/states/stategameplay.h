@@ -135,7 +135,7 @@ private:
 	int m_lightCount = 0;
 
 	// Water
-	Water *m_water = nullptr;
+	std::vector<Water *> m_waters;
 
 	// Debug Menu
 	bool m_debug = true;

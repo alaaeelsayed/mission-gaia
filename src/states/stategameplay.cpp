@@ -189,6 +189,17 @@ void StateGameplay::Enter(std::string arg)
 				Terrain *terrain = new Terrain(i, j, m_terrainGenerator);
 				m_terrains.push_back(terrain);
 				Scene::Instance()->AddNode(terrain);
+				if (i == 1 && j == 1)
+				{
+					printf("%f %f", terrain->GetPos().x, terrain->GetPos().z);
+					// Water
+					Water *water = new Water();
+					water->SetScale(glm::vec3(m_terrainSize / 2.0f, 0.0f, m_terrainSize / 2.0f));
+					water->SetPos(glm::vec3(terrain->GetPos().x + m_terrainSize / 2.0f, -5.0f, terrain->GetPos().z + m_terrainSize / 2.0f));
+					m_waters.push_back(water);
+					Scene::Instance()->AddNode(water);
+					m_soundManager->Play3D("Water", m_waterSoundPath, water->GetPos(), 10.0f, true);
+				}
 			}
 		}
 
@@ -343,13 +354,6 @@ void StateGameplay::Enter(std::string arg)
 		ImGui_ImplOpenGL3_Init("#version 430 core");
 
 		m_worldProgram = wolf::ProgramManager::CreateProgram("data/shaders/world.vsh", "data/shaders/world.fsh");
-
-		// Water
-		m_water = new Water();
-		m_water->SetScale(glm::vec3(2000.0f, 2000.0f, 2000.0f));
-		m_water->SetPos(glm::vec3(1000.0f, 5.0f, -1000.0f));
-		Scene::Instance()->AddNode(m_water);
-		m_soundManager->Play3D("Water", m_waterSoundPath, m_water->GetPos(), 10.0f, true);
 
 		m_skybox = new Skybox(m_skyboxPath);
 		Scene::Instance()->AddNode(m_skybox);
@@ -538,7 +542,10 @@ void StateGameplay::Update(float p_fDelta)
 		m_keyDown = false;
 
 	// CHECK IF NEAR WATER
-	m_nearWater = Util::inProximity(m_water->GetPos(), camera->GetPosition(), glm::vec3(1000.0f, 5.0f, 1000.0f));
+	for (Water *water : m_waters)
+	{
+		m_nearWater = m_nearWater || Util::inProximity(water->GetPos(), camera->GetPosition(), glm::vec3(1000.0f, 5.0f, 1000.0f));
+	}
 
 	if (m_nearWater && m_app->isKeyDown('E') && !m_drinking)
 	{
