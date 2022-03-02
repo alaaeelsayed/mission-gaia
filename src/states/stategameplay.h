@@ -148,7 +148,7 @@ private:
 	float m_enemySpeed = 0.8f;
 	glm::vec3 m_enemyRange = glm::vec3(70.0f, 20.0f, 70.0f);
 	glm::vec3 m_foodRange = glm::vec3(20.0f, 20.0f, 20.0f);
-	glm::vec3 m_collectibleRange = glm::vec3(5.0f, 5.0f, 5.0f);
+	glm::vec3 m_collectibleRange = glm::vec3(70.0f, 50.0f, 70.0f);
 
 	bool m_inventoryFull = false;
 	int m_repairedParts = 0;

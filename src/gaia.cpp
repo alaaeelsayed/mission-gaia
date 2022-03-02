@@ -54,7 +54,7 @@ void Gaia::Init()
 
 void Gaia::Update(float dt)
 {
-    if (m_app->isKeyDown(GLFW_KEY_ESCAPE) && !m_keyDown && !(m_stateMachine->GetCurrentState() == eStateGameplay_Respawn || m_stateMachine->GetCurrentState() == eStateGameplay_MainMenu))
+    if (m_app->isKeyDown(GLFW_KEY_ESCAPE) && !m_keyDown && !(m_stateMachine->GetCurrentState() == eStateGameplay_Respawn || m_stateMachine->GetCurrentState() == eStateGameplay_MainMenu || m_stateMachine->GetCurrentState() == eStateGameplay_End))
     {
         if (m_stateMachine->GetCurrentState() == eStateGameplay_PauseMenu)
         {
@@ -70,7 +70,7 @@ void Gaia::Update(float dt)
     if (!m_app->isKeyDown(GLFW_KEY_ESCAPE))
         m_keyDown = false;
 
-    if (m_stateMachine->GetCurrentState() != eStateGameplay_PauseMenu && m_stateMachine->GetCurrentState() != eStateGameplay_MainMenu && m_stateMachine->GetCurrentState() != eStateGameplay_Respawn && !m_debugMode)
+    if (m_stateMachine->GetCurrentState() != eStateGameplay_PauseMenu && m_stateMachine->GetCurrentState() != eStateGameplay_MainMenu && m_stateMachine->GetCurrentState() != eStateGameplay_Respawn && m_stateMachine->GetCurrentState() != eStateGameplay_End && !m_debugMode)
         Scene::Instance()->GetActiveCamera()->Update(dt);
 
     if (!m_app->isKeyDown('M'))
@@ -84,7 +84,7 @@ void Gaia::Update(float dt)
         m_debugMode = !m_debugMode;
     }
 
-    if (m_debugMode || m_stateMachine->GetCurrentState() == eStateGameplay_PauseMenu || m_stateMachine->GetCurrentState() == eStateGameplay_Respawn || m_stateMachine->GetCurrentState() == eStateGameplay_MainMenu)
+    if (m_debugMode || m_stateMachine->GetCurrentState() == eStateGameplay_PauseMenu || m_stateMachine->GetCurrentState() == eStateGameplay_End || m_stateMachine->GetCurrentState() == eStateGameplay_Respawn || m_stateMachine->GetCurrentState() == eStateGameplay_MainMenu)
     {
         m_app->setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }

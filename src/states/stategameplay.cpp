@@ -258,24 +258,24 @@ void StateGameplay::Enter(std::string arg)
 		Model *m_part1 = new Model("data/models/ships/ship-parts/part1-bearing.obj", "skinned");
 		m_part1->setTag("ship-part");
 		m_part1->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
-		m_part1->setOffset(m_part1->getModel()->getAABBMin());
+		// m_part1->setOffset(m_part1->getModel()->getAABBMin());
 		m_part1->setTexture("data/textures/ship-texture.png");
 
 		Model *m_part2 = new Model("data/models/ships/ship-parts/part2-tv.obj", "skinned");
 		m_part2->setTag("ship-part");
-		m_part2->setOffset(m_part2->getModel()->getAABBMin());
+		// m_part2->setOffset(m_part2->getModel()->getAABBMin());
 		m_part2->setTexture("data/textures/ship-texture.png");
 		m_part2->setScale(glm::vec3(0.1f, 0.1f, 0.1f));
 
 		Model *m_part3 = new Model("data/models/ships/ship-parts/part3-powerbank.obj", "skinned");
 		m_part3->setTag("ship-part");
-		m_part3->setOffset(m_part3->getModel()->getAABBMin());
+		// m_part3->setOffset(m_part3->getModel()->getAABBMin());
 		m_part3->setTexture("data/textures/ship-texture.png");
 		m_part3->setScale(glm::vec3(10.0f, 10.0f, 10.0f));
 
 		Model *m_part4 = new Model("data/models/ships/ship-parts/part4-box.obj", "skinned");
 		m_part4->setTag("ship-part");
-		m_part4->setOffset(m_part4->getModel()->getAABBMin());
+		// m_part4->setOffset(m_part4->getModel()->getAABBMin());
 		m_part4->setTexture("data/textures/ship-part-box.png");
 
 		m_numParts = 4;
@@ -432,11 +432,14 @@ void StateGameplay::Update(float p_fDelta)
 				std::string prompt = "Full Inventory";
 				m_collectText->SetText(m_font, prompt.c_str());
 			}
+			else
+			{
+				m_collectText->SetText(m_font, m_collectPrompt.c_str());
+			}
 
 			if (m_app->isKeyDown('E') && !m_inventoryFull)
 			{
 
-				m_collectText->SetText(m_font, m_collectPrompt.c_str());
 				m_models.erase(std::remove(m_models.begin(), m_models.end(), model), m_models.end());
 				delete model;
 				m_inventoryFull = true;
