@@ -309,11 +309,7 @@ void StateGameplay::Enter(std::string arg)
 		m_models.push_back(m_part3);
 		m_models.push_back(m_part4);
 
-<<<<<<< HEAD
 		for (int i = 0; i < 40; i++)
-=======
-		for (int i = 0; i < 30; i++)
->>>>>>> ada29d90b43039a12c027e1ef0a4f2b0aaf90fd1
 		{
 			Model *bush = new Model("data/models/shrub.fbx", "skinned");
 			bush->setTag("food");
