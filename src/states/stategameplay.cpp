@@ -376,7 +376,7 @@ void StateGameplay::Update(float p_fDelta)
 	// Attach spotlight
 	m_spotlight->posRange = glm::vec4(camX, camY, camZ, m_spotlight->posRange.w);
 
-	glm::vec3 lightspot = glm::normalize(camera->GetViewDirection() - glm::vec3(m_spotlight->posRange.x, m_spotlight->posRange.y, m_spotlight->posRange.z));
+	glm::vec3 lightspot = glm::normalize(camera->GetViewDirection() * glm::vec3(m_spotlight->posRange.x, m_spotlight->posRange.y, m_spotlight->posRange.z));
 	m_spotlight->lightSpot = glm::vec4(lightspot, 0.2f);
 
 	wolf::BulletPhysicsManager::Instance()->Update(p_fDelta);
