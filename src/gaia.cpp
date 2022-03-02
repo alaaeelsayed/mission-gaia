@@ -36,10 +36,15 @@ void Gaia::Init()
     StateRespawn *respawn = new StateRespawn();
     respawn->RegisterApp(m_app);
 
+    StateEndGame *gameFinished = new StateEndGame();
+    gameFinished->RegisterApp(m_app);
+
     m_stateMachine->RegisterState(eStateGameplay_Gameplay, gameplay);
     m_stateMachine->RegisterState(eStateGameplay_PauseMenu, pauseMenu);
     m_stateMachine->RegisterState(eStateGameplay_MainMenu, mainMenu);
     m_stateMachine->RegisterState(eStateGameplay_Respawn, respawn);
+    m_stateMachine->RegisterState(eStateGameplay_End, gameFinished);
+
     m_stateMachine->GoToState(eStateGameplay_MainMenu);
 
     Scene::Instance()->SetStateMachine(m_stateMachine);

@@ -150,7 +150,7 @@ private:
 	glm::vec3 m_foodRange = glm::vec3(20.0f, 20.0f, 20.0f);
 	glm::vec3 m_collectibleRange = glm::vec3(5.0f, 5.0f, 5.0f);
 
-	int m_collectedParts = 0;
+	bool m_inventoryFull = false;
 	int m_repairedParts = 0;
 
 	// Bullets
