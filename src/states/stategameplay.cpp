@@ -161,17 +161,10 @@ void StateGameplay::Enter(std::string arg)
 		m_collectMorePartsText = new TextBox(1000.0f, 200.0f);
 		m_collectMorePartsText->SetPos(glm::vec3(100.0f, 50.0f, 0.0f));
 		m_collectMorePartsText->SetText(m_font, m_noPartsPrompt.c_str());
+		m_collectMorePartsText->SetOutlined(true);
 		m_collectMorePartsText->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
 		m_collectMorePartsText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
 		m_collectMorePartsText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
-
-		// m_partsCollected = new TextBox(1000.0f, 200.0f);
-		// m_partsCollected->SetPos(glm::vec3(100.0f, 50.0f, 0.0f));
-
-		// m_partsCollected->SetText(m_font, m_noPartsPrompt.c_str());
-		// m_partsCollected->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
-		// m_partsCollected->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
-		// m_partsCollected->SetVerticalAlignment(TextBox::Alignment::AL_Top);
 
 		m_spotlight = new Light();
 		m_spotlight->posRange = glm::vec4(0.0f, 0.0f, 0.0f, 100.0f);
@@ -284,6 +277,18 @@ void StateGameplay::Enter(std::string arg)
 		m_part4->setTag("ship-part");
 		m_part4->setOffset(m_ship->getModel()->getAABBMin());
 		m_part4->setTexture("data/textures/ship-part-box.png");
+
+		m_numParts = 4;
+
+		// parts collected label
+		m_partsCollectedText = new TextBox(500.0f, 200.0f);
+		m_partsCollectedText->SetPos(glm::vec3(800.0f, 500.0f, 0.0f));
+
+		std::string partsString = "Parts: " + std::to_string(m_collectedParts) + "/" + std::to_string(m_numParts);
+		m_partsCollectedText->SetText(m_font, partsString.c_str());
+		m_partsCollectedText->SetColor(0.0f, 1.0f, 0.0f, 1.0f);
+		m_partsCollectedText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
+		m_partsCollectedText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
 
 		int x = _randomNum(0, m_terrainSize * 4);
 		int z = _randomNum(0, m_terrainSize * 4);
@@ -420,13 +425,15 @@ void StateGameplay::Update(float p_fDelta)
 			m_nearCollectible = true;
 			m_soundManager->Play3D("fire", m_fireSound, model->getPosition(), 30.0f, true);
 
-			m_nearFood = false;
-			m_nearWater = false;
 			if (m_app->isKeyDown('E'))
 			{
 				m_models.erase(std::remove(m_models.begin(), m_models.end(), model), m_models.end());
 				delete model;
 				m_collectedParts++;
+
+				std::string partsString = "Parts: " + std::to_string(m_collectedParts) + "/" + std::to_string(m_numParts);
+				m_partsCollectedText->SetText(m_font, partsString.c_str());
+
 				m_soundManager->Play2D("collected", m_pickupSoundPath);
 				m_nearCollectible = false;
 				continue;
@@ -437,8 +444,6 @@ void StateGameplay::Update(float p_fDelta)
 		{
 			m_nearShip = true;
 
-			m_nearFood = false;
-			m_nearWater = false;
 			if (m_app->isKeyDown('E') && m_collectedParts != 0)
 			{
 				m_collectedParts--;
@@ -630,7 +635,7 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 
 	m_hungerText->Render(glm::ortho(0.0f, (float)dimensions.x, (float)dimensions.y, 0.0f), glm::mat4(1.0f));
 	m_thirstText->Render(glm::ortho(0.0f, (float)dimensions.x, (float)dimensions.y, 0.0f), glm::mat4(1.0f));
-
+	m_partsCollectedText->Render(glm::ortho(0.0f, (float)dimensions.x, (float)dimensions.y, 0.0f), glm::mat4(1.0f));
 	for (Model *model : m_models)
 	{
 		if (model->isDestroyed())

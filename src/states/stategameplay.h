@@ -74,7 +74,6 @@ private:
 	const std::string m_collectPrompt = "Press E to Collect";
 	const std::string m_repairPrompt = "Press E to Repair";
 	const std::string m_noPartsPrompt = "Collect parts to repair ship";
-	const std::string m_partsCollected = "";
 
 	std::vector<Light *> m_lights;
 	wolf::Program *m_worldProgram = 0;
@@ -123,6 +122,7 @@ private:
 
 	float m_hunger = 100;
 	float m_thirst = 100;
+	int m_numParts = 0;
 
 	TextBox *m_drinkText;
 	TextBox *m_eatText;
