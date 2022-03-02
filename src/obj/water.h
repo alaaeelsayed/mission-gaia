@@ -45,14 +45,14 @@ private:
     static const unsigned short gs_bitRevMasks[];
 
     // Phillips Spectrum Variables (Wind)
-    int N = 256;
-    int L = 1000;
-    float A = 5.3f;
-    glm::vec3 W = glm::vec3(0.0f, 1.0f, 0.0f);
-    float S = 39.0f;
+    int N = 512;
+    int L = 756;
+    float A = 57.7f;
+    glm::vec3 W = glm::vec3(0.54f, 0.84f, 0.0f);
+    float S = 95.0f;
     float suppression = 0.1f;
     float choppiness = 1.7f;
-    glm::vec3 m_vWaterColor = glm::vec3(0.035f, 0.764f, 0.858f);
+    glm::vec3 m_vWaterColor = glm::vec3(0.019f, 0.537f, 0.854f);
 
     // Textures
     wolf::Texture *m_pH0Texture = nullptr;

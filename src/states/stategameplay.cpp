@@ -145,7 +145,7 @@ void StateGameplay::Enter(std::string arg)
 		// m_pFlashlight->setRotation(180, glm::vec3(0.0f, 1.0f, 0.0f));
 
 		m_collectText = new TextBox(1000.0f, 200.0f);
-		m_collectText->SetPos(glm::vec3(400.0f, 50.0f, 0.0f));
+		m_collectText->SetPos(glm::vec3(50.0f, 50.0f, 0.0f));
 		m_collectText->SetText(m_font, m_collectPrompt.c_str());
 		m_collectText->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		m_collectText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
@@ -258,24 +258,24 @@ void StateGameplay::Enter(std::string arg)
 		Model *m_part1 = new Model("data/models/ships/ship-parts/part1-bearing.obj", "skinned");
 		m_part1->setTag("ship-part");
 		m_part1->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
-		m_part1->setOffset(m_ship->getModel()->getAABBMin());
+		m_part1->setOffset(m_part1->getModel()->getAABBMin());
 		m_part1->setTexture("data/textures/ship-texture.png");
 
 		Model *m_part2 = new Model("data/models/ships/ship-parts/part2-tv.obj", "skinned");
 		m_part2->setTag("ship-part");
-		m_part2->setOffset(m_ship->getModel()->getAABBMin());
+		m_part2->setOffset(m_part2->getModel()->getAABBMin());
 		m_part2->setTexture("data/textures/ship-texture.png");
-		m_part2->setScale(glm::vec3(0.5f, 0.5f, 0.5f));
+		m_part2->setScale(glm::vec3(0.1f, 0.1f, 0.1f));
 
 		Model *m_part3 = new Model("data/models/ships/ship-parts/part3-powerbank.obj", "skinned");
 		m_part3->setTag("ship-part");
-		m_part3->setOffset(m_ship->getModel()->getAABBMin());
+		m_part3->setOffset(m_part3->getModel()->getAABBMin());
 		m_part3->setTexture("data/textures/ship-texture.png");
-		m_part2->setScale(glm::vec3(2.5f, 2.5f, 2.5f));
+		m_part3->setScale(glm::vec3(10.0f, 10.0f, 10.0f));
 
 		Model *m_part4 = new Model("data/models/ships/ship-parts/part4-box.obj", "skinned");
 		m_part4->setTag("ship-part");
-		m_part4->setOffset(m_ship->getModel()->getAABBMin());
+		m_part4->setOffset(m_part4->getModel()->getAABBMin());
 		m_part4->setTexture("data/textures/ship-part-box.png");
 
 		m_numParts = 4;
@@ -284,7 +284,7 @@ void StateGameplay::Enter(std::string arg)
 		m_partsCollectedText = new TextBox(500.0f, 200.0f);
 		m_partsCollectedText->SetPos(glm::vec3(850.0f, 50.0f, 0.0f));
 
-		std::string partsString = "Parts: " + std::to_string(m_collectedParts) + "/" + std::to_string(m_numParts);
+		std::string partsString = "Repaired: " + std::to_string(m_repairedParts) + "/" + std::to_string(m_numParts);
 		m_partsCollectedText->SetText(m_font, partsString.c_str());
 		m_partsCollectedText->SetColor(0.0f, 1.0f, 0.0f, 1.0f);
 		m_partsCollectedText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
@@ -311,7 +311,7 @@ void StateGameplay::Enter(std::string arg)
 		m_models.push_back(m_part3);
 		m_models.push_back(m_part4);
 
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < 30; i++)
 		{
 			Model *bush = new Model("data/models/shrub.fbx", "skinned");
 			bush->setTag("food");
@@ -332,7 +332,6 @@ void StateGameplay::Enter(std::string arg)
 		m_soundManager->CreateSoundSystem();
 
 		m_soundManager->Play3D("fire", m_fireSound, m_ship->getPosition(), 10.0f, true);
-
 		m_soundManager->Play2D("Nature", m_natureSoundPath, true);
 
 		// Debug Menu
@@ -372,7 +371,7 @@ void StateGameplay::Update(float p_fDelta)
 	float camY = camera->GetPosition().y;
 	float camZ = camera->GetPosition().z;
 
-	camera->SetPosition(glm::vec3(camX, m_terrainGenerator->GetHeight(int(camX), int(camZ)) + 5.0f, camZ));
+	// camera->SetPosition(glm::vec3(camX, m_terrainGenerator->GetHeight(int(camX), int(camZ)) + 5.0f, camZ));
 
 	// Attach spotlight
 	m_spotlight->posRange = glm::vec4(camX, camY, camZ, m_spotlight->posRange.w);
@@ -428,13 +427,21 @@ void StateGameplay::Update(float p_fDelta)
 			m_nearCollectible = true;
 			m_soundManager->Play3D("fire", m_fireSound, model->getPosition(), 30.0f, true);
 
-			if (m_app->isKeyDown('E'))
+			if (m_inventoryFull)
 			{
+				std::string prompt = "Full Inventory";
+				m_collectText->SetText(m_font, prompt.c_str());
+			}
+
+			if (m_app->isKeyDown('E') && !m_inventoryFull)
+			{
+
+				m_collectText->SetText(m_font, m_collectPrompt.c_str());
 				m_models.erase(std::remove(m_models.begin(), m_models.end(), model), m_models.end());
 				delete model;
-				m_collectedParts++;
+				m_inventoryFull = true;
 
-				std::string partsString = "Parts: " + std::to_string(m_collectedParts) + "/" + std::to_string(m_numParts);
+				std::string partsString = "Repaired: " + std::to_string(m_repairedParts) + "/" + std::to_string(m_numParts);
 				m_partsCollectedText->SetText(m_font, partsString.c_str());
 
 				m_soundManager->Play2D("collected", m_pickupSoundPath);
@@ -447,11 +454,19 @@ void StateGameplay::Update(float p_fDelta)
 		{
 			m_nearShip = true;
 
-			if (m_app->isKeyDown('E') && m_collectedParts != 0)
+			if (m_app->isKeyDown('E') && m_inventoryFull)
 			{
-				m_collectedParts--;
+				m_inventoryFull = false;
+				m_repairedParts++;
+				std::string partsString = "Repaired: " + std::to_string(m_repairedParts) + "/" + std::to_string(m_numParts);
+				m_partsCollectedText->SetText(m_font, partsString.c_str());
 				m_soundManager->Play2D("repair", m_repairSoundPath);
+
 				m_nearCollectible = false;
+				if (m_repairedParts == m_numParts)
+				{
+					Scene::Instance()->GetStateMachine()->GoToState(eStateGameplay_End);
+				}
 			}
 		}
 
@@ -774,7 +789,7 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 
 	if (m_nearShip)
 	{
-		if (m_collectedParts > 0)
+		if (m_inventoryFull)
 		{
 			m_repairShipText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
 		}
