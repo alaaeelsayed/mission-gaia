@@ -494,6 +494,13 @@ void StateGameplay::Update(float p_fDelta)
 				model->setPosition(modelPos + glm::vec3(xDist * p_fDelta * m_enemySpeed, 0.0f, zDist * p_fDelta * m_enemySpeed));
 				// Rotate in direction of player
 				model->setRotation(glm::vec3(0.0f, glm::degrees(atan2(-zDist, xDist)) + 90.0f, 0.0f));
+
+				if (Util::inProximity(modelPos, playerPos, glm::vec3(15.0f, 15.0f, 15.0f)))
+				{
+					m_soundManager->Play2D("pain", m_painSoundPath);
+					m_health -= 20.0f;
+					camera->SetPosition(modelPos + glm::vec3(20.0f, 0.0f, 0.0f));
+				}
 			}
 			else
 			{
@@ -568,7 +575,7 @@ void StateGameplay::Update(float p_fDelta)
 		m_eating = false;
 	}
 
-	if (m_hunger <= 0.0f && m_thirst <= 0.0f)
+	if ((m_hunger <= 0.0f && m_thirst <= 0.0f) || m_health <= 0)
 	{
 		Scene::Instance()->GetStateMachine()->GoToState(eStateGameplay_Respawn);
 	}
@@ -586,53 +593,53 @@ void StateGameplay::Update(float p_fDelta)
 	}
 
 	// Bullets
-	if (m_app->isLMBDown() && !m_rightMouseDown)
-	{
-		if (m_bullets.size() >= 5.0f)
-		{
-			m_bullets.pop_back();
-		}
-		Sphere *bullet = new Sphere(1.0f);
-		bullet->SetPosition(camera->GetPosition());
-		bullet->attachRigidBody("data/physics/bullet.rigid");
-		bullet->setTag("projectile");
-		m_bullets.push_back(bullet);
-		m_rightMouseDown = true;
-	}
+	// if (m_app->isLMBDown() && !m_rightMouseDown)
+	// {
+	// 	if (m_bullets.size() >= 5.0f)
+	// 	{
+	// 		m_bullets.pop_back();
+	// 	}
+	// 	Sphere *bullet = new Sphere(1.0f);
+	// 	bullet->SetPosition(camera->GetPosition());
+	// 	bullet->attachRigidBody("data/physics/bullet.rigid");
+	// 	bullet->setTag("projectile");
+	// 	m_bullets.push_back(bullet);
+	// 	m_rightMouseDown = true;
+	// }
 
-	if (!m_app->isLMBDown())
-	{
-		m_rightMouseDown = false;
-	}
+	// if (!m_app->isLMBDown())
+	// {
+	// 	m_rightMouseDown = false;
+	// }
 
 	// Update bullets
-	for (Sphere *bullet : m_bullets)
-	{
-		glm::vec3 camRotation = camera->GetViewDirection();
-		// glm::quat radRotation = glm::quat(glm::vec3(DEG_TO_RAD(camRotation.x), DEG_TO_RAD(camRotation.y), DEG_TO_RAD(camRotation.z)));
-		glm::vec3 velocity = camRotation * 50.0f * p_fDelta;
-		bullet->SetPosition(bullet->GetPosition() + velocity);
-		bullet->Update(p_fDelta);
-	}
+	// for (Sphere *bullet : m_bullets)
+	// {
+	// 	glm::vec3 camRotation = camera->GetViewDirection();
+	// 	// glm::quat radRotation = glm::quat(glm::vec3(DEG_TO_RAD(camRotation.x), DEG_TO_RAD(camRotation.y), DEG_TO_RAD(camRotation.z)));
+	// 	glm::vec3 velocity = camRotation * 50.0f * p_fDelta;
+	// 	bullet->SetPosition(bullet->GetPosition() + velocity);
+	// 	bullet->Update(p_fDelta);
+	// }
 
 	// Check collision
-	int index = 0;
-	for (Sphere *bullet : m_bullets)
-	{
-		for (Model *model : m_models)
-		{
-			if (model->getTag() == "enemy")
-			{
-				if (Util::inProximity(model->getPosition(), bullet->GetPosition(), glm::vec3(5.0f, 5.0f, 5.0f)))
-				{
-					m_bullets.erase(m_bullets.begin() + index);
-					model->damage(30.0f);
-					m_soundManager->Play3D("death", m_creatureGrowlPath, model->getPosition(), 10.0f);
-				}
-			}
-		}
-		index++;
-	}
+	// int index = 0;
+	// for (Sphere *bullet : m_bullets)
+	// {
+	// 	for (Model *model : m_models)
+	// 	{
+	// 		if (model->getTag() == "enemy")
+	// 		{
+	// 			if (Util::inProximity(model->getPosition(), bullet->GetPosition(), glm::vec3(5.0f, 5.0f, 5.0f)))
+	// 			{
+	// 				m_bullets.erase(m_bullets.begin() + index);
+	// 				model->damage(30.0f);
+	// 				m_soundManager->Play3D("death", m_creatureGrowlPath, model->getPosition(), 10.0f);
+	// 			}
+	// 		}
+	// 	}
+	// 	index++;
+	// }
 
 	// Update Effects
 	for (Effect *effect : m_effects)

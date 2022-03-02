@@ -68,6 +68,7 @@ private:
 	const std::string m_eatingSoundPath = "data/sounds/eating.ogg";
 	const std::string m_pickupSoundPath = "data/sounds/pickup.wav";
 	const std::string m_repairSoundPath = "data/sounds/repair.wav";
+	const std::string m_painSoundPath = "data/sounds/pain.wav";
 
 	const std::string m_drinkPrompt = "Press E to drink";
 	const std::string m_eatPrompt = "Press E to eat";
@@ -120,6 +121,7 @@ private:
 	TextBox *m_collectMorePartsText;
 	TextBox *m_partsCollectedText;
 
+	float m_health = 100;
 	float m_hunger = 100;
 	float m_thirst = 100;
 	int m_numParts = 0;
