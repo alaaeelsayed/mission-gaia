@@ -44,6 +44,8 @@ void Gaia::Init()
 
     Scene::Instance()->SetStateMachine(m_stateMachine);
 
+    Scene::Instance()->BuildQuadtree();
+
     printf("Successfully initialized Gaia\n");
 }
 

@@ -108,8 +108,8 @@ void Scene::Render()
         node->Render(mProj, mView);
     }
 
-    if (m_renderDebug)
-        m_quadtree->RenderDebug(mProj, mView);
+    // if (m_renderDebug)
+    m_quadtree->RenderDebug(mProj, mView);
 }
 
 void Scene::Update(float dt)
@@ -122,7 +122,7 @@ void Scene::Update(float dt)
     const glm::mat4 &mProj = m_activeCamera->GetProjMatrix(m_width, m_height);
     const glm::mat4 &mView = m_activeCamera->GetViewMatrix();
 
-    m_objectsToRender = m_nodes;
+    m_objectsToRender = Culling::Instance()->DoCulling(m_quadtree, mProj, mView);
 
     m_rotation += dt * 0.06f;
 }

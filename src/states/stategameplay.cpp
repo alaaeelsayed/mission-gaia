@@ -99,8 +99,6 @@ void StateGameplay::Enter(std::string arg)
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glEnable(GL_DEPTH_TEST);
 
-		Scene::Instance()->BuildQuadtree();
-
 		m_font = new Font("data/fonts/inconsolata.fnt", "data/textures/fonts/");
 
 		m_hungerText = new TextBox(200.0f, 200.0f);
@@ -159,9 +157,9 @@ void StateGameplay::Enter(std::string arg)
 		m_terrainRoughness = m_terrainGenerator->GetRoughness();
 		m_terrainAmplitude = m_terrainGenerator->GetAmplitude();
 
-		for (int i = 0; i < 4; i++)
+		for (int i = -2; i < 2; i++)
 		{
-			for (int j = 0; j < 4; j++)
+			for (int j = -2; j < 2; j++)
 			{
 				Terrain *terrain = new Terrain(i, j, m_terrainGenerator);
 				m_terrains.push_back(terrain);
@@ -169,7 +167,7 @@ void StateGameplay::Enter(std::string arg)
 			}
 		}
 
-		for (int i = 0; i < 30; i++)
+		for (int i = 0; i < 80; i++)
 		{
 			Model *m_pCreature = new Model("data/models/low_poly_spitter.obj", "skinned");
 			m_pCreature->setTag("enemy");
@@ -190,15 +188,15 @@ void StateGameplay::Enter(std::string arg)
 			int scale = _randomNum(2, 5);
 			float rotation = (float)_randomNum(-60, 60);
 
-			int x = _randomNum(0, m_terrainSize * 4);
-			int z = _randomNum(0, m_terrainSize * 4);
+			int x = _randomNum(-m_terrainSize * 2, m_terrainSize * 2);
+			int z = _randomNum(-m_terrainSize * 2, m_terrainSize * 2);
 
 			m_pCreature->setScale(glm::vec3(scale, scale, scale));
 			m_pCreature->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
 			m_pCreature->setRotation(glm::vec3(0.0f, rotation, 0.0f));
 			m_models.push_back(m_pCreature);
 		}
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < 40; i++)
 		{
 			Model *bush = new Model("data/models/shrub.fbx", "skinned");
 			bush->setTag("food");
@@ -207,8 +205,8 @@ void StateGameplay::Enter(std::string arg)
 
 			int scale = _randomNum(2, 5);
 			float rotation = (float)_randomNum(-60, 60);
-			int x = _randomNum(0, m_terrainSize * 4);
-			int z = _randomNum(0, m_terrainSize * 4);
+			int x = _randomNum(-m_terrainSize * 2, m_terrainSize * 2);
+			int z = _randomNum(-m_terrainSize * 2, m_terrainSize * 2);
 
 			bush->setScale(glm::vec3(0.01f, 0.01f, 0.01f));
 			bush->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
@@ -241,6 +239,8 @@ void StateGameplay::Enter(std::string arg)
 
 		m_skybox = new Skybox(m_skyboxPath);
 		Scene::Instance()->AddNode(m_skybox);
+
+		Scene::Instance()->BuildQuadtree();
 	}
 }
 

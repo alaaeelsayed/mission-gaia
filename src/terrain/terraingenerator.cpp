@@ -32,6 +32,9 @@ float TerrainGenerator::GetHeight(int x, int z)
 	xOff *= (m_countVerts - 1);
 	zOff *= (m_countVerts - 1);
 
+	xOff += GRID_OFFSET;
+	zOff += GRID_OFFSET;
+
 	float height;
 	if (accX <= (1 - accZ))
 	{
@@ -102,8 +105,8 @@ float TerrainGenerator::GetRoughness() const
 
 wolf::VertexDeclaration *TerrainGenerator::GenerateVertices(int gridX, int gridZ)
 {
-	int xOffset = gridX * (m_countVerts - 1);
-	int zOffset = gridZ * (m_countVerts - 1);
+	int xOffset = GRID_OFFSET + gridX * (m_countVerts - 1);
+	int zOffset = GRID_OFFSET + gridZ * (m_countVerts - 1);
 
 	int count = m_countVerts * m_countVerts;
 
