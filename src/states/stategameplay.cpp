@@ -129,12 +129,12 @@ void StateGameplay::Enter(std::string arg)
 		m_flashlight->setRotation(glm::vec3(0.0f, 180, 0.0f));
 
 		m_gravityGun = new Model("data/models/gravity-gun.obj", "dim");
-		m_gravityGun->setPosition(glm::vec3(70, -50, -150));
-		m_gravityGun->setRotation(glm::vec3(0.0f, 180, 0.0f));
+		m_gravityGun->setPosition(glm::vec3(70, -50, -130));
+		m_gravityGun->setRotation(glm::vec3(0.0f, 90, 0.0f));
 		// m_gravityGun->setScale(glm::vec3(5.0f, 5.0f, 5.0f));
 
 		m_drinkText = new TextBox(700.0f, 200.0f);
-		m_drinkText->SetPos(glm::vec3(400.0f, 50.0f, 0.0f));
+		m_drinkText->SetPos(glm::vec3(50.0f, 50.0f, 0.0f));
 
 		m_drinkText->SetText(m_font, m_drinkPrompt.c_str());
 		m_drinkText->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -142,7 +142,7 @@ void StateGameplay::Enter(std::string arg)
 		m_drinkText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
 
 		m_eatText = new TextBox(700.0f, 200.0f);
-		m_eatText->SetPos(glm::vec3(400.0f, 200.0f, 0.0f));
+		m_eatText->SetPos(glm::vec3(50.0f, 200.0f, 0.0f));
 
 		m_eatText->SetText(m_font, m_eatPrompt.c_str());
 		m_eatText->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -206,7 +206,7 @@ void StateGameplay::Enter(std::string arg)
 			m_pCreature->setTag("enemy");
 			m_pCreature->setTexture("data/textures/gimpy_diffuse.tga");
 			m_pCreature->setNormal("data/textures/gimpy_normal.tga");
-			m_pCreature->setOffset(m_pCreature->getModel()->getAABBMin() + glm::vec3(0.0f, -3.0f, 0.0f));
+			m_pCreature->setOffset(m_pCreature->getModel()->getAABBMin() + glm::vec3(0.0f, -2.0f, 0.0f));
 			// m_pCreature->attachRigidBody("data/physics/creature.rigid");
 
 			Light *pointLight = new Light();
@@ -501,7 +501,7 @@ void StateGameplay::Update(float p_fDelta)
 				// Rotate in direction of player
 				model->setRotation(glm::vec3(0.0f, glm::degrees(atan2(-zDist, xDist)) + 90.0f, 0.0f));
 
-				if (Util::inProximity(modelPos, playerPos, glm::vec3(15.0f, 15.0f, 15.0f)))
+				if (Util::inProximity(modelPos, playerPos, glm::vec3(10.0f, 10.0f, 10.0f)))
 				{
 					m_soundManager->Play2D("pain", m_painSoundPath);
 					m_health -= 20.0f;
