@@ -13,6 +13,8 @@ StateGameplay::~StateGameplay()
 	delete m_flashlight;
 	delete m_gravityGun;
 	delete m_spotlight;
+	delete m_miniCamera;
+	wolf::BufferManager::DestroyBuffer(m_frameBuffer);
 	wolf::ProgramManager::DestroyProgram(m_worldProgram);
 	wolf::MaterialManager::DestroyMaterial(m_mat);
 	wolf::TextureManager::DestroyTexture(m_creatureTex);
@@ -45,6 +47,13 @@ StateGameplay::~StateGameplay()
 	{
 		delete light;
 	}
+
+	for (Effect *effect : m_effects)
+	{
+		delete effect;
+	}
+
+	delete m_blueTrailEffect;
 	wolf::BulletPhysicsManager::DestroyInstance();
 }
 
@@ -100,6 +109,11 @@ void StateGameplay::Enter(std::string arg)
 		wolf::BulletPhysicsManager::CreateInstance("data/physics/physics_materials.xml",
 												   "data/shaders/lines.vsh",
 												   "data/shaders/lines.fsh");
+		glm::vec2 screenSize = m_app->getScreenSize();
+		m_frameBuffer = wolf::BufferManager::CreateFrameBuffer(screenSize.x / 4, screenSize.y / 4);
+
+		m_miniCamera = new OrthoCamera(m_app);
+		m_miniCamera->SetRotation(glm::vec2(0.0f, -89.99));
 
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glEnable(GL_DEPTH_TEST);
@@ -127,9 +141,13 @@ void StateGameplay::Enter(std::string arg)
 		m_flashlight->setRotation(glm::vec3(0.0f, 180, 0.0f));
 
 		m_gravityGun = new Model("data/models/gravity-gun.obj", "dim");
-		m_gravityGun->setPosition(glm::vec3(70, -50, -130));
-		m_gravityGun->setRotation(glm::vec3(0.0f, 90, 0.0f));
-		// m_gravityGun->setScale(glm::vec3(5.0f, 5.0f, 5.0f));
+		m_gravityGun->setPosition(glm::vec3(7.3, -6, -9.7));
+		m_gravityGun->setRotation(glm::vec3(-180.0f, 0.0f, 0.0f));
+		m_gravityGun->setScale(glm::vec3(5.0f, 5.0f, 5.0f));
+		m_gravityGun->setTexture("data/textures/gravity-gun.png");
+
+		m_blueTrailEffect = new Effect(m_blueTrail);
+		m_blueTrailEffect->setPos(glm::vec3(12.195, -7.3, -32.927));
 
 		m_drinkText = new TextBox(700.0f, 200.0f);
 		m_drinkText->SetPos(glm::vec3(50.0f, 50.0f, 0.0f));
@@ -240,7 +258,7 @@ void StateGameplay::Enter(std::string arg)
 		}
 
 		// Ship and ship parts
-		Model *m_ship = new Model("data/models/ships/ship3.obj", "skinned");
+		m_ship = new Model("data/models/ships/ship3.obj", "skinned");
 		m_ship->setTag("ship");
 		m_ship->setScale(glm::vec3(10.0f, 10.0f, 10.0f));
 		m_ship->setOffset(m_ship->getModel()->getAABBMin() + glm::vec3(0.0f, -5.0f, 0.0f));
@@ -258,14 +276,14 @@ void StateGameplay::Enter(std::string arg)
 		{
 			Effect *fire = new Effect(m_firepath);
 
-			int xOff = _randomNum(-5, 10);
+			int xOff = _randomNum(-40, 50);
 			int yOff = _randomNum(0, 7);
-			int zOff = _randomNum(-10, 10);
+			int zOff = _randomNum(-50, 70);
 			fire->setPos(m_ship->getPosition() + glm::vec3(xOff, yOff, zOff));
 			m_effects.push_back(fire);
 		}
 		Effect *forcefield = new Effect(m_forcefieldPath);
-		forcefield->setPos(m_ship->getPosition() + glm::vec3(0.0f, 0.0f, 0.0f));
+		forcefield->setPos(Scene::Instance()->GetActiveCamera()->GetPosition());
 		m_effects.push_back(forcefield);
 		m_models.push_back(m_ship);
 
@@ -305,20 +323,20 @@ void StateGameplay::Enter(std::string arg)
 		m_partsCollectedText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
 		m_partsCollectedText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
 
-		int x = _randomNum(0, m_terrainSize * 4);
-		int z = _randomNum(0, m_terrainSize * 4);
+		int x = _randomNum(-m_terrainSize * 2, m_terrainSize * 2);
+		int z = _randomNum(-m_terrainSize * 2, m_terrainSize * 2);
 		m_part1->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
 
-		x = _randomNum(0, m_terrainSize * 4);
-		z = _randomNum(0, m_terrainSize * 4);
+		x = _randomNum(-m_terrainSize * 2, m_terrainSize * 2);
+		z = _randomNum(-m_terrainSize * 2, m_terrainSize * 2);
 		m_part2->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
 
-		x = _randomNum(0, m_terrainSize * 4);
-		z = _randomNum(0, m_terrainSize * 4);
+		x = _randomNum(-m_terrainSize * 2, m_terrainSize * 2);
+		z = _randomNum(-m_terrainSize * 2, m_terrainSize * 2);
 		m_part3->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
 
-		x = _randomNum(0, m_terrainSize * 4);
-		z = _randomNum(0, m_terrainSize * 4);
+		x = _randomNum(-m_terrainSize * 2, m_terrainSize * 2);
+		z = _randomNum(-m_terrainSize * 2, m_terrainSize * 2);
 		m_part4->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
 
 		m_models.push_back(m_part1);
@@ -351,8 +369,8 @@ void StateGameplay::Enter(std::string arg)
 			// log->setOffset(log->getModel()->getAABBMin());
 
 			float rotation = (float)_randomNum(-60, 60);
-			int x = _randomNum(0, m_terrainSize * 4);
-			int z = _randomNum(0, m_terrainSize * 4);
+			x = _randomNum(-m_terrainSize * 2, m_terrainSize * 2);
+			z = _randomNum(-m_terrainSize * 2, m_terrainSize * 2);
 
 			// log->setScale(glm::vec3(0.01f, 0.01f, 0.01f));
 			log->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
@@ -393,6 +411,9 @@ void StateGameplay::Update(float p_fDelta)
 	m_nearFood = false;
 
 	Camera *camera = Scene::Instance()->GetActiveCamera();
+	// m_miniCamera->Update(p_fDelta);
+	m_miniCamera->SetPosition(camera->GetPosition() + glm::vec3(0.0f, 700.0f, 0.0f));
+
 	// Set camera to floor
 	float camX = camera->GetPosition().x;
 	float camY = camera->GetPosition().y;
@@ -442,7 +463,6 @@ void StateGameplay::Update(float p_fDelta)
 
 	for (Model *model : m_models)
 	{
-
 		glm::vec3 oldModelPos = model->getPosition();
 
 		if (model->isDestroyed())
@@ -560,7 +580,7 @@ void StateGameplay::Update(float p_fDelta)
 		m_keyDown = true;
 		m_soundManager->Play2D("flashlight", m_flashlightSoundPath, false, true);
 		m_flashlightEquipped = !m_flashlightEquipped;
-		m_gravityGunEqipped = false;
+		m_gravityGunEquipped = false;
 		m_spotlight->enabled = !m_spotlight->enabled;
 		if (!m_spotlight->enabled)
 		{
@@ -575,16 +595,25 @@ void StateGameplay::Update(float p_fDelta)
 	if (!m_app->isKeyDown('F'))
 		m_keyDown = false;
 
+	if (m_app->isKeyDown('P') && !m_shipBeepDown)
+	{
+		m_shipBeepDown = true;
+		m_soundManager->Play3D("shipBeep", m_shipBeepSoundPath, m_ship->getPosition(), 500.0f);
+	}
+
+	if (!m_app->isKeyDown('P'))
+		m_shipBeepDown = false;
+
 	if (m_app->isKeyDown('G') && !m_gravityKeyDown)
 	{
 		m_gravityKeyDown = true;
-		if (!m_gravityGunEqipped)
+		if (!m_gravityGunEquipped)
 			m_soundManager->Play2D("gravityGun", m_gravityGunSoundPath, false, true);
 		else
 		{
 			m_soundManager->Play2D("gravityShutdown", m_gravityGunShutdownSoundPath, false, true);
 		}
-		m_gravityGunEqipped = !m_gravityGunEqipped;
+		m_gravityGunEquipped = !m_gravityGunEquipped;
 		m_flashlightEquipped = false;
 		m_spotlight->enabled = false;
 	}
@@ -630,7 +659,6 @@ void StateGameplay::Update(float p_fDelta)
 
 	if (m_app->isKeyDown('Z') && !m_debugDown)
 	{
-
 		wolf::BulletPhysicsManager::Instance()->ToggleDebugRendering();
 		m_debugDown = true;
 	}
@@ -641,7 +669,7 @@ void StateGameplay::Update(float p_fDelta)
 	}
 
 	// Bullets
-	if (m_app->isLMBDown() && !m_leftMouseDown && m_gravityGunEqipped)
+	if (m_app->isLMBDown() && !m_leftMouseDown && m_gravityGunEquipped)
 	{
 		m_soundManager->Play2D("gravityGunFaulty", m_gravityGunFaultyPath, false, true);
 		m_leftMouseDown = true;
@@ -686,6 +714,7 @@ void StateGameplay::Update(float p_fDelta)
 	{
 		effect->update(p_fDelta);
 	}
+	m_blueTrailEffect->update(p_fDelta);
 }
 
 void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
@@ -763,6 +792,7 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 				terrain->getProgram()->SetUniform("u_spotLightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
 			}
 		}
+
 		model->render(mProj, mView, camera->GetViewDirection());
 	}
 
@@ -857,19 +887,77 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 		glEnable(GL_DEPTH_TEST);
 	}
 
-	if (m_gravityGunEqipped)
+	if (m_gravityGunEquipped)
 	{
 		glDisable(GL_DEPTH_TEST);
 
 		m_gravityGun->render(mProj, glm::mat4(1.0f));
+		m_blueTrailEffect->render(mProj, glm::mat4(1.0f));
 		glEnable(GL_DEPTH_TEST);
 	}
 
 	// Render Effects
 	for (Effect *effect : m_effects)
 	{
-		// effect->render(mProj, mView);
+		effect->render(mProj, mView);
 	}
+
+	// MINIMAP
+	glm::vec2 screenSize = m_app->getScreenSize();
+
+	glViewport(0, 0, screenSize.x, screenSize.y);
+
+	m_frameBuffer->Bind();
+
+	glClearColor(0.3f, 0.3f, 0.3f, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	GLfloat pointVertex[] = {screenSize.x / 4, screenSize.y / 4};
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glPointSize(50);
+	glVertexPointer(2, GL_FLOAT, 0, pointVertex);
+	glDrawArrays(GL_POINTS, 0, 1);
+	glDisableClientState(GL_VERTEX_ARRAY);
+
+	const glm::mat4 &miniProj = m_miniCamera->GetProjMatrix(screenSize.x, screenSize.y);
+	const glm::mat4 &miniView = m_miniCamera->GetViewMatrix();
+
+	m_skybox->Render(miniProj, miniView);
+	m_ship->render(miniProj, miniView);
+
+	for (Terrain *terrain : m_terrains)
+	{
+		terrain->Render(miniProj, miniView);
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	// glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glViewport(screenSize.x - screenSize.x / 4, 0, screenSize.x / 4, screenSize.y / 4);
+
+	m_frameBuffer->Render();
+
+	// MODEL POSITIONING (TESTING ONLY)
+
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+	ImGui::Begin("Model Debug Menu");
+	ImGui::SetWindowSize(ImVec2(400.0f, 400.0f), true);
+	ImGui::SliderFloat("x", &x, -400.0f, 400.0f);
+	ImGui::SliderFloat("y", &y, -400.0f, 400.0f);
+	ImGui::SliderFloat("z", &z, -400.0f, 400.0f);
+	ImGui::SliderFloat("xRot", &xRot, -560.0f, 560.0f);
+	ImGui::SliderFloat("yRot", &yRot, -180.0f, 180.0f);
+	ImGui::SliderFloat("zRot", &zRot, -180.0f, 180.0f);
+
+	// CURRENT MODEL FOR TESTING
+	// Effect *curModel = m_blueTrailEffect;
+	// m_miniCamera->SetPosition(glm::vec3(x, y, z));
+	ImGui::End();
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 int StateGameplay::_randomNum(int lowerBound, int upperBound)

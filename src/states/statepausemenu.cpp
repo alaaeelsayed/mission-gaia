@@ -112,6 +112,7 @@ void StatePauseMenu::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glViewport(0, 0, screenSize.x, screenSize.y);
 
 	m_frameBuffer->Render();
 

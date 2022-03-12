@@ -326,7 +326,7 @@ void Emitter::render(const glm::mat4 &p_mProj, const glm::mat4 &p_mView)
     Particle *pCurrent = m_pActiveHead;
     while (pCurrent)
     {
-        pCurrent->m_mWorldMatrix = mBillboard;
+        // pCurrent->m_mWorldMatrix = mBillboard;
         pCurrent = pCurrent->m_pNext;
     }
 
@@ -476,9 +476,9 @@ void Emitter::_spawnParticle()
         float theta = Util::randNum(0.0f, 2.0f * (float)PI);
         float v = Util::randNum(0.0f, 1.0f);
         float phi = acos((2 * v) - 1);
-        p_pParticle->m_vPosition.x = m_fSphereRadius * sin(phi) * cos(theta);
-        p_pParticle->m_vPosition.y = m_fSphereRadius * sin(phi) * sin(theta);
-        p_pParticle->m_vPosition.z = m_fSphereRadius * cos(phi);
+        p_pParticle->m_vPosition.x = m_vPosition.x + m_fSphereRadius * sin(phi) * cos(theta);
+        p_pParticle->m_vPosition.y = m_vPosition.y + m_fSphereRadius * sin(phi) * sin(theta);
+        p_pParticle->m_vPosition.z = m_vPosition.z + m_fSphereRadius * cos(phi);
     }
 
     _addToActive(p_pParticle);
