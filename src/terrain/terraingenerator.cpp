@@ -118,6 +118,28 @@ float TerrainGenerator::GetRoughness() const
 	return m_roughness;
 }
 
+BoundingBox TerrainGenerator::GetBounds(int gridX, int gridZ)
+{
+	float min = 100000.0f;
+	float max = -100000.0f;
+
+	int xOffset = GRID_OFFSET + gridX * (m_countVerts - 1);
+	int zOffset = GRID_OFFSET + gridZ * (m_countVerts - 1);
+
+	for (int i = 0; i < m_countVerts; i++)
+	{
+		for (int j = 0; j < m_countVerts; j++)
+		{
+			float height = _generateHeight(j, i, xOffset, zOffset);
+			if (height < min)
+				min = height;
+			if (height > max)
+				max = height;
+		}
+	}
+	return BoundingBox(glm::vec3(gridX * m_size, min, gridZ * m_size), glm::vec3(gridX * m_size + m_size, max, gridZ * m_size + m_size));
+}
+
 wolf::VertexDeclaration *TerrainGenerator::GenerateVertices(int gridX, int gridZ)
 {
 	int xOffset = GRID_OFFSET + gridX * (m_countVerts - 1);

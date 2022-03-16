@@ -101,7 +101,7 @@ file(GLOB_RECURSE HEADER_FILES
 	${CMAKE_SOURCE_DIR}/src/*.h
     ${CMAKE_SOURCE_DIR}/src/*.hpp)
 
-add_executable(sample 
+add_executable(gaia 
     ${SAMPLEFW_SOURCE_FILES}
     ${SAMPLEFW_HEADER_FILES}
     ${WOLF_SOURCE_FILES}
@@ -111,11 +111,19 @@ add_executable(sample
     ${SOURCE_FILES}
     ${HEADER_FILES}
     )
-target_link_libraries(sample ${CMAKE_SOURCE_DIR}/irrklang/lib/Winx64-visualStudio/irrKlang.lib)
-target_link_libraries(sample ${CMAKE_SOURCE_DIR}/thirdparty/bullet/lib/BulletCollision.lib)
-target_link_libraries(sample ${CMAKE_SOURCE_DIR}/thirdparty/bullet/lib/LinearMath.lib)
-target_link_libraries(sample ${CMAKE_SOURCE_DIR}/thirdparty/bullet/lib/BulletDynamics.lib)
-target_link_libraries(sample assimp glfw glew ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES})
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_link_libraries(gaia ${CMAKE_SOURCE_DIR}/thirdparty/bullet/lib/BulletCollision_Debug.lib)
+    target_link_libraries(gaia ${CMAKE_SOURCE_DIR}/thirdparty/bullet/lib/LinearMath_Debug.lib)
+    target_link_libraries(gaia ${CMAKE_SOURCE_DIR}/thirdparty/bullet/lib/BulletDynamics_Debug.lib)
+else ()
+    target_link_libraries(gaia ${CMAKE_SOURCE_DIR}/thirdparty/bullet/lib/BulletCollision.lib)
+    target_link_libraries(gaia ${CMAKE_SOURCE_DIR}/thirdparty/bullet/lib/LinearMath.lib)
+    target_link_libraries(gaia ${CMAKE_SOURCE_DIR}/thirdparty/bullet/lib/BulletDynamics.lib)
+endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
+
+target_link_libraries(gaia ${CMAKE_SOURCE_DIR}/irrklang/lib/Winx64-visualStudio/irrKlang.lib)
+target_link_libraries(gaia assimp glfw glew ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES})
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
@@ -123,8 +131,8 @@ set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 
 ADD_CUSTOM_COMMAND(
-            TARGET sample POST_BUILD
+            TARGET gaia POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
                 "${CMAKE_SOURCE_DIR}/irrklang/bin/winx64-visualStudio/irrKlang.dll"
-                "$<TARGET_FILE_DIR:sample>"
+                "$<TARGET_FILE_DIR:gaia>"
 )

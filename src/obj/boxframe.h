@@ -3,6 +3,12 @@
 #include "../../wolf/wolf.h"
 #include "boundingbox.h"
 
+struct BoxVertex
+{
+    GLfloat x, y, z;
+    GLfloat r, g, b, a;
+};
+
 class BoxFrame
 {
 public:

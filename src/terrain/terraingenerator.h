@@ -54,6 +54,7 @@ public:
     std::vector<float> getRawVertices();
     std::vector<float> getHeights();
     btConvexHullShape *getConvexHull();
+    BoundingBox GetBounds(int gridX, int gridZ);
 
 private:
     float _generateHeight(int x, int z, int xOff, int zOff);

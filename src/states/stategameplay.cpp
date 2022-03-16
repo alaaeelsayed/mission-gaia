@@ -109,7 +109,7 @@ void StateGameplay::Enter(std::string arg)
 		m_hungerText = new TextBox(200.0f, 200.0f);
 		m_hungerText->SetPos(glm::vec3(20.0f, 500.0f, 0.0f));
 
-		m_hungerText->SetText(m_font, "%f%", m_hunger);
+		// m_hungerText->SetText(m_font, "%f%", m_hunger);
 		m_hungerText->SetColor(1.0f, 1.0f, 1.0f, 0.6f);
 		m_hungerText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
 		m_hungerText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
@@ -117,7 +117,7 @@ void StateGameplay::Enter(std::string arg)
 		m_thirstText = new TextBox(200.0f, 200.0f);
 		m_thirstText->SetPos(glm::vec3(20.0f, 600.0f, 0.0f));
 
-		m_thirstText->SetText(m_font, "%f%", m_thirst);
+		// m_thirstText->SetText(m_font, "%f%", m_thirst);
 		m_thirstText->SetColor(1.0f, 1.0f, 1.0f, 0.6f);
 		m_thirstText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
 		m_thirstText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
@@ -134,7 +134,7 @@ void StateGameplay::Enter(std::string arg)
 		m_drinkText = new TextBox(700.0f, 200.0f);
 		m_drinkText->SetPos(glm::vec3(50.0f, 50.0f, 0.0f));
 
-		m_drinkText->SetText(m_font, m_drinkPrompt.c_str());
+		// m_drinkText->SetText(m_font, m_drinkPrompt.c_str());
 		m_drinkText->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		m_drinkText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
 		m_drinkText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
@@ -142,7 +142,7 @@ void StateGameplay::Enter(std::string arg)
 		m_eatText = new TextBox(700.0f, 200.0f);
 		m_eatText->SetPos(glm::vec3(50.0f, 200.0f, 0.0f));
 
-		m_eatText->SetText(m_font, m_eatPrompt.c_str());
+		// m_eatText->SetText(m_font, m_eatPrompt.c_str());
 		m_eatText->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		m_eatText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
 		m_eatText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
@@ -150,21 +150,21 @@ void StateGameplay::Enter(std::string arg)
 
 		m_collectText = new TextBox(1000.0f, 200.0f);
 		m_collectText->SetPos(glm::vec3(50.0f, 50.0f, 0.0f));
-		m_collectText->SetText(m_font, m_collectPrompt.c_str());
+		// m_collectText->SetText(m_font, m_collectPrompt.c_str());
 		m_collectText->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		m_collectText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
 		m_collectText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
 
 		m_repairShipText = new TextBox(1000.0f, 200.0f);
 		m_repairShipText->SetPos(glm::vec3(100.0f, 50.0f, 0.0f));
-		m_repairShipText->SetText(m_font, m_repairPrompt.c_str());
+		// m_repairShipText->SetText(m_font, m_repairPrompt.c_str());
 		m_repairShipText->SetColor(0.0f, 1.0f, 0.0f, 1.0f);
 		m_repairShipText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
 		m_repairShipText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
 
 		m_collectMorePartsText = new TextBox(500.0f, 200.0f);
 		m_collectMorePartsText->SetPos(glm::vec3(50.0f, 50.0f, 0.0f));
-		m_collectMorePartsText->SetText(m_font, m_noPartsPrompt.c_str());
+		// m_collectMorePartsText->SetText(m_font, m_noPartsPrompt.c_str());
 		m_collectMorePartsText->SetOutlined(true);
 		m_collectMorePartsText->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
 		m_collectMorePartsText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
@@ -195,13 +195,14 @@ void StateGameplay::Enter(std::string arg)
 				Terrain *terrain = new Terrain(i, j, m_terrainGenerator);
 				m_terrains.push_back(terrain);
 				Scene::Instance()->AddNode(terrain);
-				if (i == 1 && j == 1)
+				printf("Got dat %f", terrain->GetBoundingBox().GetMin().y);
+				if (terrain->GetBoundingBox().GetMin().y < -44.0f)
 				{
 					printf("%f %f", terrain->GetPos().x, terrain->GetPos().z);
 					// Water
 					Water *water = new Water();
 					water->SetScale(glm::vec3(m_terrainSize / 2.0f, 0.0f, m_terrainSize / 2.0f));
-					water->SetPos(glm::vec3(terrain->GetPos().x + m_terrainSize / 2.0f, -5.0f, terrain->GetPos().z + m_terrainSize / 2.0f));
+					water->SetPos(glm::vec3(terrain->GetPos().x + m_terrainSize / 2.0f, -44.0f, terrain->GetPos().z + m_terrainSize / 2.0f));
 					m_waters.push_back(water);
 					Scene::Instance()->AddNode(water);
 					m_soundManager->Play3D("Water", m_waterSoundPath, water->GetPos(), 10.0f, true);
@@ -399,7 +400,7 @@ void StateGameplay::Update(float p_fDelta)
 
 	glm::vec3 camPosition = camera->GetPosition();
 
-	m_hungerText->SetText(m_font, "%d%", hunger);
+	// m_hungerText->SetText(m_font, "%d%", hunger);
 	if (m_hunger >= 70)
 		m_hungerText->SetColor(0.0f, 1.0f, 0.0f, 0.6f);
 	else if (m_hunger >= 40)
@@ -414,7 +415,7 @@ void StateGameplay::Update(float p_fDelta)
 	else
 		m_thirstText->SetColor(1.0f, 0.0f, 0.0f, 0.6f);
 
-	m_thirstText->SetText(m_font, "%d%", thirst);
+	// m_thirstText->SetText(m_font, "%d%", thirst);
 
 	m_terrainGenerator->SetSize(m_terrainSize);
 	m_terrainGenerator->SetAmplitude(m_terrainAmplitude);
@@ -690,62 +691,62 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 		if (model->isDestroyed())
 			continue;
 
-		std::sort(m_lights.begin(), m_lights.end(), [this, model](const Light *lhs, const Light *rhs) -> bool
-				  { return _isEffectiveLight(lhs, rhs, model); });
+		// std::sort(m_lights.begin(), m_lights.end(), [this, model](const Light *lhs, const Light *rhs) -> bool
+		// 		  { return _isEffectiveLight(lhs, rhs, model); });
 
-		for (int i = 0; i < 4; i++)
-		{
-			// Point lights
-			Light *pLight = m_lights[i];
-			if (pLight->enabled)
-			{
-				m_worldProgram->SetUniform("u_lightPosRange" + std::to_string(i + 1), pLight->posRange);
-				m_worldProgram->SetUniform("u_lightColor" + std::to_string(i + 1), pLight->color);
-				m_worldProgram->SetUniform("u_lightAttenuation" + std::to_string(i + 1), pLight->attenuation);
-				model->getMaterial()->SetUniform("u_lightPosRange" + std::to_string(i + 1), pLight->posRange);
-				model->getMaterial()->SetUniform("u_lightColor" + std::to_string(i + 1), pLight->color);
-				model->getMaterial()->SetUniform("u_lightAttenuation" + std::to_string(i + 1), pLight->attenuation);
-			}
-		}
+		// for (int i = 0; i < 4; i++)
+		// {
+		// 	// Point lights
+		// 	Light *pLight = m_lights[i];
+		// 	if (pLight->enabled)
+		// 	{
+		// 		m_worldProgram->SetUniform("u_lightPosRange" + std::to_string(i + 1), pLight->posRange);
+		// 		m_worldProgram->SetUniform("u_lightColor" + std::to_string(i + 1), pLight->color);
+		// 		m_worldProgram->SetUniform("u_lightAttenuation" + std::to_string(i + 1), pLight->attenuation);
+		// 		model->getMaterial()->SetUniform("u_lightPosRange" + std::to_string(i + 1), pLight->posRange);
+		// 		model->getMaterial()->SetUniform("u_lightColor" + std::to_string(i + 1), pLight->color);
+		// 		model->getMaterial()->SetUniform("u_lightAttenuation" + std::to_string(i + 1), pLight->attenuation);
+		// 	}
+		// }
 
-		// Spot Light
-		if (m_spotlight->enabled)
-		{
-			m_worldProgram->SetUniform("u_lightPosRange", m_spotlight->posRange);
-			m_worldProgram->SetUniform("u_lightColor", m_spotlight->color);
-			m_worldProgram->SetUniform("u_lightSpot", m_spotlight->lightSpot);
-			m_worldProgram->SetUniform("u_lightAttenuation", m_spotlight->attenuation);
+		// // Spot Light
+		// if (m_spotlight->enabled)
+		// {
+		// 	m_worldProgram->SetUniform("u_lightPosRange", m_spotlight->posRange);
+		// 	m_worldProgram->SetUniform("u_lightColor", m_spotlight->color);
+		// 	m_worldProgram->SetUniform("u_lightSpot", m_spotlight->lightSpot);
+		// 	m_worldProgram->SetUniform("u_lightAttenuation", m_spotlight->attenuation);
 
-			model->getMaterial()->SetUniform("u_lightPosRange", m_spotlight->posRange);
-			model->getMaterial()->SetUniform("u_lightColor", m_spotlight->color);
-			model->getMaterial()->SetUniform("u_lightSpot", m_spotlight->lightSpot);
-			model->getMaterial()->SetUniform("u_lightAttenuation", m_spotlight->attenuation);
+		// 	model->getMaterial()->SetUniform("u_lightPosRange", m_spotlight->posRange);
+		// 	model->getMaterial()->SetUniform("u_lightColor", m_spotlight->color);
+		// 	model->getMaterial()->SetUniform("u_lightSpot", m_spotlight->lightSpot);
+		// 	model->getMaterial()->SetUniform("u_lightAttenuation", m_spotlight->attenuation);
 
-			for (Terrain *terrain : m_terrains)
-			{
-				terrain->getProgram()->SetUniform("u_spotLightPosRange", m_spotlight->posRange);
-				terrain->getProgram()->SetUniform("u_spotLightColor", m_spotlight->color);
-				terrain->getProgram()->SetUniform("u_spotLightSpot", m_spotlight->lightSpot);
-				terrain->getProgram()->SetUniform("u_spotLightAttenuation", m_spotlight->attenuation);
-			}
-		}
-		else
-		{
-			m_worldProgram->SetUniform("u_lightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-			m_worldProgram->SetUniform("u_lightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-			m_worldProgram->SetUniform("u_lightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
+		// 	for (Terrain *terrain : m_terrains)
+		// 	{
+		// 		terrain->getProgram()->SetUniform("u_spotLightPosRange", m_spotlight->posRange);
+		// 		terrain->getProgram()->SetUniform("u_spotLightColor", m_spotlight->color);
+		// 		terrain->getProgram()->SetUniform("u_spotLightSpot", m_spotlight->lightSpot);
+		// 		terrain->getProgram()->SetUniform("u_spotLightAttenuation", m_spotlight->attenuation);
+		// 	}
+		// }
+		// else
+		// {
+		// 	m_worldProgram->SetUniform("u_lightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+		// 	m_worldProgram->SetUniform("u_lightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+		// 	m_worldProgram->SetUniform("u_lightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
 
-			model->getMaterial()->SetUniform("u_lightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-			model->getMaterial()->SetUniform("u_lightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-			model->getMaterial()->SetUniform("u_lightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
+		// 	model->getMaterial()->SetUniform("u_lightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+		// 	model->getMaterial()->SetUniform("u_lightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+		// 	model->getMaterial()->SetUniform("u_lightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
 
-			for (Terrain *terrain : m_terrains)
-			{
-				terrain->getProgram()->SetUniform("u_spotLightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-				terrain->getProgram()->SetUniform("u_spotLightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-				terrain->getProgram()->SetUniform("u_spotLightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
-			}
-		}
+		// 	for (Terrain *terrain : m_terrains)
+		// 	{
+		// 		terrain->getProgram()->SetUniform("u_spotLightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+		// 		terrain->getProgram()->SetUniform("u_spotLightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+		// 		terrain->getProgram()->SetUniform("u_spotLightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
+		// 	}
+		// }
 		model->render(mProj, mView, camera->GetViewDirection());
 	}
 

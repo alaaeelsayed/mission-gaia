@@ -272,7 +272,7 @@ void Water::_calculateH0K()
     m_pH0MinuskTexture->BindImageTexture(1, 0, GL_FALSE, 0, GL_WRITE_ONLY, wolf::Texture::FMT_888832F);
     GLuint uiNumGroups = N / 16;
     m_pAmplitudeProgram->DispatchCompute(uiNumGroups, uiNumGroups, 1);
-    glFinish();
+    // glFinish();
 }
 
 void Water::_calculateH0T()
@@ -309,7 +309,7 @@ void Water::_generateTwiddleFactors()
     m_pTwiddleFactors->BindImageTexture(0, 0, GL_FALSE, 0, GL_WRITE_ONLY, wolf::Texture::FMT_888832F);
     GLuint uiNumGroups = N / 16;
     m_pTwiddleFactorsProgram->DispatchCompute(log2n, uiNumGroups, 1);
-    glFinish();
+    // glFinish();
 }
 
 void Water::_butterflyOperation(wolf::Texture *axisTexture, wolf::Texture *dest)
@@ -332,7 +332,7 @@ void Water::_butterflyOperation(wolf::Texture *axisTexture, wolf::Texture *dest)
 
         GLuint uiNumGroups = N / 16;
         m_pButterflyProgram->DispatchCompute(uiNumGroups, uiNumGroups, 1);
-        glFinish();
+        // glFinish();
         pingpong++;
         pingpong = pingpong % 2;
     }
@@ -348,7 +348,7 @@ void Water::_butterflyOperation(wolf::Texture *axisTexture, wolf::Texture *dest)
 
         GLuint uiNumGroups = N / 16;
         m_pButterflyProgram->DispatchCompute(uiNumGroups, uiNumGroups, 1);
-        glFinish();
+        // glFinish();
         pingpong++;
         pingpong = pingpong % 2;
     }
@@ -370,7 +370,7 @@ void Water::_inversionOperation(wolf::Texture *axisTexture, wolf::Texture *dest,
 
     GLuint uiNumGroups = N / 16;
     m_pInversionProgram->DispatchCompute(uiNumGroups, uiNumGroups, 1);
-    glFinish();
+    // glFinish();
 }
 
 void Water::_generateIndices()

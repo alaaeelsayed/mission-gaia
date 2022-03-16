@@ -11,10 +11,10 @@ BoxFrame::BoxFrame(const BoundingBox &box)
 
     /*
     MINX, MAXZ          MAXX, MAXZ
-              
+
     MINX, MINZ          MAXX, MINZ
     */
-    Vertex verts[2 * 12] = {
+    BoxVertex verts[2 * 12] = {
         // {min.x, 0.0f, min.z, 1.0f, 1.0f, 1.0f, 1.0f},
         // {min.x, 0.0f, max.z, 1.0f, 1.0f, 1.0f, 1.0f},
         // {max.x, 0.0f, max.z, 1.0f, 1.0f, 1.0f, 1.0f},
@@ -49,7 +49,7 @@ BoxFrame::BoxFrame(const BoundingBox &box)
         {max.x, max.y, max.z, 1.0f, 1.0f, 1.0f, 1.0f},
     };
 
-    m_vb = wolf::BufferManager::CreateVertexBuffer(verts, sizeof(Vertex) * 24);
+    m_vb = wolf::BufferManager::CreateVertexBuffer(verts, sizeof(BoxVertex) * 24);
 
     m_decl = new wolf::VertexDeclaration();
     m_decl->Begin();

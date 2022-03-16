@@ -58,7 +58,7 @@ Skybox::~Skybox()
     wolf::MaterialManager::DestroyMaterial(m_material);
 }
 
-Skybox::Skybox(const std::string &texturePath) : Node(BoundingBox())
+Skybox::Skybox(const std::string &texturePath) : Node(BoundingBox(glm::vec3(-10000, -10000, -10000), glm::vec3(10000, 10000, 10000)))
 {
     m_vb = wolf::BufferManager::CreateVertexBuffer(s_skyboxVertices, sizeof(Vertex) * 6 * 3 * 2);
 

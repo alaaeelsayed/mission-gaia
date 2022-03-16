@@ -18,6 +18,8 @@ Terrain::Terrain(int x, int z, TerrainGenerator *terrainGenerator) : Node(Boundi
     // int length = terrainGenerator->getHeights().size();
     // m_rigidBody = new RigidBody(terrainGenerator->GetVertexCount(), terrainGenerator->GetVertexCount(), data, 1, -3, 3, 1, PHY_FLOAT, false);
     m_terrainGenerator = terrainGenerator;
+
+    GetBoundingBox().Extend(terrainGenerator->GetBounds(x, z));
 }
 
 Terrain::~Terrain()
