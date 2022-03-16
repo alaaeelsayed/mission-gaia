@@ -344,16 +344,16 @@ void StateGameplay::Enter(std::string arg)
 		for (Model *shipPart : m_shipParts)
 		{
 			// Fire near ship parts
-			int xOff = _randomNum(-40, 50);
-			int zOff = _randomNum(-50, 70);
+			int xOff = _randomNum(-5, 5);
+			int zOff = _randomNum(-10, 10);
 
 			Effect *fire1 = new Effect(m_firepath);
 			glm::vec3 newPos = shipPart->getPosition() + glm::vec3(xOff, 0.0f, zOff);
 			fire1->setPos(glm::vec3(newPos.x, m_terrainGenerator->GetHeight(newPos.x, newPos.z), newPos.z));
 			m_effects.push_back(fire1);
 
-			xOff = _randomNum(-40, 50);
-			zOff = _randomNum(-50, 70);
+			xOff = _randomNum(-5, 5);
+			zOff = _randomNum(-10, 10);
 
 			Effect *fire2 = new Effect(m_firepath);
 			newPos = shipPart->getPosition() + glm::vec3(xOff, 0.0f, zOff);
