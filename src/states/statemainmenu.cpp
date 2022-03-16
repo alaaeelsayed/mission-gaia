@@ -77,6 +77,8 @@ void StateMainMenu::Update(float p_fDelta)
 		m_stateMachine->GoToState(eStateGameplay_Gameplay);
 	}
 
+	m_pSkybox->Update(p_fDelta);
+
 	glm::vec2 screenSize = m_app->getScreenSize();
 
 	// m_pSkybox->update(p_fDelta);

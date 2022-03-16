@@ -70,6 +70,11 @@ public:
         m_isChasing = isChasing;
     }
 
+    bool isChasing()
+    {
+        return m_isChasing;
+    }
+
 private:
     float m_health = 100.0f;
     float m_isDestroyed = false;

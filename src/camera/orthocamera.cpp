@@ -86,6 +86,8 @@ void OrthoCamera::SetRotation(const glm::vec2 &rotation)
 {
     m_rotX = rotation.x;
     m_rotY = rotation.y;
+    m_rotY = wolf::max(wolf::min(89.0f, m_rotY), -89.0f);
+
     m_eye = glm::normalize(glm::vec3(cos(glm::radians(m_rotX)) * cos(glm::radians(m_rotY)), sin(glm::radians(m_rotY)), sin(glm::radians(m_rotX)) * cos(glm::radians(m_rotY))));
 }
 
