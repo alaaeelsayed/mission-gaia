@@ -95,7 +95,7 @@ Water::Water() : Node(BoundingBox())
         _generateTwiddleFactors();
 
         // Initialize water surface
-        m_pSurface = new Plane(m_pRenderProgram, 512);
+        m_pSurface = new Plane(m_pRenderProgram, 256);
 
         // Initialize rain effect
         m_pEffect = new Effect(m_sRainPath);
@@ -106,6 +106,12 @@ Water::Water() : Node(BoundingBox())
 
 void Water::Update(float dt)
 {
+    glm::vec3 dimensions = GetScale();
+    glm::vec3 min = GetWorldPos() - dimensions / 2.0f;
+    glm::vec3 max = min + dimensions;
+    GetBoundingBox().SetMin(min);
+    GetBoundingBox().SetMax(max);
+
     if (m_bRenderRain)
     {
         m_pEffect->update(dt);
@@ -159,96 +165,96 @@ void Water::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
     if (m_bRenderRain)
         m_pEffect->render(mProj, mView);
 
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-    ImGui::Begin("Water Debug Menu");
-    ImGui::SetWindowSize(ImVec2(400.0f, 400.0f), true);
-    ImGui::SliderInt("L", &L, 0, 2000);
-    ImGui::SliderFloat("A", &A, 0.0f, 100.0f);
-    ImGui::SliderFloat("Wind.x", &W.x, 0.0f, 1.0f);
-    ImGui::SliderFloat("Wind.y", &W.y, 0.0f, 1.0f);
-    ImGui::SliderFloat("Windspeed", &S, 0.0f, 100.0f);
-    ImGui::SliderFloat("Choppiness", &choppiness, 0.0f, 2.0f);
-    ImGui::ColorPicker3("Water Color", glm::value_ptr(m_vWaterColor));
-    ImGui::Checkbox("Choppy", &m_bIsChoppy);
-    ImGui::Checkbox("Invert Colors", &m_bInvertColors);
-    if (ImGui::Button("Update"))
-    {
-        m_bUpdate = true;
-    }
-    if (ImGui::Button(m_sStopResume.c_str()))
-    {
-        m_bStop = !m_bStop;
-        if (m_bStop)
-            m_sStopResume = "Resume Water";
-        else
-            m_sStopResume = "Stop Water";
-    }
-    ImGui::Text("Configurations:");
-    if (ImGui::Button("Calm Water"))
-    {
-        L = 642;
-        A = 17.5f;
-        W.x = 0;
-        W.y = 1.0f;
-        S = 13.3f;
-        m_bIsChoppy = true;
-        choppiness = 2.0f;
-        m_bUpdate = true;
-        m_bRenderRain = false;
-    }
-    if (ImGui::Button("Aggressive Water"))
-    {
-        L = 585;
-        A = 31.3f;
-        S = 95.0f;
-        W.x = 0.0f;
-        W.y = 1.0f;
-        m_bIsChoppy = true;
-        choppiness = 1.7f;
-        m_bUpdate = true;
-        m_bRenderRain = false;
-    }
-    if (ImGui::Button("Lava"))
-    {
-        L = 2000;
-        A = 19.8f;
-        W.x = 0;
-        W.y = 1.0f;
-        S = 10.9f;
-        m_vWaterColor = glm::vec3(0.811f, 0.062f, 0.125f);
-        m_bUpdate = true;
-        m_bRenderRain = false;
-        m_bIsChoppy = false;
-    }
-    if (ImGui::Button("Cloudy"))
-    {
-        L = 829;
-        A = 20.650f;
-        W.x = 0.5f;
-        W.y = 0.8f;
-        S = 50.0f;
-        m_vWaterColor = glm::vec3(1.0f, 1.0f, 1.0f);
-        m_bUpdate = true;
-        m_bRenderRain = true;
-        m_bIsChoppy = false;
-    }
-    if (ImGui::Button("Cartoon"))
-    {
-        L = 2000;
-        A = 15.0f;
-        W.x = 0.5f;
-        W.y = 0.8f;
-        S = 7.0f;
-        m_vWaterColor = glm::vec3(0.250f, 0.878f, 0.815f);
-        m_bUpdate = true;
-        m_bRenderRain = false;
-        m_bIsChoppy = false;
-    }
-    ImGui::End();
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    // ImGui_ImplOpenGL3_NewFrame();
+    // ImGui_ImplGlfw_NewFrame();
+    // ImGui::NewFrame();
+    // ImGui::Begin("Water Debug Menu");
+    // ImGui::SetWindowSize(ImVec2(400.0f, 400.0f), true);
+    // ImGui::SliderInt("L", &L, 0, 2000);
+    // ImGui::SliderFloat("A", &A, 0.0f, 100.0f);
+    // ImGui::SliderFloat("Wind.x", &W.x, 0.0f, 1.0f);
+    // ImGui::SliderFloat("Wind.y", &W.y, 0.0f, 1.0f);
+    // ImGui::SliderFloat("Windspeed", &S, 0.0f, 100.0f);
+    // ImGui::SliderFloat("Choppiness", &choppiness, 0.0f, 2.0f);
+    // ImGui::ColorPicker3("Water Color", glm::value_ptr(m_vWaterColor));
+    // ImGui::Checkbox("Choppy", &m_bIsChoppy);
+    // ImGui::Checkbox("Invert Colors", &m_bInvertColors);
+    // if (ImGui::Button("Update"))
+    // {
+    //     m_bUpdate = true;
+    // }
+    // if (ImGui::Button(m_sStopResume.c_str()))
+    // {
+    //     m_bStop = !m_bStop;
+    //     if (m_bStop)
+    //         m_sStopResume = "Resume Water";
+    //     else
+    //         m_sStopResume = "Stop Water";
+    // }
+    // ImGui::Text("Configurations:");
+    // if (ImGui::Button("Calm Water"))
+    // {
+    //     L = 642;
+    //     A = 17.5f;
+    //     W.x = 0;
+    //     W.y = 1.0f;
+    //     S = 13.3f;
+    //     m_bIsChoppy = true;
+    //     choppiness = 2.0f;
+    //     m_bUpdate = true;
+    //     m_bRenderRain = false;
+    // }
+    // if (ImGui::Button("Aggressive Water"))
+    // {
+    //     L = 585;
+    //     A = 31.3f;
+    //     S = 95.0f;
+    //     W.x = 0.0f;
+    //     W.y = 1.0f;
+    //     m_bIsChoppy = true;
+    //     choppiness = 1.7f;
+    //     m_bUpdate = true;
+    //     m_bRenderRain = false;
+    // }
+    // if (ImGui::Button("Lava"))
+    // {
+    //     L = 2000;
+    //     A = 19.8f;
+    //     W.x = 0;
+    //     W.y = 1.0f;
+    //     S = 10.9f;
+    //     m_vWaterColor = glm::vec3(0.811f, 0.062f, 0.125f);
+    //     m_bUpdate = true;
+    //     m_bRenderRain = false;
+    //     m_bIsChoppy = false;
+    // }
+    // if (ImGui::Button("Cloudy"))
+    // {
+    //     L = 829;
+    //     A = 20.650f;
+    //     W.x = 0.5f;
+    //     W.y = 0.8f;
+    //     S = 50.0f;
+    //     m_vWaterColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    //     m_bUpdate = true;
+    //     m_bRenderRain = true;
+    //     m_bIsChoppy = false;
+    // }
+    // if (ImGui::Button("Cartoon"))
+    // {
+    //     L = 2000;
+    //     A = 15.0f;
+    //     W.x = 0.5f;
+    //     W.y = 0.8f;
+    //     S = 7.0f;
+    //     m_vWaterColor = glm::vec3(0.250f, 0.878f, 0.815f);
+    //     m_bUpdate = true;
+    //     m_bRenderRain = false;
+    //     m_bIsChoppy = false;
+    // }
+    // ImGui::End();
+    // ImGui::Render();
+    // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void Water::_calculateH0K()

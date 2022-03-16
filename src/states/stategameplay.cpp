@@ -224,8 +224,8 @@ void StateGameplay::Enter(std::string arg)
 					printf("%f %f", terrain->GetPos().x, terrain->GetPos().z);
 					// Water
 					Water *water = new Water();
-					water->SetScale(glm::vec3(m_terrainSize / 2.0f, 0.0f, m_terrainSize / 2.0f));
-					water->SetPos(glm::vec3(terrain->GetPos().x + m_terrainSize / 2.0f, -44.0f, terrain->GetPos().z + m_terrainSize / 2.0f));
+					water->SetScale(glm::vec3(m_terrainSize, 0.0f, m_terrainSize));
+					water->SetPos(glm::vec3(terrain->GetPos().x + m_terrainSize / 2.0f, -35.0f, terrain->GetPos().z + m_terrainSize / 2.0f));
 					m_waters.push_back(water);
 					Scene::Instance()->AddNode(water);
 					m_soundManager->Play3D("Water", m_waterSoundPath, water->GetPos(), 10.0f, true);
@@ -504,7 +504,7 @@ void StateGameplay::Update(float p_fDelta)
 	float camY = camera->GetPosition().y;
 	float camZ = camera->GetPosition().z;
 
-	camera->SetPosition(glm::vec3(camX, m_terrainGenerator->GetHeight(int(camX), int(camZ)) + 5.0f, camZ));
+	// camera->SetPosition(glm::vec3(camX, m_terrainGenerator->GetHeight(int(camX), int(camZ)) + 5.0f, camZ));
 
 	// Attach spotlight
 	m_spotlight->posRange = glm::vec4(camX, camY, camZ, m_spotlight->posRange.w);
@@ -1190,7 +1190,6 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 
 	// CURRENT MODEL FOR TESTING
 	// Effect *curModel = m_blueTrailEffect;
-
 	// ImGui::End();
 	// ImGui::Render();
 	// ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
