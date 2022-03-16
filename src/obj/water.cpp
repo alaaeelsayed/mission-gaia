@@ -95,7 +95,7 @@ Water::Water() : Node(BoundingBox())
         _generateTwiddleFactors();
 
         // Initialize water surface
-        m_pSurface = new Plane(m_pRenderProgram, 512);
+        m_pSurface = new Plane(m_pRenderProgram, 256);
 
         // Initialize rain effect
         m_pEffect = new Effect(m_sRainPath);
@@ -106,6 +106,12 @@ Water::Water() : Node(BoundingBox())
 
 void Water::Update(float dt)
 {
+    glm::vec3 dimensions = GetScale();
+    glm::vec3 min = GetWorldPos() - dimensions / 2.0f;
+    glm::vec3 max = min + dimensions;
+    GetBoundingBox().SetMin(min);
+    GetBoundingBox().SetMax(max);
+
     if (m_bRenderRain)
     {
         m_pEffect->update(dt);
@@ -270,9 +276,9 @@ void Water::_calculateH0K()
     m_pAmplitudeProgram->Bind();
     m_pH0Texture->BindImageTexture(0, 0, GL_FALSE, 0, GL_WRITE_ONLY, wolf::Texture::FMT_888832F);
     m_pH0MinuskTexture->BindImageTexture(1, 0, GL_FALSE, 0, GL_WRITE_ONLY, wolf::Texture::FMT_888832F);
-    GLuint uiNumGroups = N / 16;
+    GLuint uiNumGroups = N / 32;
     m_pAmplitudeProgram->DispatchCompute(uiNumGroups, uiNumGroups, 1);
-    // glFinish();
+    glFinish();
 }
 
 void Water::_calculateH0T()
@@ -291,7 +297,7 @@ void Water::_calculateH0T()
     m_pH0Texture->BindImageTexture(3, 0, GL_FALSE, 0, GL_READ_ONLY, wolf::Texture::FMT_888832F);
     m_pH0MinuskTexture->BindImageTexture(4, 0, GL_FALSE, 0, GL_READ_ONLY, wolf::Texture::FMT_888832F);
 
-    GLuint uiNumGroups = N / 16;
+    GLuint uiNumGroups = N / 32;
     m_pAmplitudeByTimeProgram->DispatchCompute(uiNumGroups, uiNumGroups, 1);
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 }
@@ -307,9 +313,9 @@ void Water::_generateTwiddleFactors()
 
     m_pTwiddleFactorsProgram->Bind();
     m_pTwiddleFactors->BindImageTexture(0, 0, GL_FALSE, 0, GL_WRITE_ONLY, wolf::Texture::FMT_888832F);
-    GLuint uiNumGroups = N / 16;
+    GLuint uiNumGroups = N / 32;
     m_pTwiddleFactorsProgram->DispatchCompute(log2n, uiNumGroups, 1);
-    // glFinish();
+    glFinish();
 }
 
 void Water::_butterflyOperation(wolf::Texture *axisTexture, wolf::Texture *dest)
@@ -330,9 +336,9 @@ void Water::_butterflyOperation(wolf::Texture *axisTexture, wolf::Texture *dest)
 
         m_pButterflyProgram->Bind();
 
-        GLuint uiNumGroups = N / 16;
+        GLuint uiNumGroups = N / 32;
         m_pButterflyProgram->DispatchCompute(uiNumGroups, uiNumGroups, 1);
-        // glFinish();
+        glFinish();
         pingpong++;
         pingpong = pingpong % 2;
     }
@@ -346,9 +352,9 @@ void Water::_butterflyOperation(wolf::Texture *axisTexture, wolf::Texture *dest)
 
         m_pButterflyProgram->Bind();
 
-        GLuint uiNumGroups = N / 16;
+        GLuint uiNumGroups = N / 32;
         m_pButterflyProgram->DispatchCompute(uiNumGroups, uiNumGroups, 1);
-        // glFinish();
+        glFinish();
         pingpong++;
         pingpong = pingpong % 2;
     }
@@ -368,9 +374,9 @@ void Water::_inversionOperation(wolf::Texture *axisTexture, wolf::Texture *dest,
     axisTexture->BindImageTexture(1, 0, GL_FALSE, 0, GL_READ_ONLY, wolf::Texture::FMT_888832F);
     m_pPingPong->BindImageTexture(2, 0, GL_FALSE, 0, GL_READ_ONLY, wolf::Texture::FMT_888832F);
 
-    GLuint uiNumGroups = N / 16;
+    GLuint uiNumGroups = N / 32;
     m_pInversionProgram->DispatchCompute(uiNumGroups, uiNumGroups, 1);
-    // glFinish();
+    glFinish();
 }
 
 void Water::_generateIndices()

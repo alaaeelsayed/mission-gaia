@@ -70,28 +70,28 @@ vec4 get_terrain_color()
     regionRange = regionMax - regionMin;
     regionWeight = (regionRange - abs(height - regionMax)) / regionRange;
     regionWeight = max(0.0, regionWeight);
-    terrainColor += regionWeight * texture2D(region1ColorMap, v_uv1.st);
+    terrainColor += regionWeight * texture(region1ColorMap, v_uv1.st);
 
     regionMin = region2.min;
     regionMax = region2.max;
     regionRange = regionMax - regionMin;
     regionWeight = (regionRange - abs(height - regionMax)) / regionRange;
     regionWeight = max(0.0, regionWeight);
-    terrainColor += regionWeight * texture2D(region2ColorMap, v_uv1.st);
+    terrainColor += regionWeight * texture(region2ColorMap, v_uv1.st);
 
     regionMin = region3.min;
     regionMax = region3.max;
     regionRange = regionMax - regionMin;
     regionWeight = (regionRange - abs(height - regionMax)) / regionRange;
     regionWeight = max(0.0, regionWeight);
-    terrainColor += regionWeight * texture2D(region3ColorMap, v_uv1.st);
+    terrainColor += regionWeight * texture(region3ColorMap, v_uv1.st);
 
     regionMin = region4.min;
     regionMax = region4.max;
     regionRange = regionMax - regionMin;
     regionWeight = (regionRange - abs(height - regionMax)) / regionRange;
     regionWeight = max(0.0, regionWeight);
-    terrainColor += regionWeight * texture2D(region4ColorMap, v_uv1.st);
+    terrainColor += regionWeight * texture(region4ColorMap, v_uv1.st);
 
 	return terrainColor;
 }

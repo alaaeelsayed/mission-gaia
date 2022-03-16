@@ -58,6 +58,7 @@ private:
 
 	const std::string m_groundTexPath = "data/textures/ground/ground.png";
 	const std::string m_skyboxPath = "data/textures/skybox/skybox.png";
+	const std::string m_flyingShipTex = "data/textures/flying-ship-texture.png";
 
 	const std::string m_natureSoundPath = "data/sounds/ambient.ogg";
 	const std::string m_waterSoundPath = "data/sounds/ocean.wav";
@@ -85,6 +86,7 @@ private:
 	std::vector<Light *> m_lights;
 	wolf::Program *m_worldProgram = 0;
 	std::vector<Model *> m_models;
+	std::vector<Model *> m_shipParts;
 	std::vector<glm::vec3> m_positions;
 	wolf::Material *m_mat = nullptr;
 
@@ -159,7 +161,7 @@ private:
 	int m_terrainSize, m_terrainVerts, m_terrainOctaves;
 	float m_terrainAmplitude, m_terrainRoughness;
 
-	float m_enemySpeed = 0.4f;
+	float m_enemySpeed = 0.2f;
 	glm::vec3 m_enemyRange = glm::vec3(70.0f, 20.0f, 70.0f);
 	glm::vec3 m_foodRange = glm::vec3(20.0f, 20.0f, 20.0f);
 	glm::vec3 m_collectibleRange = glm::vec3(70.0f, 50.0f, 70.0f);
@@ -167,9 +169,11 @@ private:
 	bool m_inventoryFull = false;
 	int m_repairedParts = 0;
 
-	// Bullets
+	// Gravity Bullets
 	std::vector<Sphere *> m_bullets;
+	bool m_usingGravityGun = false;
 	bool m_leftMouseDown = false;
+	Model *m_gravityItem = nullptr;
 
 	Common::StateMachine *m_stateMachine = nullptr;
 
@@ -180,12 +184,14 @@ private:
 	std::string m_blueTrail = "data/effects/blue-trail.pfx";
 	std::string m_fireSound = "data/sounds/fire-sound.ogg";
 	Effect *m_blueTrailEffect = nullptr;
+	Effect *m_gravityForcefield = nullptr;
 
 	// For Minimap
 	float m_miniWidth = 400.0f;
-	float m_miniHeight = 400.0f;
+	float m_miniHeight = 300.0f;
 	wolf::FrameBuffer *m_frameBuffer;
 	OrthoCamera *m_miniCamera = nullptr;
+	TextBox *m_characterBox = nullptr;
 
 	// Model positioning (testing only)
 	float x = 0.0f;

@@ -1,6 +1,6 @@
-<emitter name="bluetrail" num_particles="30"
+<emitter name="bluetrail" num_particles="10"
  duration="-1" mode="continuous" type="box_emitter" box_emitter_min="0.1,0.1,0.1"
- box_emitter_max="0.2,0.2, 0.2" birthrate="10">
+ box_emitter_max="0.2,0.2, 0.2" birthrate="5">
 
  <spawn_property name="velocity" type="random" min="0,0,0" max="0,1,0"/>
  <spawn_property name="color" type="constant" value="0,0.5,1,0.5"/>

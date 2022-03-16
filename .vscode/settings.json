@@ -82,7 +82,8 @@
     "format": "cpp",
     "optional": "cpp",
     "stop_token": "cpp",
-    "filesystem": "cpp"
+    "filesystem": "cpp",
+    "*.rh": "cpp"
   },
   "C_Cpp.errorSquiggles": "Disabled"
 }
