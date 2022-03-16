@@ -46,8 +46,13 @@ private:
 
     // Phillips Spectrum Variables (Wind)
     int N = 256;
+<<<<<<< HEAD
     int L = 1000;
     float A = 5.0f;
+=======
+    int L = 756;
+    float A = 57.7f;
+>>>>>>> c29611c97c9c0c7fccf08815d3bc12a0751d2b81
     glm::vec3 W = glm::vec3(0.54f, 0.84f, 0.0f);
     float S = 70.0f;
     float suppression = 0.1f;
