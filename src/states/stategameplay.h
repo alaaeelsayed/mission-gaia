@@ -4,6 +4,7 @@
 #include "statebase.h"
 #include "../camera/camera.h"
 #include "../camera/freeroamcamera.h"
+#include "../camera/orthocamera.h"
 #include "../obj/skybox.h"
 #include "../obj/plane.h"
 #include "../obj/water.h"
@@ -73,6 +74,7 @@ private:
 	const std::string m_pickupSoundPath = "data/sounds/pickup.wav";
 	const std::string m_repairSoundPath = "data/sounds/repair.wav";
 	const std::string m_painSoundPath = "data/sounds/pain.wav";
+	const std::string m_shipBeepSoundPath = "data/sounds/ship-beep.wav";
 
 	const std::string m_drinkPrompt = "Press E to drink";
 	const std::string m_eatPrompt = "Press E to eat";
@@ -88,11 +90,13 @@ private:
 
 	wolf::Texture *m_creatureTex = nullptr;
 
-	wolf::Model *m_shipModel = nullptr;
+	Model *m_ship = nullptr;
+
 	wolf::Texture *m_shipTex = nullptr;
 
 	Model *m_flashlight = nullptr;
 	Model *m_gravityGun = nullptr;
+	bool m_attackingEnemy = false;
 	Light *m_spotlight = nullptr;
 
 	wolf::SoundManager *m_soundManager = nullptr;
@@ -113,9 +117,10 @@ private:
 
 	bool m_keyDown = false;
 	bool m_gravityKeyDown = false;
+	bool m_shipBeepDown = false;
 	bool m_debugDown = false;
 	bool m_flashlightEquipped = false;
-	bool m_gravityGunEqipped = false;
+	bool m_gravityGunEquipped = false;
 	bool m_drinking = false;
 	bool m_eating = false;
 
@@ -154,7 +159,7 @@ private:
 	int m_terrainSize, m_terrainVerts, m_terrainOctaves;
 	float m_terrainAmplitude, m_terrainRoughness;
 
-	float m_enemySpeed = 0.8f;
+	float m_enemySpeed = 0.4f;
 	glm::vec3 m_enemyRange = glm::vec3(70.0f, 20.0f, 70.0f);
 	glm::vec3 m_foodRange = glm::vec3(20.0f, 20.0f, 20.0f);
 	glm::vec3 m_collectibleRange = glm::vec3(70.0f, 50.0f, 70.0f);
@@ -172,8 +177,23 @@ private:
 	std::vector<Effect *> m_effects;
 	std::string m_firepath = "data/effects/fire.pfx";
 	std::string m_forcefieldPath = "data/effects/forcefield.pfx";
-
+	std::string m_blueTrail = "data/effects/blue-trail.pfx";
 	std::string m_fireSound = "data/sounds/fire-sound.ogg";
+	Effect *m_blueTrailEffect = nullptr;
+
+	// For Minimap
+	float m_miniWidth = 400.0f;
+	float m_miniHeight = 400.0f;
+	wolf::FrameBuffer *m_frameBuffer;
+	OrthoCamera *m_miniCamera = nullptr;
+
+	// Model positioning (testing only)
+	float x = 0.0f;
+	float y = 0.0f;
+	float z = 0.0f;
+	float xRot = 0.0f;
+	float yRot = 0.0f;
+	float zRot = 0.0f;
 };
 
 #endif
