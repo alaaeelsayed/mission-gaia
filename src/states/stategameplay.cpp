@@ -170,7 +170,6 @@ void StateGameplay::Enter(std::string arg)
 		m_eatText->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		m_eatText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
 		m_eatText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
-		// m_pFlashlight->setRotation(180, glm::vec3(0.0f, 1.0f, 0.0f));
 
 		m_collectText = new TextBox(1000.0f, 200.0f);
 		m_collectText->SetPos(glm::vec3(50.0f, 50.0f, 0.0f));
@@ -219,13 +218,14 @@ void StateGameplay::Enter(std::string arg)
 				Terrain *terrain = new Terrain(i, j, m_terrainGenerator);
 				m_terrains.push_back(terrain);
 				Scene::Instance()->AddNode(terrain);
-				if (i == 1 && j == 1)
+				printf("Got dat %f", terrain->GetBoundingBox().GetMin().y);
+				if (terrain->GetBoundingBox().GetMin().y < -44.0f)
 				{
 					printf("%f %f", terrain->GetPos().x, terrain->GetPos().z);
 					// Water
 					Water *water = new Water();
 					water->SetScale(glm::vec3(m_terrainSize / 2.0f, 0.0f, m_terrainSize / 2.0f));
-					water->SetPos(glm::vec3(terrain->GetPos().x + m_terrainSize / 2.0f, -5.0f, terrain->GetPos().z + m_terrainSize / 2.0f));
+					water->SetPos(glm::vec3(terrain->GetPos().x + m_terrainSize / 2.0f, -44.0f, terrain->GetPos().z + m_terrainSize / 2.0f));
 					m_waters.push_back(water);
 					Scene::Instance()->AddNode(water);
 					m_soundManager->Play3D("Water", m_waterSoundPath, water->GetPos(), 10.0f, true);
@@ -313,28 +313,28 @@ void StateGameplay::Enter(std::string arg)
 		m_models.push_back(m_ship);
 
 		// Ship Parts
-		Model *m_part1 = new Model("data/models/ships/ship-parts/part1-bearing.obj", "dim");
+		Model *m_part1 = new Model("data/models/ships/ship-parts/part1-bearing.obj", "super-dim");
 		m_part1->setTag("ship-part");
-		m_part1->setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+		m_part1->setScale(glm::vec3(0.05f, 0.05f, 0.05f));
 		// m_part1->setOffset(m_part1->getModel()->getAABBMin());
 		m_part1->setTexture("data/textures/ship-texture.png");
 
-		Model *m_part2 = new Model("data/models/ships/ship-parts/part2-tv.obj", "dim");
+		Model *m_part2 = new Model("data/models/ships/ship-parts/part2-tv.obj", "super-dim");
 		m_part2->setTag("ship-part");
 		// m_part2->setOffset(m_part2->getModel()->getAABBMin());
-		m_part2->setTexture("data/textures/ship-texture.png");
+		m_part2->setTexture("data/textures/gravity-gun.png");
 		m_part2->setScale(glm::vec3(0.1f, 0.1f, 0.1f));
 
-		Model *m_part3 = new Model("data/models/ships/ship-parts/part3-powerbank.obj", "dim");
+		Model *m_part3 = new Model("data/models/ships/ship-parts/part3-powerbank.obj", "super-dim");
 		m_part3->setTag("ship-part");
 		// m_part3->setOffset(m_part3->getModel()->getAABBMin());
-		m_part3->setTexture("data/textures/ship-texture.png");
+		m_part3->setTexture("data/textures/gravity-gun.png");
 		m_part3->setScale(glm::vec3(10.0f, 10.0f, 10.0f));
 
-		Model *m_part4 = new Model("data/models/ships/ship-parts/part4-box.obj", "dim");
+		Model *m_part4 = new Model("data/models/ships/ship-parts/part4-box.obj", "super-dim");
 		m_part4->setTag("ship-part");
 		// m_part4->setOffset(m_part4->getModel()->getAABBMin());
-		m_part4->setTexture("data/textures/ship-part-box.png");
+		m_part4->setTexture("data/textures/gravity-gun.png");
 
 		m_shipParts.push_back(m_part1);
 		m_shipParts.push_back(m_part2);
@@ -348,14 +348,16 @@ void StateGameplay::Enter(std::string arg)
 			int zOff = _randomNum(-50, 70);
 
 			Effect *fire1 = new Effect(m_firepath);
-			fire1->setPos(shipPart->getPosition() + glm::vec3(xOff, 0.0f, zOff));
+			glm::vec3 newPos = shipPart->getPosition() + glm::vec3(xOff, 0.0f, zOff);
+			fire1->setPos(glm::vec3(newPos.x, m_terrainGenerator->GetHeight(newPos.x, newPos.z), newPos.z));
 			m_effects.push_back(fire1);
 
 			xOff = _randomNum(-40, 50);
 			zOff = _randomNum(-50, 70);
 
 			Effect *fire2 = new Effect(m_firepath);
-			fire1->setPos(shipPart->getPosition() + glm::vec3(xOff, 0.0f, zOff));
+			newPos = shipPart->getPosition() + glm::vec3(xOff, 0.0f, zOff);
+			fire2->setPos(glm::vec3(newPos.x, m_terrainGenerator->GetHeight(newPos.x, newPos.z), newPos.z));
 			m_effects.push_back(fire2);
 		}
 
@@ -512,8 +514,8 @@ void StateGameplay::Update(float p_fDelta)
 
 	wolf::BulletPhysicsManager::Instance()->Update(p_fDelta);
 
-	// m_hunger = glm::max(m_hunger - (p_fDelta * (rand() % 2)), 0.0f);
-	// m_thirst = glm::max(m_thirst - p_fDelta * (rand() % 2), 0.0f);
+	m_hunger = glm::max(m_hunger - (p_fDelta * (rand() % 2)), 0.0f);
+	m_thirst = glm::max(m_thirst - p_fDelta * (rand() % 2), 0.0f);
 
 	int hunger = (int)m_hunger;
 	int thirst = (int)m_thirst;
@@ -943,7 +945,6 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 				terrain->getProgram()->SetUniform("u_spotLightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
 			}
 		}
-
 		model->render(mProj, mView, camera->GetViewDirection());
 	}
 
@@ -1103,23 +1104,23 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 		if (model->isDestroyed())
 			continue;
 
-		std::sort(m_lights.begin(), m_lights.end(), [this, model](const Light *lhs, const Light *rhs) -> bool
-				  { return _isEffectiveLight(lhs, rhs, model); });
+		// std::sort(m_lights.begin(), m_lights.end(), [this, model](const Light *lhs, const Light *rhs) -> bool
+		// 		  { return _isEffectiveLight(lhs, rhs, model); });
 
-		for (int i = 0; i < 4; i++)
-		{
-			// Point lights
-			Light *pLight = m_lights[i];
-			if (pLight->enabled)
-			{
-				m_worldProgram->SetUniform("u_lightPosRange" + std::to_string(i + 1), pLight->posRange);
-				m_worldProgram->SetUniform("u_lightColor" + std::to_string(i + 1), pLight->color);
-				m_worldProgram->SetUniform("u_lightAttenuation" + std::to_string(i + 1), pLight->attenuation);
-				model->getMaterial()->SetUniform("u_lightPosRange" + std::to_string(i + 1), pLight->posRange);
-				model->getMaterial()->SetUniform("u_lightColor" + std::to_string(i + 1), pLight->color);
-				model->getMaterial()->SetUniform("u_lightAttenuation" + std::to_string(i + 1), pLight->attenuation);
-			}
-		}
+		// for (int i = 0; i < 4; i++)
+		// {
+		// 	// Point lights
+		// 	Light *pLight = m_lights[i];
+		// 	if (pLight->enabled)
+		// 	{
+		// 		m_worldProgram->SetUniform("u_lightPosRange" + std::to_string(i + 1), pLight->posRange);
+		// 		m_worldProgram->SetUniform("u_lightColor" + std::to_string(i + 1), pLight->color);
+		// 		m_worldProgram->SetUniform("u_lightAttenuation" + std::to_string(i + 1), pLight->attenuation);
+		// 		model->getMaterial()->SetUniform("u_lightPosRange" + std::to_string(i + 1), pLight->posRange);
+		// 		model->getMaterial()->SetUniform("u_lightColor" + std::to_string(i + 1), pLight->color);
+		// 		model->getMaterial()->SetUniform("u_lightAttenuation" + std::to_string(i + 1), pLight->attenuation);
+		// 	}
+		// }
 
 		// Spot Light
 		if (m_spotlight->enabled)

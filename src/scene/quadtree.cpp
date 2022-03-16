@@ -39,7 +39,7 @@ void Quadtree::AddNode(Node *node)
 
     m_nodes.push_back(node);
 
-    if (m_isLeaf && m_nodes.size() > QuadtreeLimits::minNodes && m_level < QuadtreeLimits::maxLevel)
+    if (m_isLeaf && m_nodes.size() > QuadtreeLimits::minNodes && m_level < 4)
     {
         _subdivide();
     }
@@ -131,16 +131,16 @@ void Quadtree::_subdivide()
     MINX MINZ    CENTX MINZ     MAXX MINZ
     */
 
-    m_children[TopLeft] = new Quadtree(m_level + 1, BoundingBox(glm::vec3(min.x, 0, center.z),
+    m_children[TopLeft] = new Quadtree(m_level + 1, BoundingBox(glm::vec3(min.x, -QuadtreeLimits::treeHeight, center.z),
                                                                 glm::vec3(center.x, QuadtreeLimits::treeHeight, max.z)));
 
-    m_children[TopRight] = new Quadtree(m_level + 1, BoundingBox(glm::vec3(center.x, 0, center.z),
+    m_children[TopRight] = new Quadtree(m_level + 1, BoundingBox(glm::vec3(center.x, -QuadtreeLimits::treeHeight, center.z),
                                                                  glm::vec3(max.x, QuadtreeLimits::treeHeight, max.z)));
 
-    m_children[BottomLeft] = new Quadtree(m_level + 1, BoundingBox(glm::vec3(min.x, 0, min.z),
+    m_children[BottomLeft] = new Quadtree(m_level + 1, BoundingBox(glm::vec3(min.x, -QuadtreeLimits::treeHeight, min.z),
                                                                    glm::vec3(center.x, QuadtreeLimits::treeHeight, center.z)));
 
-    m_children[BottomRight] = new Quadtree(m_level + 1, BoundingBox(glm::vec3(center.x, 0, min.z),
+    m_children[BottomRight] = new Quadtree(m_level + 1, BoundingBox(glm::vec3(center.x, -QuadtreeLimits::treeHeight, min.z),
                                                                     glm::vec3(max.x, QuadtreeLimits::treeHeight, center.z)));
 
     m_isLeaf = false;

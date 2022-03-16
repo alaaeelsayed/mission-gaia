@@ -70,7 +70,7 @@ void Scene::BuildQuadtree()
 {
     if (m_quadtree)
         delete m_quadtree;
-    m_quadtree = new Quadtree(0, BoundingBox(glm::vec3(-200, 0, -200), glm::vec3(200, QuadtreeLimits::treeHeight, 200)));
+    m_quadtree = new Quadtree(0, BoundingBox(glm::vec3(-10000, -QuadtreeLimits::treeHeight, -10000), glm::vec3(10000, QuadtreeLimits::treeHeight, 10000)));
 
     for (Node *node : m_nodes)
     {
@@ -122,8 +122,8 @@ void Scene::Update(float dt)
     const glm::mat4 &mProj = m_activeCamera->GetProjMatrix(m_width, m_height);
     const glm::mat4 &mView = m_activeCamera->GetViewMatrix();
 
-    // m_objectsToRender = Culling::Instance()->DoCulling(m_quadtree, mProj, mView);
-    m_objectsToRender = m_nodes;
+    m_objectsToRender = Culling::Instance()->DoCulling(m_quadtree, mProj, mView);
+    // m_objectsToRender = m_nodes;
 
     m_rotation += dt * 0.06f;
 }

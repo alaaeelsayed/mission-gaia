@@ -45,7 +45,7 @@ private:
     static const unsigned short gs_bitRevMasks[];
 
     // Phillips Spectrum Variables (Wind)
-    int N = 512;
+    int N = 256;
     int L = 756;
     float A = 57.7f;
     glm::vec3 W = glm::vec3(0.54f, 0.84f, 0.0f);

@@ -18,7 +18,14 @@ Model::Model(const std::string &modelPath, const std::string &matName)
     m_pMat->SetDepthWrite(true);
 
     m_pMat->SetUniform("u_lightDir", Scene::Instance()->GetLightDirection());
-    m_pMat->SetUniform("u_ambientLight", glm::vec3(0.3f, 0.21f, 0.11f));
+    if (matName.compare("super-dim") == 0)
+    {
+        m_pMat->SetUniform("u_ambientLight", glm::vec3(0.0f, 0.0f, 0.0f));
+    }
+    else
+    {
+        m_pMat->SetUniform("u_ambientLight", glm::vec3(0.3f, 0.21f, 0.11f));
+    }
     m_pMat->SetUniform("u_specularColor", glm::vec3(0.3f, 0.3f, 0.3f));
     m_pMat->SetUniform("u_shininess", 0.4f);
 
@@ -146,5 +153,6 @@ void Model::render(const glm::mat4 &mProj, const glm::mat4 &mView, const glm::ve
                        glm::mat4_cast(radRotation) * glm::scale(m_vScale);
 
     m_pMat->SetUniform("u_viewPos", mViewPos);
+
     m_pModel->Render(mWorld, mView, mProj);
 }
