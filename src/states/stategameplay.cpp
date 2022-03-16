@@ -1190,10 +1190,6 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 
 	// CURRENT MODEL FOR TESTING
 	// Effect *curModel = m_blueTrailEffect;
-<<<<<<< HEAD
-=======
-
->>>>>>> c29611c97c9c0c7fccf08815d3bc12a0751d2b81
 	// ImGui::End();
 	// ImGui::Render();
 	// ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
