@@ -72,4 +72,14 @@ namespace Util
         float l3 = 1.0f - l1 - l2;
         return l1 * firstPos.y + l2 * secondPos.y + l3 * thirdPos.y;
     }
+
+    static bool isAllTrue(std::vector<bool> arr)
+    {
+        for (int i = 0; i < arr.size(); i++)
+        {
+            if (!arr[i])
+                return false;
+        }
+        return true;
+    }
 };

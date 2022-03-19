@@ -115,6 +115,7 @@ void StateGameplay::Enter(std::string arg)
 	if (!m_worldProgram)
 	{
 
+		srand(time(NULL));
 		wolf::BulletPhysicsManager::CreateInstance("data/physics/physics_materials.xml",
 												   "data/shaders/lines.vsh",
 												   "data/shaders/lines.fsh");
@@ -341,26 +342,6 @@ void StateGameplay::Enter(std::string arg)
 		m_shipParts.push_back(m_part3);
 		m_shipParts.push_back(m_part4);
 
-		for (Model *shipPart : m_shipParts)
-		{
-			// Fire near ship parts
-			int xOff = _randomNum(-5, 5);
-			int zOff = _randomNum(-10, 10);
-
-			Effect *fire1 = new Effect(m_firepath);
-			glm::vec3 newPos = shipPart->getPosition() + glm::vec3(xOff, 0.0f, zOff);
-			fire1->setPos(glm::vec3(newPos.x, m_terrainGenerator->GetHeight(newPos.x, newPos.z), newPos.z));
-			m_effects.push_back(fire1);
-
-			xOff = _randomNum(-5, 5);
-			zOff = _randomNum(-10, 10);
-
-			Effect *fire2 = new Effect(m_firepath);
-			newPos = shipPart->getPosition() + glm::vec3(xOff, 0.0f, zOff);
-			fire2->setPos(glm::vec3(newPos.x, m_terrainGenerator->GetHeight(newPos.x, newPos.z), newPos.z));
-			m_effects.push_back(fire2);
-		}
-
 		m_numParts = 4;
 
 		// parts collected label
@@ -392,6 +373,26 @@ void StateGameplay::Enter(std::string arg)
 		m_models.push_back(m_part2);
 		m_models.push_back(m_part3);
 		m_models.push_back(m_part4);
+
+		for (Model *shipPart : m_shipParts)
+		{
+			// Fire near ship parts
+			int xOff = _randomNum(-5, 5);
+			int zOff = _randomNum(-10, 10);
+
+			Effect *fire1 = new Effect(m_firepath);
+			glm::vec3 newPos = shipPart->getPosition() + glm::vec3(xOff, 0.0f, zOff);
+			fire1->setPos(glm::vec3(newPos.x, m_terrainGenerator->GetHeight(newPos.x, newPos.z), newPos.z));
+			m_effects.push_back(fire1);
+
+			xOff = _randomNum(-5, 5);
+			zOff = _randomNum(-10, 10);
+
+			Effect *fire2 = new Effect(m_firepath);
+			newPos = shipPart->getPosition() + glm::vec3(xOff, 0.0f, zOff);
+			fire2->setPos(glm::vec3(newPos.x, m_terrainGenerator->GetHeight(newPos.x, newPos.z), newPos.z));
+			m_effects.push_back(fire2);
+		}
 
 		for (int i = 0; i < 40; i++)
 		{
@@ -496,7 +497,7 @@ void StateGameplay::Update(float p_fDelta)
 	m_miniCamera->SetPosition(camera->GetPosition() + glm::vec3(0.0f, 500.0f, 0.0f));
 
 	// m_miniCamera->Update(p_fDelta);
-	m_characterBox->SetPos(glm::vec3(width - width / 8, height - height / 8, 0.0f));
+	// m_characterBox->SetPos(glm::vec3(width - width / 8, height - height / 8, 0.0f));
 	// glViewport(screenSize.x - screenSize.x / 4, screenSize.y - screenSize.y / 4, screenSize.x / 4, screenSize.y / 4);
 
 	// Set camera to floorcamera->GetPosition() + glm::vec3(0.0f, 700.0f, 0.0f)
@@ -504,7 +505,7 @@ void StateGameplay::Update(float p_fDelta)
 	float camY = camera->GetPosition().y;
 	float camZ = camera->GetPosition().z;
 
-	// camera->SetPosition(glm::vec3(camX, m_terrainGenerator->GetHeight(int(camX), int(camZ)) + 5.0f, camZ));
+	camera->SetPosition(glm::vec3(camX, m_terrainGenerator->GetHeight(int(camX), int(camZ)) + 5.0f, camZ));
 
 	// Attach spotlight
 	m_spotlight->posRange = glm::vec4(camX, camY, camZ, m_spotlight->posRange.w);
@@ -717,10 +718,12 @@ void StateGameplay::Update(float p_fDelta)
 		m_gravityKeyDown = false;
 
 	// CHECK IF NEAR WATER
+	std::vector<bool> results;
 	for (Water *water : m_waters)
 	{
-		m_nearWater = Util::inProximity(water->GetPos(), camera->GetPosition(), glm::vec3(m_terrainSize / 4, 5.0f, m_terrainSize / 4));
+		results.push_back(Util::inProximity(water->GetPos(), camera->GetPosition(), glm::vec3(m_terrainSize / 4, 10.0f, m_terrainSize / 4)));
 	}
+	m_nearWater = Util::isAllTrue(results);
 
 	if (m_nearWater && m_app->isKeyDown('E') && !m_drinking)
 	{
