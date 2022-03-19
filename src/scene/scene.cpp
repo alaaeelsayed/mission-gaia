@@ -68,6 +68,7 @@ Common::StateMachine *Scene::GetStateMachine()
 
 void Scene::BuildQuadtree()
 {
+
     if (m_quadtree)
         delete m_quadtree;
     m_quadtree = new Quadtree(0, BoundingBox(glm::vec3(-10000, -QuadtreeLimits::treeHeight, -10000), glm::vec3(10000, QuadtreeLimits::treeHeight, 10000)));

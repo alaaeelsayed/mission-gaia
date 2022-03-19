@@ -42,9 +42,24 @@ StateGameplay::~StateGameplay()
 
 	delete m_soundManager;
 
-	for (Terrain *terrain : m_terrains)
+	std::vector<Terrain *> terrains;
+	transform(m_terrainMap.begin(), m_terrainMap.end(), back_inserter(terrains),
+			  [](const std::map<std::pair<int, int>, Terrain *>::value_type &val)
+			  { return val.second; });
+
+	for (Terrain *terrain : terrains)
 	{
 		delete terrain;
+	}
+
+	std::vector<Water *> waters;
+	transform(m_waterMap.begin(), m_waterMap.end(), back_inserter(waters),
+			  [](const std::map<std::pair<int, int>, Water *>::value_type &val)
+			  { return val.second; });
+
+	for (Water *water : waters)
+	{
+		delete water;
 	}
 
 	for (Model *model : m_models)
@@ -60,6 +75,11 @@ StateGameplay::~StateGameplay()
 	for (Effect *effect : m_effects)
 	{
 		delete effect;
+	}
+
+	for (std::thread &thread : m_threads)
+	{
+		thread.join();
 	}
 
 	delete m_blueTrailEffect;
@@ -211,27 +231,7 @@ void StateGameplay::Enter(std::string arg)
 		m_terrainRoughness = m_terrainGenerator->GetRoughness();
 		m_terrainAmplitude = m_terrainGenerator->GetAmplitude();
 
-		for (int i = -2; i < 2; i++)
-		{
-			for (int j = -2; j < 2; j++)
-			{
-				Terrain *terrain = new Terrain(i, j, m_terrainGenerator);
-				m_terrains.push_back(terrain);
-				Scene::Instance()->AddNode(terrain);
-				printf("Got dat %f", terrain->GetBoundingBox().GetMin().y);
-				if (terrain->GetBoundingBox().GetMin().y < -44.0f)
-				{
-					printf("%f %f", terrain->GetPos().x, terrain->GetPos().z);
-					// Water
-					Water *water = new Water();
-					water->SetScale(glm::vec3(m_terrainSize, 0.0f, m_terrainSize));
-					water->SetPos(glm::vec3(terrain->GetPos().x + m_terrainSize / 2.0f, -35.0f, terrain->GetPos().z + m_terrainSize / 2.0f));
-					m_waters.push_back(water);
-					Scene::Instance()->AddNode(water);
-					m_soundManager->Play3D("Water", m_waterSoundPath, water->GetPos(), 10.0f, true);
-				}
-			}
-		}
+		_generateTerrain(-2, 2);
 
 		for (int i = 0; i < 80; i++)
 		{
@@ -716,10 +716,25 @@ void StateGameplay::Update(float p_fDelta)
 	if (!m_app->isKeyDown('G'))
 		m_gravityKeyDown = false;
 
-	// CHECK IF NEAR WATER
-	for (Water *water : m_waters)
+	int chunkX = camera->GetPosition().x / m_terrainSize;
+	int chunkZ = camera->GetPosition().z / m_terrainSize;
+	if (!_inRange(chunkX - 2, chunkZ + 2))
 	{
-		m_nearWater = Util::inProximity(water->GetPos(), camera->GetPosition(), glm::vec3(m_terrainSize / 4, 5.0f, m_terrainSize / 4));
+		_generateTerrain(chunkX - 2, chunkZ + 2);
+		// std::thread terrainThread(&StateGameplay::_generateTerrain, this, chunkX - 2, chunkZ + 2);
+		// terrainThread.detach();
+		// m_threads.push_back(std::move(terrainThread));
+	}
+
+	std::vector<Water *> waters;
+	transform(m_waterMap.begin(), m_waterMap.end(), back_inserter(waters),
+			  [](const std::map<std::pair<int, int>, Water *>::value_type &val)
+			  { return val.second; });
+
+	// CHECK IF NEAR WATER
+	for (Water *water : waters)
+	{
+		m_nearWater = m_nearWater || Util::inProximity(water->GetPos(), camera->GetPosition(), glm::vec3(m_terrainSize / 4, 5.0f, m_terrainSize / 4));
 	}
 
 	if (m_nearWater && m_app->isKeyDown('E') && !m_drinking)
@@ -868,6 +883,8 @@ void StateGameplay::Update(float p_fDelta)
 		m_gravityForcefield->setPos(m_gravityItem->getPosition());
 	}
 	m_blueTrailEffect->update(p_fDelta);
+
+	Scene::Instance()->BuildQuadtree();
 }
 
 void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
@@ -919,14 +936,6 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 			model->getMaterial()->SetUniform("u_lightColor", m_spotlight->color);
 			model->getMaterial()->SetUniform("u_lightSpot", m_spotlight->lightSpot);
 			model->getMaterial()->SetUniform("u_lightAttenuation", m_spotlight->attenuation);
-
-			for (Terrain *terrain : m_terrains)
-			{
-				terrain->getProgram()->SetUniform("u_spotLightPosRange", m_spotlight->posRange);
-				terrain->getProgram()->SetUniform("u_spotLightColor", m_spotlight->color);
-				terrain->getProgram()->SetUniform("u_spotLightSpot", m_spotlight->lightSpot);
-				terrain->getProgram()->SetUniform("u_spotLightAttenuation", m_spotlight->attenuation);
-			}
 		}
 		else
 		{
@@ -937,16 +946,29 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 			model->getMaterial()->SetUniform("u_lightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
 			model->getMaterial()->SetUniform("u_lightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
 			model->getMaterial()->SetUniform("u_lightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
-
-			for (Terrain *terrain : m_terrains)
-			{
-				terrain->getProgram()->SetUniform("u_spotLightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-				terrain->getProgram()->SetUniform("u_spotLightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-				terrain->getProgram()->SetUniform("u_spotLightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
-			}
 		}
 		model->render(mProj, mView, camera->GetViewDirection());
 	}
+
+	glm::vec4 spotLightPosRange = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+	glm::vec4 spotLightSpot = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+	glm::vec3 spotLightAttenuation = glm::vec3(1.0f, 1.0f, 1.0f);
+	glm::vec3 spotLightColor = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	if (m_spotlight->enabled)
+	{
+		spotLightPosRange = m_spotlight->posRange;
+		spotLightSpot = m_spotlight->lightSpot;
+		spotLightAttenuation = m_spotlight->attenuation;
+		spotLightColor = m_spotlight->color;
+	}
+
+	Terrain *terrain = m_terrainMap[std::make_pair(camera->GetPosition().x / m_terrainSize, camera->GetPosition().z / m_terrainSize)];
+
+	terrain->getProgram()->SetUniform("u_spotLightPosRange", spotLightPosRange);
+	terrain->getProgram()->SetUniform("u_spotLightColor", spotLightColor);
+	terrain->getProgram()->SetUniform("u_spotLightSpot", spotLightSpot);
+	terrain->getProgram()->SetUniform("u_spotLightAttenuation", spotLightAttenuation);
 
 	wolf::BulletPhysicsManager::Instance()->Render(mProj, mView);
 
@@ -1089,7 +1111,12 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 	m_skybox->Render(miniProj, miniView);
 	m_ship->render(miniProj, miniView);
 
-	for (Terrain *terrain : m_terrains)
+	std::vector<Terrain *> terrains;
+	transform(m_terrainMap.begin(), m_terrainMap.end(), back_inserter(terrains),
+			  [](const std::map<std::pair<int, int>, Terrain *>::value_type &val)
+			  { return val.second; });
+
+	for (Terrain *terrain : terrains)
 	{
 		terrain->Render(miniProj, miniView);
 	}
@@ -1099,70 +1126,70 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 		effect->render(miniProj, miniView);
 	}
 
-	for (Model *model : m_models)
-	{
-		if (model->isDestroyed())
-			continue;
+	// for (Model *model : m_models)
+	// {
+	// 	if (model->isDestroyed())
+	// 		continue;
 
-		// std::sort(m_lights.begin(), m_lights.end(), [this, model](const Light *lhs, const Light *rhs) -> bool
-		// 		  { return _isEffectiveLight(lhs, rhs, model); });
+	// 	// std::sort(m_lights.begin(), m_lights.end(), [this, model](const Light *lhs, const Light *rhs) -> bool
+	// 	// 		  { return _isEffectiveLight(lhs, rhs, model); });
 
-		// for (int i = 0; i < 4; i++)
-		// {
-		// 	// Point lights
-		// 	Light *pLight = m_lights[i];
-		// 	if (pLight->enabled)
-		// 	{
-		// 		m_worldProgram->SetUniform("u_lightPosRange" + std::to_string(i + 1), pLight->posRange);
-		// 		m_worldProgram->SetUniform("u_lightColor" + std::to_string(i + 1), pLight->color);
-		// 		m_worldProgram->SetUniform("u_lightAttenuation" + std::to_string(i + 1), pLight->attenuation);
-		// 		model->getMaterial()->SetUniform("u_lightPosRange" + std::to_string(i + 1), pLight->posRange);
-		// 		model->getMaterial()->SetUniform("u_lightColor" + std::to_string(i + 1), pLight->color);
-		// 		model->getMaterial()->SetUniform("u_lightAttenuation" + std::to_string(i + 1), pLight->attenuation);
-		// 	}
-		// }
+	// 	// for (int i = 0; i < 4; i++)
+	// 	// {
+	// 	// 	// Point lights
+	// 	// 	Light *pLight = m_lights[i];
+	// 	// 	if (pLight->enabled)
+	// 	// 	{
+	// 	// 		m_worldProgram->SetUniform("u_lightPosRange" + std::to_string(i + 1), pLight->posRange);
+	// 	// 		m_worldProgram->SetUniform("u_lightColor" + std::to_string(i + 1), pLight->color);
+	// 	// 		m_worldProgram->SetUniform("u_lightAttenuation" + std::to_string(i + 1), pLight->attenuation);
+	// 	// 		model->getMaterial()->SetUniform("u_lightPosRange" + std::to_string(i + 1), pLight->posRange);
+	// 	// 		model->getMaterial()->SetUniform("u_lightColor" + std::to_string(i + 1), pLight->color);
+	// 	// 		model->getMaterial()->SetUniform("u_lightAttenuation" + std::to_string(i + 1), pLight->attenuation);
+	// 	// 	}
+	// 	// }
 
-		// Spot Light
-		if (m_spotlight->enabled)
-		{
-			m_worldProgram->SetUniform("u_lightPosRange", m_spotlight->posRange);
-			m_worldProgram->SetUniform("u_lightColor", m_spotlight->color);
-			m_worldProgram->SetUniform("u_lightSpot", m_spotlight->lightSpot);
-			m_worldProgram->SetUniform("u_lightAttenuation", m_spotlight->attenuation);
+	// 	// Spot Light
+	// 	if (m_spotlight->enabled)
+	// 	{
+	// 		m_worldProgram->SetUniform("u_lightPosRange", m_spotlight->posRange);
+	// 		m_worldProgram->SetUniform("u_lightColor", m_spotlight->color);
+	// 		m_worldProgram->SetUniform("u_lightSpot", m_spotlight->lightSpot);
+	// 		m_worldProgram->SetUniform("u_lightAttenuation", m_spotlight->attenuation);
 
-			model->getMaterial()->SetUniform("u_lightPosRange", m_spotlight->posRange);
-			model->getMaterial()->SetUniform("u_lightColor", m_spotlight->color);
-			model->getMaterial()->SetUniform("u_lightSpot", m_spotlight->lightSpot);
-			model->getMaterial()->SetUniform("u_lightAttenuation", m_spotlight->attenuation);
+	// 		model->getMaterial()->SetUniform("u_lightPosRange", m_spotlight->posRange);
+	// 		model->getMaterial()->SetUniform("u_lightColor", m_spotlight->color);
+	// 		model->getMaterial()->SetUniform("u_lightSpot", m_spotlight->lightSpot);
+	// 		model->getMaterial()->SetUniform("u_lightAttenuation", m_spotlight->attenuation);
 
-			for (Terrain *terrain : m_terrains)
-			{
-				terrain->getProgram()->SetUniform("u_spotLightPosRange", m_spotlight->posRange);
-				terrain->getProgram()->SetUniform("u_spotLightColor", m_spotlight->color);
-				terrain->getProgram()->SetUniform("u_spotLightSpot", m_spotlight->lightSpot);
-				terrain->getProgram()->SetUniform("u_spotLightAttenuation", m_spotlight->attenuation);
-			}
-		}
-		else
-		{
-			m_worldProgram->SetUniform("u_lightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-			m_worldProgram->SetUniform("u_lightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-			m_worldProgram->SetUniform("u_lightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
+	// 		for (Terrain *terrain : m_terrains)
+	// 		{
+	// 			terrain->getProgram()->SetUniform("u_spotLightPosRange", m_spotlight->posRange);
+	// 			terrain->getProgram()->SetUniform("u_spotLightColor", m_spotlight->color);
+	// 			terrain->getProgram()->SetUniform("u_spotLightSpot", m_spotlight->lightSpot);
+	// 			terrain->getProgram()->SetUniform("u_spotLightAttenuation", m_spotlight->attenuation);
+	// 		}
+	// 	}
+	// 	else
+	// 	{
+	// 		m_worldProgram->SetUniform("u_lightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+	// 		m_worldProgram->SetUniform("u_lightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+	// 		m_worldProgram->SetUniform("u_lightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
 
-			model->getMaterial()->SetUniform("u_lightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-			model->getMaterial()->SetUniform("u_lightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-			model->getMaterial()->SetUniform("u_lightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
+	// 		model->getMaterial()->SetUniform("u_lightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+	// 		model->getMaterial()->SetUniform("u_lightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+	// 		model->getMaterial()->SetUniform("u_lightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
 
-			for (Terrain *terrain : m_terrains)
-			{
-				terrain->getProgram()->SetUniform("u_spotLightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-				terrain->getProgram()->SetUniform("u_spotLightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
-				terrain->getProgram()->SetUniform("u_spotLightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
-			}
-		}
+	// 		for (Terrain *terrain : m_terrains)
+	// 		{
+	// 			terrain->getProgram()->SetUniform("u_spotLightPosRange", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+	// 			terrain->getProgram()->SetUniform("u_spotLightSpot", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+	// 			terrain->getProgram()->SetUniform("u_spotLightAttenuation", glm::vec3(1.0f, 1.0f, 1.0f));
+	// 		}
+	// 	}
 
-		model->render(miniProj, miniView, m_miniCamera->GetViewDirection());
-	}
+	// 	model->render(miniProj, miniView, m_miniCamera->GetViewDirection());
+	// }
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	// glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -1221,19 +1248,35 @@ bool StateGameplay::_isEffectiveLight(const Light *pLight1, const Light *pLight2
 	return glm::any(glm::lessThan(pLight1->attenuation, pLight2->attenuation)) && (fLight1Dist < fLight2Dist);
 }
 
-void StateGameplay::_renderTerrain()
+void StateGameplay::_generateTerrain(int rangeStart, int rangeEnd)
 {
-	for (Terrain *terrain : m_terrains)
+	for (int i = rangeStart; i < rangeEnd; i++)
 	{
-		delete terrain;
-	}
-	m_terrains.clear();
-	for (int i = 0; i < 4; i++)
-	{
-		for (int j = 0; j < 4; j++)
+		for (int j = rangeStart; j < rangeEnd; j++)
 		{
+			if (m_terrainMap[std::make_pair(i, j)])
+				continue;
+
 			Terrain *terrain = new Terrain(i, j, m_terrainGenerator);
-			m_terrains.push_back(terrain);
+			m_terrainMap[std::make_pair(i, j)] = terrain;
+			Scene::Instance()->AddNode(terrain);
+			if (terrain->GetBoundingBox().GetMin().y < -44.0f)
+			{
+				// Water
+				Water *water = new Water();
+				water->SetScale(glm::vec3(m_terrainSize, 0.0f, m_terrainSize));
+				water->SetPos(glm::vec3(terrain->GetPos().x + m_terrainSize / 2.0f, -35.0f, terrain->GetPos().z + m_terrainSize / 2.0f));
+				m_waterMap[std::make_pair(i, j)] = water;
+				Scene::Instance()->AddNode(water);
+				m_soundManager->Play3D("Water", m_waterSoundPath, water->GetPos(), 10.0f, true);
+			}
 		}
 	}
+	m_loadedStart = wolf::min(m_loadedStart, rangeStart);
+	m_loadedEnd = wolf::max(m_loadedEnd, rangeEnd);
+}
+
+bool StateGameplay::_inRange(int chunkX, int chunkZ)
+{
+	return chunkX > m_loadedStart && chunkX < m_loadedEnd && chunkZ > m_loadedStart && chunkZ < m_loadedEnd;
 }

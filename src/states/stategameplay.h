@@ -50,6 +50,8 @@ public:
 	virtual void Exit();
 
 private:
+	void _generateTerrain(int rangeStart, int rangeEnd);
+	bool _inRange(int chunkX, int chunkZ);
 	void _renderTerrain();
 	int _randomNum(int lowerBound, int upperBound);
 	float _randomFloat(float lo, float hi);
@@ -113,7 +115,12 @@ private:
 	GLfloat m_sunAngle = -60;
 
 	TerrainGenerator *m_terrainGenerator = 0;
-	std::vector<Terrain *> m_terrains;
+	std::map<std::pair<int, int>, Terrain *> m_terrainMap;
+
+	int m_loadedStart = 0;
+	int m_loadedEnd = 0;
+
+	std::vector<std::thread> m_threads;
 
 	Skybox *m_skybox = 0;
 
@@ -151,7 +158,7 @@ private:
 	int m_lightCount = 0;
 
 	// Water
-	std::vector<Water *> m_waters;
+	std::map<std::pair<int, int>, Water *> m_waterMap;
 
 	// Debug Menu
 	bool m_debug = true;
