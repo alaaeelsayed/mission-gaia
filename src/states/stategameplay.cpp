@@ -39,6 +39,7 @@ StateGameplay::~StateGameplay()
 	delete m_collectMorePartsText;
 	delete m_partsCollectedText;
 	delete m_stateMachine;
+	delete m_player;
 
 	delete m_soundManager;
 
@@ -213,6 +214,8 @@ void StateGameplay::Enter(std::string arg)
 		m_collectMorePartsText->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
 		m_collectMorePartsText->SetHorizontalAlignment(TextBox::Alignment::AL_Left);
 		m_collectMorePartsText->SetVerticalAlignment(TextBox::Alignment::AL_Top);
+
+		m_player = new Quad(m_playerIconPath);
 
 		m_spotlight = new Light();
 		m_spotlight->posRange = glm::vec4(0.0f, 0.0f, 0.0f, 100.0f);
@@ -450,7 +453,7 @@ void StateGameplay::Enter(std::string arg)
 		m_soundManager->CreateSoundSystem();
 
 		m_soundManager->Play3D("fire", m_fireSound, m_ship->getPosition(), 10.0f, true);
-		m_soundManager->Play2D("Nature", m_natureSoundPath, true);
+		// m_soundManager->Play2D("Nature", m_natureSoundPath, true);
 
 		// For Minimap
 		m_characterBox = new TextBox(100.0f, 100.0f);
@@ -478,6 +481,8 @@ void StateGameplay::Enter(std::string arg)
 
 void StateGameplay::Update(float p_fDelta)
 {
+	Camera *camera = Scene::Instance()->GetActiveCamera();
+
 	glm::vec2 dimensions = m_app->getScreenSize();
 	float width = dimensions.x;
 	float height = dimensions.y;
@@ -485,13 +490,35 @@ void StateGameplay::Update(float p_fDelta)
 	m_nearCollectible = false;
 	m_nearFood = false;
 
+	// Was attacked
+	if (m_force > 0.0f)
+	{
+		m_force = glm::max(m_force - (p_fDelta * 5.0f), 0.0f);
+		camera->SetPosition(camera->GetPosition() + glm::vec3(m_force, 0.0f, 0.0f));
+	}
+
+	// Letting go of enemy
+	if (m_gravityItem && !m_usingGravityGun)
+	{
+		glm::vec3 gravityItemPos = m_gravityItem->getPosition();
+		if (gravityItemPos.y > m_terrainGenerator->GetHeight(gravityItemPos.x, gravityItemPos.z))
+		{
+			m_gravityItem->setPosition(m_gravityItem->getPosition() - glm::vec3(0.0f, p_fDelta * 200.0f, 0.0f));
+		}
+		else
+		{
+			m_gravityItem = nullptr;
+			m_gravityGunForce = 0.0f;
+		}
+	}
+
+	m_player->Update(p_fDelta);
+
 	// Text boxes
 	m_partsCollectedText->SetPos(glm::vec3(width - m_miniWidth, height - height / 2, 0.0f));
 
 	m_thirstText->SetPos(glm::vec3(width / 14, height - height / 8, 0.0f));
 	m_hungerText->SetPos(glm::vec3(width / 14, height - height / 4, 0.0f));
-
-	Camera *camera = Scene::Instance()->GetActiveCamera();
 
 	m_miniCamera->SetRotation(glm::vec2(camera->GetRotation().x, -90.01f));
 	m_miniCamera->SetPosition(camera->GetPosition() + glm::vec3(0.0f, 500.0f, 0.0f));
@@ -641,7 +668,7 @@ void StateGameplay::Update(float p_fDelta)
 					{
 						m_soundManager->Play2D("pain", m_painSoundPath);
 						m_health -= 20.0f;
-						camera->SetPosition(modelPos + glm::vec3(20.0f, 0.0f, 0.0f));
+						m_force = 5.0f;
 					}
 				}
 				else
@@ -732,10 +759,23 @@ void StateGameplay::Update(float p_fDelta)
 			  [](const std::map<std::pair<int, int>, Water *>::value_type &val)
 			  { return val.second; });
 
-	// CHECK IF NEAR WATER
-	for (Water *water : waters)
+	// CHECK IF NEAR WATER (NOT THE BEST WAY)
+	int i = 0;
+	if (m_nearWater)
 	{
-		m_nearWater = m_nearWater || Util::inProximity(water->GetPos(), camera->GetPosition(), glm::vec3(m_terrainSize / 4, 5.0f, m_terrainSize / 4));
+		m_nearWater = Util::inProximity(waters[m_waterIndex]->GetPos(), camera->GetPosition(), glm::vec3(m_terrainSize, 3.0f, m_terrainSize));
+	}
+	else
+	{
+		for (Water *water : waters)
+		{
+			m_nearWater = m_nearWater || Util::inProximity(water->GetPos(), camera->GetPosition(), glm::vec3(m_terrainSize, 3.0f, m_terrainSize));
+			if (Util::inProximity(water->GetPos(), camera->GetPosition(), glm::vec3(m_terrainSize, 3.0f, m_terrainSize)))
+			{
+				m_waterIndex = i;
+			}
+			i++;
+		}
 	}
 
 	if (m_nearWater && m_app->isKeyDown('E') && !m_drinking)
@@ -785,7 +825,7 @@ void StateGameplay::Update(float p_fDelta)
 		if (m_usingGravityGun)
 		{
 			// let go of enemy
-			m_gravityItem = nullptr;
+			m_gravityGunForce = 5.0f;
 			m_usingGravityGun = false;
 		}
 		else
@@ -895,6 +935,8 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 	int height = dimensions.y;
 
 	Camera *camera = Scene::Instance()->GetActiveCamera();
+
+	m_player->Render(glm::ortho(0.0f, (float)dimensions.x, (float)dimensions.y, 0.0f), glm::mat4(1.0f));
 
 	m_worldProgram->SetUniform("u_lightDir", Scene::Instance()->GetLightDirection());
 	m_worldProgram->SetUniform("u_viewPos", camera->GetViewDirection());

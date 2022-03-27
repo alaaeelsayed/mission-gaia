@@ -19,6 +19,8 @@
 #include "../../samplefw/Sphere.h"
 #include "../particles/effect.h"
 
+#include "../obj/quad.h"
+
 #include "../../irrklang/include/irrKlang.h"
 
 class Model;
@@ -101,6 +103,8 @@ private:
 	Model *m_flashlight = nullptr;
 	Model *m_gravityGun = nullptr;
 	bool m_attackingEnemy = false;
+	float m_force = 0.0f;
+	float m_gravityGunForce = 0.0f;
 	Light *m_spotlight = nullptr;
 
 	wolf::SoundManager *m_soundManager = nullptr;
@@ -151,6 +155,8 @@ private:
 	TextBox *m_eatText;
 
 	bool m_nearWater = false;
+	int m_waterIndex = 0;
+
 	bool m_nearFood = false;
 	bool m_nearCollectible = false;
 	bool m_nearShip = false;
@@ -194,6 +200,8 @@ private:
 	Effect *m_gravityForcefield = nullptr;
 
 	// For Minimap
+	Quad *m_player = nullptr;
+	std::string m_playerIconPath = "data/textures/hud/arrow.png";
 	float m_miniWidth = 400.0f;
 	float m_miniHeight = 300.0f;
 	wolf::FrameBuffer *m_frameBuffer;
