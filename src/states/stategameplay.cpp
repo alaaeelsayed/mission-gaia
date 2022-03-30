@@ -505,7 +505,7 @@ void StateGameplay::Update(float p_fDelta)
 	float camY = camera->GetPosition().y;
 	float camZ = camera->GetPosition().z;
 
-	camera->SetPosition(glm::vec3(camX, m_terrainGenerator->GetHeight(int(camX), int(camZ)) + 5.0f, camZ));
+	// camera->SetPosition(glm::vec3(camX, m_terrainGenerator->GetHeight(int(camX), int(camZ)) + 5.0f, camZ));
 
 	// Attach spotlight
 	m_spotlight->posRange = glm::vec4(camX, camY, camZ, m_spotlight->posRange.w);
@@ -719,9 +719,17 @@ void StateGameplay::Update(float p_fDelta)
 
 	int chunkX = camera->GetPosition().x / m_terrainSize;
 	int chunkZ = camera->GetPosition().z / m_terrainSize;
-	if (!_inRange(chunkX - 2, chunkZ + 2))
+	if (!_inRange(chunkX + 2, chunkZ + 2) ||
+		!_inRange(chunkX - 2, chunkZ - 2) ||
+		!_inRange(chunkX, chunkZ + 2) ||
+		!_inRange(chunkX, chunkZ - 2) ||
+		!_inRange(chunkX + 2, chunkZ) ||
+		!_inRange(chunkX - 2, chunkZ) ||
+		!_inRange(chunkX - 2, chunkZ + 2) ||
+		!_inRange(chunkX + 2, chunkZ - 2))
 	{
-		_generateTerrain(chunkX - 2, chunkZ + 2);
+		_generateTerrain(chunkX - 2, chunkX + 2);
+		_generateTerrain(chunkZ - 2, chunkZ + 2);
 		// std::thread terrainThread(&StateGameplay::_generateTerrain, this, chunkX - 2, chunkZ + 2);
 		// terrainThread.detach();
 		// m_threads.push_back(std::move(terrainThread));
@@ -1251,9 +1259,9 @@ bool StateGameplay::_isEffectiveLight(const Light *pLight1, const Light *pLight2
 
 void StateGameplay::_generateTerrain(int rangeStart, int rangeEnd)
 {
-	for (int i = rangeStart; i < rangeEnd; i++)
+	for (int i = rangeStart; i <= rangeEnd; i++)
 	{
-		for (int j = rangeStart; j < rangeEnd; j++)
+		for (int j = rangeStart; j <= rangeEnd; j++)
 		{
 			if (m_terrainMap[std::make_pair(i, j)])
 				continue;
