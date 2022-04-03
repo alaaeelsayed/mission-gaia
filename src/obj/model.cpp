@@ -8,7 +8,7 @@ Model::~Model()
     delete m_pRigidBody;
 }
 
-Model::Model(const std::string &modelPath, const std::string &matName)
+Model::Model(const std::string &modelPath, const std::string &matName, bool skinned) : Node(BoundingBox())
 {
 
     const std::string MATNAME = modelPath + matName;
@@ -30,7 +30,10 @@ Model::Model(const std::string &modelPath, const std::string &matName)
     m_pMat->SetUniform("u_shininess", 0.4f);
 
     SingleMaterialProvider matProvider(MATNAME);
-    m_pModel = new wolf::Model(modelPath, matProvider);
+    if (skinned)
+        m_pModel = new wolf::SkinnedModel(modelPath, matProvider);
+    else
+        m_pModel = new wolf::Model(modelPath, matProvider);
 }
 
 void Model::attachRigidBody(const std::string &p_sConfiguration)
@@ -113,8 +116,12 @@ glm::vec3 Model::getScale()
     return m_vScale;
 }
 
-void Model::update(float fDelta)
+void Model::Update(float fDelta)
 {
+
+    GetBoundingBox().SetMin(m_pModel->getAABBMin() * m_vScale);
+    GetBoundingBox().SetMax(m_pModel->getAABBMax() * m_vScale);
+
     if (m_pRigidBody)
     {
         glm::vec3 newPos = m_pRigidBody->Update(fDelta, m_vPosition);
@@ -129,6 +136,8 @@ void Model::update(float fDelta)
     {
         m_pLight->posRange = glm::vec4(m_vPosition.x, m_vPosition.y, m_vPosition.z, m_pLight->posRange.w);
     }
+
+    m_pModel->Update(fDelta);
 }
 
 void Model::damage(float hp)
@@ -145,14 +154,14 @@ bool Model::isDestroyed()
     return m_isDestroyed;
 }
 
-void Model::render(const glm::mat4 &mProj, const glm::mat4 &mView, const glm::vec3 &mViewPos)
+void Model::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 {
     glm::quat radRotation = glm::quat(glm::vec3(DEG_TO_RAD(m_vRotation.x), DEG_TO_RAD(m_vRotation.y), DEG_TO_RAD(m_vRotation.z)));
 
     glm::mat4 mWorld = glm::translate(glm::mat4(1.0f), m_vPosition - m_vOffset) *
                        glm::mat4_cast(radRotation) * glm::scale(m_vScale);
 
-    m_pMat->SetUniform("u_viewPos", mViewPos);
+    // m_pMat->SetUniform("u_viewPos", mViewPos);
 
     m_pModel->Render(mWorld, mView, mProj);
 }

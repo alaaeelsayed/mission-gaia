@@ -19,6 +19,7 @@
 #include "../../samplefw/Sphere.h"
 #include "../particles/effect.h"
 
+#include "../obj/triangle.h"
 #include "../obj/quad.h"
 
 #include "../../irrklang/include/irrKlang.h"
@@ -120,6 +121,7 @@ private:
 
 	TerrainGenerator *m_terrainGenerator = 0;
 	std::map<std::pair<int, int>, Terrain *> m_terrainMap;
+	Terrain::Biome m_curBiome = Terrain::Regular;
 
 	int m_loadedStart = 0;
 	int m_loadedEnd = 0;
@@ -130,7 +132,7 @@ private:
 
 	bool m_keyDown = false;
 	bool m_gravityKeyDown = false;
-	bool m_shipBeepDown = false;
+	bool m_scannerButtonDown = false;
 	bool m_debugDown = false;
 	bool m_flashlightEquipped = false;
 	bool m_gravityGunEquipped = false;
@@ -200,13 +202,15 @@ private:
 	Effect *m_gravityForcefield = nullptr;
 
 	// For Minimap
-	Quad *m_player = nullptr;
+	Triangle *m_playerIcon = nullptr;
+	Quad *m_shipIcon = nullptr;
 	std::string m_playerIconPath = "data/textures/hud/arrow.png";
 	float m_miniWidth = 400.0f;
 	float m_miniHeight = 300.0f;
 	wolf::FrameBuffer *m_frameBuffer;
 	OrthoCamera *m_miniCamera = nullptr;
 	TextBox *m_characterBox = nullptr;
+	Effect *m_scannerEffect = nullptr;
 
 	// Model positioning (testing only)
 	float x = 0.0f;

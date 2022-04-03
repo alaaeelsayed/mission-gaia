@@ -21,6 +21,20 @@ public:
     void update(float p_fDeltaTime);
     void render(const glm::mat4 &p_mProj, const glm::mat4 &p_mView);
 
+    void setRadius(float pRadius)
+    {
+        for (Emitter *emitter : m_vEmitters)
+        {
+            emitter->setRadius(m_radius);
+        }
+        m_radius = pRadius;
+    }
+
+    float getRadius() const
+    {
+        return m_radius;
+    }
+
 private:
     std::string m_sName;
     std::vector<Emitter *> m_vEmitters;
@@ -31,4 +45,7 @@ private:
     bool m_bStopped = false;
 
     const char m_cDelimeter = ',';
+
+    // For spherical effects
+    float m_radius = 0.0f;
 };

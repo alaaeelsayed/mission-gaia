@@ -71,6 +71,8 @@ public:
     void update(float p_fDeltaTime);
     void render(const glm::mat4 &p_mProj, const glm::mat4 &p_mView);
 
+    void setRadius(float pRadius);
+
     void killParticle(Particle *p_pParticle);
 
 private:

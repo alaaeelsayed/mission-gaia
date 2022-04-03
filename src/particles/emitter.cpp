@@ -216,6 +216,11 @@ Emitter::Emitter(const string &p_sFilePath)
     }
 }
 
+void Emitter::setRadius(float pRadius)
+{
+    m_fSphereRadius = pRadius;
+}
+
 Emitter::~Emitter()
 {
     wolf::MaterialManager::DestroyMaterial(m_pMaterial);

@@ -13,7 +13,8 @@
 class Water : public Node
 {
 public:
-    Water();
+    Water(int pL = 1000, float pA = 20.0f, glm::vec3 pW = glm::vec3(0.54f, 0.84f, 0.0f), float pS = 70.0f, float pSuppression = 0.1f, float pChoppiness = 1.7f, glm::vec3 pWaterColor = glm::vec3(0.019f, 0.537f, 0.854f));
+
     virtual ~Water();
     void Update(float dt) override;
     void Render(const glm::mat4 &mProj, const glm::mat4 &mView) override;
@@ -47,7 +48,7 @@ private:
     // Phillips Spectrum Variables (Wind)
     int N = 256;
     int L = 1000;
-    float A = 5.0f;
+    float A = 20.0f;
     glm::vec3 W = glm::vec3(0.54f, 0.84f, 0.0f);
     float S = 70.0f;
     float suppression = 0.1f;

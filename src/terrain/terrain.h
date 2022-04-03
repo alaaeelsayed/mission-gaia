@@ -9,6 +9,14 @@
 class Terrain : public Node
 {
 public:
+    enum Biome
+    {
+        Regular = 0,
+        Desert,
+        Water,
+        Lava
+    };
+
     Terrain(int x, int z, TerrainGenerator *terrainGenerator);
     ~Terrain();
 
@@ -19,6 +27,9 @@ public:
     {
         return m_program;
     }
+
+    Biome getBiome();
+    void setBiome(Biome pBiome);
 
 private:
     int m_x, m_z;
@@ -32,4 +43,7 @@ private:
 
     // Rigid Body for collision
     RigidBody *m_rigidBody = nullptr;
+
+    // Biomes
+    Biome m_biome = Regular;
 };

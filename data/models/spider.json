@@ -1,0 +1,20 @@
+{
+    "fbx": "models/spider.fbx",
+    "clips": [
+        {
+            "name": "idle",
+            "start": 10,
+            "end": 110 
+        },
+        {
+            "name": "walk",
+            "start": 120,
+            "end": 160 
+        },
+        {
+            "name": "attack",
+            "start": 420,
+            "end": 500 
+        }
+    ]
+}

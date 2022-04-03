@@ -23,10 +23,10 @@ private:
     std::string m_matName;
 };
 
-class Model
+class Model : public Node
 {
 public:
-    Model(const std::string &modelPath, const std::string &matName);
+    Model(const std::string &modelPath, const std::string &matName, bool skinned = false);
     virtual ~Model();
 
     void damage(float hp);
@@ -42,7 +42,10 @@ public:
     void setOffset(const glm::vec3 &vOffset);
     wolf::Model *getModel();
     void attachLight(StateGameplay::Light *pLight);
-    void update(float fDelta);
+
+    void Update(float dt) override;
+    void Render(const glm::mat4 &mProj, const glm::mat4 &mView) override;
+
     void setTag(const std::string &p_sTag)
     {
         m_sTag = p_sTag;
@@ -63,7 +66,6 @@ public:
     wolf::Material *getMaterial();
 
     glm::vec3 getPosition();
-    void render(const glm::mat4 &mProj, const glm::mat4 &mView, const glm::vec3 &mViewPos = glm::vec3(0.0f, 0.0f, 0.0f));
     bool isDestroyed();
     void setChasing(bool isChasing)
     {

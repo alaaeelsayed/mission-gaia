@@ -10,6 +10,13 @@ struct Vertex
     GLfloat nX, nY, nZ; // Normals
 };
 
+struct Vertex2D
+{
+    GLfloat x, y;       // Position
+    GLfloat r, g, b, a; // Color
+    GLfloat u, v;       // Texture Coordinates
+};
+
 class Node
 {
 public:
