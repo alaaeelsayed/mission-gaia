@@ -109,8 +109,8 @@ void Scene::Render()
         node->Render(mProj, mView);
     }
 
-    // if (m_renderDebug)
-    m_quadtree->RenderDebug(mProj, mView);
+    if (m_renderDebug)
+        m_quadtree->RenderDebug(mProj, mView);
 }
 
 void Scene::Update(float dt)

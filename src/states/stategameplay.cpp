@@ -368,7 +368,7 @@ void StateGameplay::Enter(std::string arg)
 		m_soundManager = new wolf::SoundManager();
 		m_soundManager->CreateSoundSystem();
 
-		m_soundManager->Play3D("fire", m_fireSound, m_ship->getPosition(), 10.0f, true);
+		// m_soundManager->Play3D("fire", m_fireSound, m_ship->getPosition(), 10.0f, true);
 		m_soundManager->Play2D("Nature", m_natureSoundPath, true);
 
 		// For Minimap
@@ -455,7 +455,7 @@ void StateGameplay::Update(float p_fDelta)
 	float camY = camera->GetPosition().y;
 	float camZ = camera->GetPosition().z;
 
-	camera->SetPosition(glm::vec3(camX, m_terrainGenerator->GetHeight(int(camX), int(camZ)) + 5.0f, camZ));
+	// camera->SetPosition(glm::vec3(camX, m_terrainGenerator->GetHeight(int(camX), int(camZ)) + 5.0f, camZ));
 
 	// Attach spotlight
 	m_spotlight->posRange = glm::vec4(camX, camY, camZ, m_spotlight->posRange.w);
@@ -507,7 +507,7 @@ void StateGameplay::Update(float p_fDelta)
 		if (model->getTag().compare("ship-part") == 0 && Util::inProximity(model->getPosition(), camera->GetPosition(), glm::vec3(30.0f, 30.0f, 30.0f)))
 		{
 			m_nearCollectible = true;
-			m_soundManager->Play3D("fire", m_fireSound, model->getPosition(), 30.0f, true);
+			// m_soundManager->Play3D("fire", m_fireSound, model->getPosition(), 30.0f, true);
 
 			if (m_inventoryFull)
 			{
@@ -582,8 +582,8 @@ void StateGameplay::Update(float p_fDelta)
 					float xDist = playerPos.x - modelPos.x;
 					float zDist = playerPos.z - modelPos.z;
 
-					if (!model->isChasing())
-						m_soundManager->Play3D("growl", m_creatureGrowlPath, modelPos, 10.0f);
+					// if (!model->isChasing())
+					// 	m_soundManager->Play3D("growl", m_creatureGrowlPath, modelPos, 10.0f);
 
 					model->setChasing(true);
 
@@ -1288,7 +1288,7 @@ void StateGameplay::_generateTerrain(int rangeStart, int rangeEnd)
 					water->SetPos(glm::vec3(terrain->GetPos().x + m_terrainSize / 2.0f, -35.0f, terrain->GetPos().z + m_terrainSize / 2.0f));
 					m_waterMap[std::make_pair(i, j)] = water;
 					Scene::Instance()->AddNode(water);
-					m_soundManager->Play3D("Water", m_waterSoundPath, water->GetPos(), 10.0f, true);
+					// m_soundManager->Play3D("Water", m_waterSoundPath, water->GetPos(), 10.0f, true);
 				}
 
 				for (int i = 0; i < 1; i++)
@@ -1322,27 +1322,27 @@ void StateGameplay::_generateTerrain(int rangeStart, int rangeEnd)
 					Scene::Instance()->AddNode(m_pCreature);
 				}
 
-				for (int i = 0; i < 3; i++)
-				{
-					Model *m_pCreature = new Model("data/models/crawler.obj", "skinned");
-					m_pCreature->setTag("enemy");
-					m_pCreature->setTexture("data/textures/gimpy_diffuse.tga");
-					m_pCreature->setNormal("data/textures/gimpy_normal.tga");
-					m_pCreature->setOffset(m_pCreature->getModel()->getAABBMin() + glm::vec3(0.0f, -2.0f, 0.0f));
-					// m_pCreature->attachRigidBody("data/physics/creature.rigid");
+				// for (int i = 0; i < 3; i++)
+				// {
+				// 	Model *m_pCreature = new Model("data/models/crawler.obj", "skinned");
+				// 	m_pCreature->setTag("enemy");
+				// 	m_pCreature->setTexture("data/textures/gimpy_diffuse.tga");
+				// 	m_pCreature->setNormal("data/textures/gimpy_normal.tga");
+				// 	m_pCreature->setOffset(m_pCreature->getModel()->getAABBMin() + glm::vec3(0.0f, -2.0f, 0.0f));
+				// 	// m_pCreature->attachRigidBody("data/physics/creature.rigid");
 
-					int scale = _randomNum(2, 5);
-					float rotation = (float)_randomNum(-60, 60);
+				// 	int scale = _randomNum(2, 5);
+				// 	float rotation = (float)_randomNum(-60, 60);
 
-					int x = _randomNum(terrain->GetPos().x - m_terrainSize / 2, terrain->GetPos().x + m_terrainSize / 2);
-					int z = _randomNum(terrain->GetPos().z - m_terrainSize / 2, terrain->GetPos().z + m_terrainSize / 2);
+				// 	int x = _randomNum(terrain->GetPos().x - m_terrainSize / 2, terrain->GetPos().x + m_terrainSize / 2);
+				// 	int z = _randomNum(terrain->GetPos().z - m_terrainSize / 2, terrain->GetPos().z + m_terrainSize / 2);
 
-					m_pCreature->setScale(glm::vec3(scale, scale, scale));
-					m_pCreature->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
-					m_pCreature->setRotation(glm::vec3(0.0f, rotation, 0.0f));
-					m_models.push_back(m_pCreature);
-					Scene::Instance()->AddNode(m_pCreature);
-				}
+				// 	m_pCreature->setScale(glm::vec3(scale, scale, scale));
+				// 	m_pCreature->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
+				// 	m_pCreature->setRotation(glm::vec3(0.0f, rotation, 0.0f));
+				// 	m_models.push_back(m_pCreature);
+				// 	Scene::Instance()->AddNode(m_pCreature);
+				// }
 
 				for (int i = 0; i < 10; i++)
 				{
@@ -1506,7 +1506,7 @@ void StateGameplay::_generateTerrain(int rangeStart, int rangeEnd)
 				water->SetPos(glm::vec3(terrain->GetPos().x + m_terrainSize / 2.0f, -15.0f, terrain->GetPos().z + m_terrainSize / 2.0f));
 				m_waterMap[std::make_pair(i, j)] = water;
 				Scene::Instance()->AddNode(water);
-				m_soundManager->Play3D("Water", m_waterSoundPath, water->GetPos(), 10.0f, true);
+				// m_soundManager->Play3D("Water", m_waterSoundPath, water->GetPos(), 10.0f, true);
 				break;
 			}
 		}
