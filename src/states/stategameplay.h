@@ -216,6 +216,8 @@ private:
 	std::string m_forcefieldPath = "data/effects/forcefield.pfx";
 	std::string m_blueTrail = "data/effects/blue-trail.pfx";
 	std::string m_fireSound = "data/sounds/fire-sound.ogg";
+	std::string m_sRainPath = "data/effects/rain.pfx";
+
 	Effect *m_blueTrailEffect = nullptr;
 	Effect *m_gravityForcefield = nullptr;
 
@@ -237,6 +239,10 @@ private:
 	float xRot = 0.0f;
 	float yRot = 0.0f;
 	float zRot = 0.0f;
+
+	// Cinematic Mode
+	bool m_bCinematic = false;
+	bool m_bCinematicButtonDown = false;
 };
 
 #endif

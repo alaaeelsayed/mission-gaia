@@ -1,6 +1,6 @@
-<emitter name="raindrops" num_particles="5000"
- duration="-1" mode="continuous" type="box_emitter" box_emitter_min="-100.0,0.0,-100.0" 
- box_emitter_max="100.0,400.0,100.0" birthrate="4000">
+<emitter name="raindrops" num_particles="500"
+ duration="-1" mode="continuous" type="box_emitter" box_emitter_min="-1000.0,0.0,-1000.0" 
+ box_emitter_max="1000.0,400.0,1000.0" birthrate="50">
 
  <spawn_property name="velocity" type="random" min="0,0,0" max="0.0,-1,0.0"/>
  <spawn_property name="color" type="constant" value="0,0,1,0.5"/>

@@ -428,6 +428,8 @@ void StateGameplay::Update(float p_fDelta)
 	glm::vec3 camRot = camera->GetRotation();
 	glm::vec3 shipPos = m_ship->getPosition();
 
+	// printf("CAM POS: (%f, %f, %f)  - - - - - SHIP POS: (%f, %f, %f)\n", camPos.x, camPos.y, camPos.z, shipPos.x, shipPos.y, shipPos.z);
+
 	// screenSize.x - m_miniWidth, screenSize.y - m_miniHeight, m_miniWidth, m_miniHeight
 	// width is from -20 to 20
 	// height is from -15 to 15
@@ -435,8 +437,10 @@ void StateGameplay::Update(float p_fDelta)
 	// float x = glm::clamp((camPos.x + ((shipPos.x - camPos.x) * cos(camRot.x)) - ((shipPos.z - camPos.z) * sin(camRot.x))) / 20.0f, -20.0f, 20.0f);
 	// float y = glm::clamp((camPos.z + ((shipPos.x - camPos.x) * sin(camRot.z)) + ((shipPos.z - camPos.z) * cos(camRot.z))) / 15.0f, -15.0f, 15.0f);
 
-	float x = glm::clamp(((camPos.x - shipPos.x)), -20.0f, 20.0f);
-	float y = glm::clamp(((camPos.z - shipPos.z)), -15.0f, 15.0f);
+	float x = glm::clamp((((camPos.x - shipPos.x)) / 20.0f) * camera->GetViewDirection().x, -20.0f, 20.0f);
+	float y = glm::clamp((((camPos.z - shipPos.z)) / 15.0f), -15.0f, 15.0f);
+
+	// printf("ICON POS: (%f, %f)\n", x, y);
 
 	m_shipIcon->setPosition(glm::vec2(0, 0));
 
@@ -447,7 +451,7 @@ void StateGameplay::Update(float p_fDelta)
 	m_hungerText->SetPos(glm::vec3(width / 14, height - height / 4, 0.0f));
 
 	m_miniCamera->SetRotation(glm::vec2(camera->GetRotation().x, -90.01f));
-	m_miniCamera->SetPosition(camera->GetPosition() + glm::vec3(0.0f, 500.0f, 0.0f));
+	m_miniCamera->SetPosition(glm::vec3(camera->GetPosition().x, 500.0f, camera->GetPosition().z));
 
 	// m_miniCamera->Update(p_fDelta);
 	m_characterBox->SetPos(glm::vec3(width - width / 8, height - height / 8, 0.0f));
@@ -458,7 +462,7 @@ void StateGameplay::Update(float p_fDelta)
 	float camY = camera->GetPosition().y;
 	float camZ = camera->GetPosition().z;
 
-	// camera->SetPosition(glm::vec3(camX, m_terrainGenerator->GetHeight(int(camX), int(camZ)) + 5.0f, camZ));
+	camera->SetPosition(glm::vec3(camX, m_terrainGenerator->GetHeight(int(camX), int(camZ)) + 5.0f, camZ));
 
 	// Attach spotlight
 	m_spotlight->posRange = glm::vec4(camX, camY, camZ, m_spotlight->posRange.w);
@@ -658,6 +662,15 @@ void StateGameplay::Update(float p_fDelta)
 
 	if (!m_app->isKeyDown('P'))
 		m_scannerButtonDown = false;
+
+	if (m_app->isKeyDown('C') && !m_bCinematicButtonDown)
+	{
+		m_bCinematicButtonDown = true;
+		m_bCinematic = !m_bCinematic;
+	}
+
+	if (!m_app->isKeyDown('C'))
+		m_bCinematicButtonDown = false;
 
 	if (m_scannerEffect)
 	{
@@ -896,9 +909,6 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 	m_worldProgram->SetUniform("u_lightDir", Scene::Instance()->GetLightDirection());
 	m_worldProgram->SetUniform("u_viewPos", camera->GetViewDirection());
 
-	m_hungerText->Render(glm::ortho(0.0f, (float)dimensions.x, (float)dimensions.y, 0.0f), glm::mat4(1.0f));
-	m_thirstText->Render(glm::ortho(0.0f, (float)dimensions.x, (float)dimensions.y, 0.0f), glm::mat4(1.0f));
-	m_partsCollectedText->Render(glm::ortho(0.0f, (float)dimensions.x, (float)dimensions.y, 0.0f), glm::mat4(1.0f));
 	for (Model *model : m_models)
 	{
 		if (model->isDestroyed())
@@ -1022,31 +1032,36 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 			m_soundManager->PauseSound("running");
 	}
 
-	m_hungerText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
-	m_thirstText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
-	if (m_nearWater)
+	if (!m_bCinematic)
 	{
-		m_drinkText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
-	}
-	if (m_nearFood)
-	{
-		m_eatText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
-	}
+		m_hungerText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
+		m_thirstText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
+		m_partsCollectedText->Render(glm::ortho(0.0f, (float)dimensions.x, (float)dimensions.y, 0.0f), glm::mat4(1.0f));
 
-	if (m_nearCollectible)
-	{
-		m_collectText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
-	}
-
-	if (m_nearShip)
-	{
-		if (m_inventoryFull)
+		if (m_nearWater)
 		{
-			m_repairShipText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
+			m_drinkText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
 		}
-		else
+		if (m_nearFood)
 		{
-			m_collectMorePartsText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
+			m_eatText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
+		}
+
+		if (m_nearCollectible)
+		{
+			m_collectText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
+		}
+
+		if (m_nearShip)
+		{
+			if (m_inventoryFull)
+			{
+				m_repairShipText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
+			}
+			else
+			{
+				m_collectMorePartsText->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
+			}
 		}
 	}
 
@@ -1107,32 +1122,39 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 	const glm::mat4 &miniProj = m_miniCamera->GetProjMatrix(screenSize.x, screenSize.y);
 	const glm::mat4 &miniView = m_miniCamera->GetViewMatrix();
 
-	m_skybox->Render(miniProj, miniView);
-	m_ship->Render(miniProj, miniView);
-
-	for (const auto &element : m_terrainMap)
+	if (!m_bCinematic)
 	{
-		element.second->Render(miniProj, miniView);
-	}
+		m_skybox->Render(miniProj, miniView);
+		m_ship->Render(miniProj, miniView);
 
-	for (Effect *effect : m_effects)
-	{
-		effect->render(miniProj, miniView);
-	}
+		std::vector<Terrain *> terrains;
+		transform(m_terrainMap.begin(), m_terrainMap.end(), back_inserter(terrains),
+				  [](const std::map<std::pair<int, int>, Terrain *>::value_type &val)
+				  { return val.second; });
+		for (Terrain *terrain : terrains)
+		{
+			terrain->Render(miniProj, miniView);
+		}
 
-	if (m_scannerEffect)
-	{
-		m_scannerEffect->render(miniProj, miniView);
-	}
+		for (Effect *effect : m_effects)
+		{
+			effect->render(miniProj, miniView);
+		}
 
-	std::vector<Water *> waters;
-	transform(m_waterMap.begin(), m_waterMap.end(), back_inserter(waters),
-			  [](const std::map<std::pair<int, int>, Water *>::value_type &val)
-			  { return val.second; });
+		if (m_scannerEffect)
+		{
+			m_scannerEffect->render(miniProj, miniView);
+		}
 
-	for (Water *water : waters)
-	{
-		water->Render(miniProj, miniView);
+		std::vector<Water *> waters;
+		transform(m_waterMap.begin(), m_waterMap.end(), back_inserter(waters),
+				  [](const std::map<std::pair<int, int>, Water *>::value_type &val)
+				  { return val.second; });
+
+		for (Water *water : waters)
+		{
+			water->Render(miniProj, miniView);
+		}
 	}
 
 	m_shipIcon->Render(camera->GetProjMatrix(screenSize.x, screenSize.y), camera->GetViewMatrix());
@@ -1207,11 +1229,13 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 	// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glViewport(screenSize.x - m_miniWidth, screenSize.y - m_miniHeight, m_miniWidth, m_miniHeight);
+	if (!m_bCinematic)
+	{
+		m_frameBuffer->Render();
 
-	m_frameBuffer->Render();
-
-	m_playerIcon->Render(glm::ortho(0.0f, (float)dimensions.x, (float)dimensions.y, 0.0f), glm::mat4(1.0f));
-
+		m_shipIcon->Render(glm::ortho(0.0f, (float)dimensions.x, (float)dimensions.y, 0.0f), glm::mat4(1.0f));
+		m_playerIcon->Render(glm::ortho(0.0f, (float)dimensions.x, (float)dimensions.y, 0.0f), glm::mat4(1.0f));
+	}
 	// m_characterBox->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
 
 	// MODEL POSITIONING (TESTING ONLY)
@@ -1411,99 +1435,105 @@ void StateGameplay::_generateTerrain(int centerChunkX, int centerChunkZ)
 				// pot tree offset is aabcenter scale between 0.2 and 5
 				// dead tree offset is none (for now) scale between 50 and 100 use wood texture
 
-				for (int i = 0; i < 4; i++)
-				{
-					Model *tree = new Model("data/models/biomes/desert/potTree.obj", "skinned");
-					// tree->setTag("food");
+				// for (int i = 0; i < 4; i++)
+				// {
+				// 	Model *tree = new Model("data/models/biomes/desert/potTree.obj", "skinned");
+				// 	// tree->setTag("food");
 
-					tree->setTexture("data/textures/wood.png");
-					tree->setOffset(tree->getModel()->getAABBCenter());
+				// 	tree->setTexture("data/textures/wood.png");
+				// 	tree->setOffset(tree->getModel()->getAABBCenter());
 
-					float rotation = (float)_randomNum(-60, 60);
-					int x = _randomNum(terrain->GetPos().x - m_terrainSize / 2, terrain->GetPos().x + m_terrainSize / 2);
-					int z = _randomNum(terrain->GetPos().z - m_terrainSize / 2, terrain->GetPos().z + m_terrainSize / 2);
-					int scale = _randomNum(0.2f, 5.0f);
-					// tree->setScale(glm::vec3(scale, scale, scale));
-					tree->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
-					tree->setRotation(glm::vec3(0.0f, rotation, 0.0f));
-					m_models.push_back(tree);
-					Scene::Instance()->AddNode(tree);
-				}
+				// 	float rotation = (float)_randomNum(-60, 60);
+				// 	int x = _randomNum(terrain->GetPos().x - m_terrainSize / 2, terrain->GetPos().x + m_terrainSize / 2);
+				// 	int z = _randomNum(terrain->GetPos().z - m_terrainSize / 2, terrain->GetPos().z + m_terrainSize / 2);
+				// 	int scale = _randomNum(0.2f, 5.0f);
+				// 	// tree->setScale(glm::vec3(scale, scale, scale));
+				// 	tree->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
+				// 	tree->setRotation(glm::vec3(0.0f, rotation, 0.0f));
+				// 	m_models.push_back(tree);
+				// 	Scene::Instance()->AddNode(tree);
+				// }
 
-				for (int i = 0; i < 3; i++)
-				{
-					Model *log = new Model("data/models/log.fbx", "dim");
-					log->setTexture("data/textures/log.png");
-					// log->setOffset(log->getModel()->getAABBMin());
+				// for (int i = 0; i < 3; i++)
+				// {
+				// 	Model *log = new Model("data/models/log.fbx", "dim");
+				// 	log->setTexture("data/textures/log.png");
+				// 	// log->setOffset(log->getModel()->getAABBMin());
 
-					float rotation = (float)_randomNum(-60, 60);
-					int x = _randomNum(terrain->GetPos().x - m_terrainSize / 2, terrain->GetPos().x + m_terrainSize / 2);
-					int z = _randomNum(terrain->GetPos().z - m_terrainSize / 2, terrain->GetPos().z + m_terrainSize / 2);
+				// 	float rotation = (float)_randomNum(-60, 60);
+				// 	int x = _randomNum(terrain->GetPos().x - m_terrainSize / 2, terrain->GetPos().x + m_terrainSize / 2);
+				// 	int z = _randomNum(terrain->GetPos().z - m_terrainSize / 2, terrain->GetPos().z + m_terrainSize / 2);
 
-					// log->setScale(glm::vec3(0.01f, 0.01f, 0.01f));
-					log->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
-					log->setRotation(glm::vec3(0.0f, rotation, 0.0f));
-					m_models.push_back(log);
-					Scene::Instance()->AddNode(log);
-				}
+				// 	// log->setScale(glm::vec3(0.01f, 0.01f, 0.01f));
+				// 	log->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
+				// 	log->setRotation(glm::vec3(0.0f, rotation, 0.0f));
+				// 	m_models.push_back(log);
+				// 	Scene::Instance()->AddNode(log);
+				// }
 
-				for (int i = 0; i < 5; i++)
-				{
-					Model *m_pCreature = new Model("data/models/low_poly_spitter.obj", "skinned");
-					m_pCreature->setTag("enemy");
-					m_pCreature->setTexture("data/textures/gimpy_diffuse.tga");
-					m_pCreature->setNormal("data/textures/gimpy_normal.tga");
-					m_pCreature->setOffset(m_pCreature->getModel()->getAABBMin());
-					// m_pCreature->attachRigidBody("data/physics/creature.rigid");
+				// for (int i = 0; i < 5; i++)
+				// {
+				// 	Model *m_pCreature = new Model("data/models/low_poly_spitter.obj", "skinned");
+				// 	m_pCreature->setTag("enemy");
+				// 	m_pCreature->setTexture("data/textures/gimpy_diffuse.tga");
+				// 	m_pCreature->setNormal("data/textures/gimpy_normal.tga");
+				// 	m_pCreature->setOffset(m_pCreature->getModel()->getAABBMin());
+				// 	// m_pCreature->attachRigidBody("data/physics/creature.rigid");
 
-					// Light *pointLight = new Light();
-					// float r = _randomFloat(0.0001f, 0.0018f);
-					// float g = _randomFloat(0.0001f, 0.0028f);
-					// float b = _randomFloat(0.0001f, 0.0038f);
-					// pointLight->color = glm::vec3(r, g, b);
-					// pointLight->attenuation = glm::vec3(0.9f, 0.9f, 0.9f);
-					// pointLight->posRange = glm::vec4(0.0f, 0.0f, 0.0f, 3.0f);
-					// m_lights.push_back(pointLight);
-					// m_pCreature->attachLight(pointLight);
-					int scale = _randomNum(3.0f, 5.0f);
-					float rotation = (float)_randomNum(-60, 60);
+				// 	// Light *pointLight = new Light();
+				// 	// float r = _randomFloat(0.0001f, 0.0018f);
+				// 	// float g = _randomFloat(0.0001f, 0.0028f);
+				// 	// float b = _randomFloat(0.0001f, 0.0038f);
+				// 	// pointLight->color = glm::vec3(r, g, b);
+				// 	// pointLight->attenuation = glm::vec3(0.9f, 0.9f, 0.9f);
+				// 	// pointLight->posRange = glm::vec4(0.0f, 0.0f, 0.0f, 3.0f);
+				// 	// m_lights.push_back(pointLight);
+				// 	// m_pCreature->attachLight(pointLight);
+				// 	int scale = _randomNum(3.0f, 5.0f);
+				// 	float rotation = (float)_randomNum(-60, 60);
 
-					int x = _randomNum(terrain->GetPos().x - m_terrainSize / 2, terrain->GetPos().x + m_terrainSize / 2);
-					int z = _randomNum(terrain->GetPos().z - m_terrainSize / 2, terrain->GetPos().z + m_terrainSize / 2);
-					m_pCreature->setScale(glm::vec3(scale, scale, scale));
-					m_pCreature->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
-					m_pCreature->setRotation(glm::vec3(0.0f, rotation, 0.0f));
-					m_models.push_back(m_pCreature);
-					Scene::Instance()->AddNode(m_pCreature);
-				}
+				// 	int x = _randomNum(terrain->GetPos().x - m_terrainSize / 2, terrain->GetPos().x + m_terrainSize / 2);
+				// 	int z = _randomNum(terrain->GetPos().z - m_terrainSize / 2, terrain->GetPos().z + m_terrainSize / 2);
+				// 	m_pCreature->setScale(glm::vec3(scale, scale, scale));
+				// 	m_pCreature->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
+				// 	m_pCreature->setRotation(glm::vec3(0.0f, rotation, 0.0f));
+				// 	m_models.push_back(m_pCreature);
+				// 	Scene::Instance()->AddNode(m_pCreature);
+				// }
 
-				for (int i = 0; i < 3; i++)
-				{
-					Model *m_pCreature = new Model("data/models/crawler.obj", "skinned");
-					m_pCreature->setTag("enemy");
-					m_pCreature->setTexture("data/textures/gimpy_diffuse.tga");
-					m_pCreature->setNormal("data/textures/gimpy_normal.tga");
-					m_pCreature->setOffset(m_pCreature->getModel()->getAABBMin() + glm::vec3(0.0f, -2.0f, 0.0f));
-					// m_pCreature->attachRigidBody("data/physics/creature.rigid");
+				// for (int i = 0; i < 3; i++)
+				// {
+				// 	Model *m_pCreature = new Model("data/models/crawler.obj", "skinned");
+				// 	m_pCreature->setTag("enemy");
+				// 	m_pCreature->setTexture("data/textures/gimpy_diffuse.tga");
+				// 	m_pCreature->setNormal("data/textures/gimpy_normal.tga");
+				// 	m_pCreature->setOffset(m_pCreature->getModel()->getAABBMin() + glm::vec3(0.0f, -2.0f, 0.0f));
+				// 	// m_pCreature->attachRigidBody("data/physics/creature.rigid");
 
-					int scale = _randomNum(2, 5);
-					float rotation = (float)_randomNum(-60, 60);
+				// 	int scale = _randomNum(2, 5);
+				// 	float rotation = (float)_randomNum(-60, 60);
 
-					int x = _randomNum(terrain->GetPos().x - m_terrainSize / 2, terrain->GetPos().x + m_terrainSize / 2);
-					int z = _randomNum(terrain->GetPos().z - m_terrainSize / 2, terrain->GetPos().z + m_terrainSize / 2);
+				// 	int x = _randomNum(terrain->GetPos().x - m_terrainSize / 2, terrain->GetPos().x + m_terrainSize / 2);
+				// 	int z = _randomNum(terrain->GetPos().z - m_terrainSize / 2, terrain->GetPos().z + m_terrainSize / 2);
 
-					m_pCreature->setScale(glm::vec3(scale, scale, scale));
-					m_pCreature->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
-					m_pCreature->setRotation(glm::vec3(0.0f, rotation, 0.0f));
-					m_models.push_back(m_pCreature);
-					Scene::Instance()->AddNode(m_pCreature);
-				}
+				// 	m_pCreature->setScale(glm::vec3(scale, scale, scale));
+				// 	m_pCreature->setPosition(glm::vec3(x, m_terrainGenerator->GetHeight(x, z), z));
+				// 	m_pCreature->setRotation(glm::vec3(0.0f, rotation, 0.0f));
+				// 	m_models.push_back(m_pCreature);
+				// 	Scene::Instance()->AddNode(m_pCreature);
+				// }
 				break;
 			case Terrain::Lava:
-
-				break;
+			{
+				Water *lava = new Water(2000, 19.8f, glm::vec3(0.0f, 1.0f, 0.0f), 10.9f, 0.1f, 1.7f, glm::vec3(0.411f, 0.022f, 0.025f));
+				lava->SetScale(glm::vec3(m_terrainSize, m_terrainSize, m_terrainSize));
+				lava->SetPos(glm::vec3(terrain->GetPos().x + m_terrainSize / 2.0f, -15.0f, terrain->GetPos().z + m_terrainSize / 2.0f));
+				m_waterMap[std::make_pair(i, j)] = lava;
+				Scene::Instance()->AddNode(lava);
+			}
+			break;
 			case Terrain::Water:
-				Water *water = new Water(700, 31.3f, glm::vec3(0.0f, 1.0f, 0.0f), 95.3f, 0.1f, 1.7f, glm::vec3(0.019f, 0.537f, 0.854f));
+				Water *water = new Water(1000, 31.3f, glm::vec3(0.0f, 1.0f, 0.0f), 95.3f, 0.1f, 1.7f, glm::vec3(0.019f, 0.537f, 0.854f));
 				water->SetScale(glm::vec3(m_terrainSize, m_terrainSize, m_terrainSize));
 				water->SetPos(glm::vec3(terrain->GetPos().x + m_terrainSize / 2.0f, -15.0f, terrain->GetPos().z + m_terrainSize / 2.0f));
 				m_waterMap[std::make_pair(i, j)] = water;
