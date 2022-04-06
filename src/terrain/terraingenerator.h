@@ -53,7 +53,6 @@ public:
     std::vector<Vertex> getVertices();
     std::vector<float> getRawVertices();
     std::vector<float> getHeights();
-    btConvexHullShape *getConvexHull();
     BoundingBox GetBounds(int gridX, int gridZ);
 
 private:

@@ -703,7 +703,6 @@ void StateGameplay::Update(float p_fDelta)
 
 	int chunkX = camera->GetPosition().x / m_terrainSize;
 	int chunkZ = camera->GetPosition().z / m_terrainSize;
-	printf("(%d, %d)\n", chunkX, chunkZ);
 	if (!_inRange(chunkX + 2, chunkZ + 2) ||
 		!_inRange(chunkX - 2, chunkZ - 2) ||
 		!_inRange(chunkX, chunkZ + 2) ||
@@ -1297,7 +1296,6 @@ void StateGameplay::_generateTerrain(int centerChunkX, int centerChunkZ)
 
 			Terrain *terrain = new Terrain(i, j, m_terrainGenerator);
 			m_terrainMap[std::make_pair(i, j)] = terrain;
-			printf("MADE TERRAAAAAAAAAAAAAAAAAAIN");
 			Scene::Instance()->AddNode(terrain);
 
 			// Render based on Biome
