@@ -44,14 +44,9 @@ StateGameplay::~StateGameplay()
 
 	delete m_soundManager;
 
-	std::vector<Terrain *> terrains;
-	transform(m_terrainMap.begin(), m_terrainMap.end(), back_inserter(terrains),
-			  [](const std::map<std::pair<int, int>, Terrain *>::value_type &val)
-			  { return val.second; });
-
-	for (Terrain *terrain : terrains)
+	for (const auto &element : m_terrainMap)
 	{
-		delete terrain;
+		delete element.second;
 	}
 
 	std::vector<Water *> waters;
@@ -237,7 +232,7 @@ void StateGameplay::Enter(std::string arg)
 		m_terrainRoughness = m_terrainGenerator->GetRoughness();
 		m_terrainAmplitude = m_terrainGenerator->GetAmplitude();
 
-		_generateTerrain(-2, 2);
+		_generateTerrain(0, 0);
 
 		// Ship and ship parts
 		m_ship = new Model("data/models/ships/ship3.obj", "skinned");
@@ -685,9 +680,8 @@ void StateGameplay::Update(float p_fDelta)
 		!_inRange(chunkX - 2, chunkZ + 2) ||
 		!_inRange(chunkX + 2, chunkZ - 2))
 	{
-		_generateTerrain(chunkX - 2, chunkX + 2);
-		_generateTerrain(chunkZ - 2, chunkZ + 2);
-		// std::thread terrainThread(&StateGameplay::_generateTerrain, this, chunkX - 2, chunkZ + 2);
+		_generateTerrain(chunkX, chunkZ);
+		// std::thread terrainThread(&StateGameplay::_generateTerrain, this, chunkX, chunkZ);
 		// terrainThread.detach();
 		// m_threads.push_back(std::move(terrainThread));
 	}
@@ -1133,6 +1127,8 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 		}
 	}
 
+	m_shipIcon->Render(camera->GetProjMatrix(screenSize.x, screenSize.y), camera->GetViewMatrix());
+
 	// for (Model *model : m_models)
 	// {
 	// 	if (model->isDestroyed())
@@ -1257,11 +1253,12 @@ bool StateGameplay::_isEffectiveLight(const Light *pLight1, const Light *pLight2
 	return glm::any(glm::lessThan(pLight1->attenuation, pLight2->attenuation)) && (fLight1Dist < fLight2Dist);
 }
 
-void StateGameplay::_generateTerrain(int rangeStart, int rangeEnd)
+void StateGameplay::_generateTerrain(int centerChunkX, int centerChunkZ)
 {
-	for (int i = rangeStart; i <= rangeEnd; i++)
+	// std::lock_guard<std::mutex> lock(m_mutex);
+	for (int i = centerChunkX - 2; i <= centerChunkX + 2; i++)
 	{
-		for (int j = rangeStart; j <= rangeEnd; j++)
+		for (int j = centerChunkZ - 2; j <= centerChunkZ + 2; j++)
 		{
 			if (m_terrainMap[std::make_pair(i, j)])
 				continue;
@@ -1284,7 +1281,7 @@ void StateGameplay::_generateTerrain(int rangeStart, int rangeEnd)
 					water->SetPos(glm::vec3(terrain->GetPos().x + m_terrainSize / 2.0f, -35.0f, terrain->GetPos().z + m_terrainSize / 2.0f));
 					m_waterMap[std::make_pair(i, j)] = water;
 					Scene::Instance()->AddNode(water);
-					// m_soundManager->Play3D("Water", m_waterSoundPath, water->GetPos(), 10.0f, true);
+					m_soundManager->Play3D("Water", m_waterSoundPath, water->GetPos(), 10.0f, true);
 				}
 
 				for (int i = 0; i < 1; i++)
@@ -1581,12 +1578,12 @@ void StateGameplay::_generateTerrain(int rangeStart, int rangeEnd)
 			}
 		}
 	}
-	m_loadedStart = wolf::min(m_loadedStart, rangeStart);
-	m_loadedEnd = wolf::max(m_loadedEnd, rangeEnd);
+	m_loadedStart = wolf::min(m_loadedStart, centerChunkX);
+	m_loadedEnd = wolf::max(m_loadedEnd, centerChunkZ);
 	m_curBiome = static_cast<Terrain::Biome>(rand() % 4);
 }
 
 bool StateGameplay::_inRange(int chunkX, int chunkZ)
 {
-	return chunkX > m_loadedStart && chunkX < m_loadedEnd && chunkZ > m_loadedStart && chunkZ < m_loadedEnd;
+	return m_terrainMap[std::make_pair(chunkX, chunkZ)];
 }

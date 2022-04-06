@@ -23,6 +23,23 @@
 #include "../obj/quad.h"
 
 #include "../../irrklang/include/irrKlang.h"
+#include <unordered_map>
+
+constexpr size_t hashCombine(size_t t, size_t u)
+{
+	return t ^ (0x517cc1b727220a95 + ((t << 2) ^ (u >> 3)));
+}
+namespace std
+{
+	template <>
+	struct hash<std::pair<int, int>>
+	{
+		size_t operator()(const std::pair<int, int> &object) const
+		{
+			return hashCombine(std::hash<int>()(object.first), std::hash<int>()(object.second));
+		}
+	};
+}
 
 class Model;
 class StateGameplay : public Common::StateBase
@@ -120,13 +137,14 @@ private:
 	GLfloat m_sunAngle = -60;
 
 	TerrainGenerator *m_terrainGenerator = 0;
-	std::map<std::pair<int, int>, Terrain *> m_terrainMap;
+	std::unordered_map<std::pair<int, int>, Terrain *> m_terrainMap;
 	Terrain::Biome m_curBiome = Terrain::Regular;
 
 	int m_loadedStart = 0;
 	int m_loadedEnd = 0;
 
 	std::vector<std::thread> m_threads;
+	std::mutex m_mutex;
 
 	Skybox *m_skybox = 0;
 

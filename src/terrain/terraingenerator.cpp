@@ -5,7 +5,6 @@ TerrainGenerator::TerrainGenerator()
 	std::random_device rd;
 	std::mt19937 mt(rd());
 	std::uniform_int_distribution<int> dist(0, 1000000000);
-	m_convexHull = new btConvexHullShape();
 	m_seed = dist(mt);
 }
 
@@ -167,11 +166,6 @@ wolf::VertexDeclaration *TerrainGenerator::GenerateVertices(int gridX, int gridZ
 				normal.y,
 				normal.z};
 
-			if (i % 20 == 0)
-			{
-				m_convexHull->addPoint(btVector3(vertices[vertexOffset].x, vertices[vertexOffset].y, vertices[vertexOffset].z));
-			}
-
 			m_rawVertices.push_back((float)j / ((float)m_countVerts - 1) * m_size);
 			m_rawVertices.push_back(height);
 			m_rawVertices.push_back((float)i / ((float)m_countVerts - 1) * m_size);
@@ -217,11 +211,6 @@ wolf::VertexDeclaration *TerrainGenerator::GenerateVertices(int gridX, int gridZ
 
 	m_vertices = vertices;
 	return vertexDeclaration;
-}
-
-btConvexHullShape *TerrainGenerator::getConvexHull()
-{
-	return m_convexHull;
 }
 
 glm::vec3 TerrainGenerator::_calculateNormal(int x, int z, int xOff, int zOff)
