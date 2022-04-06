@@ -205,14 +205,17 @@ private:
 
 	// For Minimap
 	Triangle *m_playerIcon = nullptr;
-	Quad *m_shipIcon = nullptr;
+
 	std::string m_playerIconPath = "data/textures/hud/arrow.png";
 	float m_miniWidth = 400.0f;
 	float m_miniHeight = 300.0f;
 	wolf::FrameBuffer *m_frameBuffer;
 	OrthoCamera *m_miniCamera = nullptr;
-	TextBox *m_characterBox = nullptr;
+	TextBox *m_shipPrompt = nullptr;
+	int m_shipDistance = 0.0f;
 	Effect *m_scannerEffect = nullptr;
+	bool m_bScanning = false;
+	float m_timer = 0.0f;
 
 	// Model positioning (testing only)
 	float x = 0.0f;

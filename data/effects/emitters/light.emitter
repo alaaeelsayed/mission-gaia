@@ -1,5 +1,5 @@
-<emitter name="light" num_particles="500"
- duration="-1" mode="continuous" type="sphere_emitter" sphere_radius="20.0" birthrate="100">
+<emitter name="light" num_particles="7000"
+ duration="-1" mode="continuous" type="sphere_emitter" sphere_radius="20.0" birthrate="2000">
 
  <spawn_property name="velocity" type="random" min="0,0,0" max="0.6,0.3,0.4"/>
  <spawn_property name="color" type="constant" value="0,0.5,1,0.5"/>
