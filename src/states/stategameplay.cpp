@@ -286,7 +286,7 @@ void StateGameplay::Enter(std::string arg)
 		m_shipParts.push_back(m_part2);
 		m_shipParts.push_back(m_part3);
 
-		m_numParts = 5;
+		m_numParts = 1;
 
 		// parts collected label
 		m_partsCollectedText = new TextBox(500.0f, 200.0f);
@@ -429,8 +429,10 @@ void StateGameplay::Update(float p_fDelta)
 	float camY = camera->GetPosition().y;
 	float camZ = camera->GetPosition().z;
 
-	camera->SetPosition(glm::vec3(camX, m_terrainGenerator->GetHeight(int(camX), int(camZ)) + 5.0f, camZ));
-
+	if (!m_bCinematic)
+	{
+		camera->SetPosition(glm::vec3(camX, m_terrainGenerator->GetHeight(int(camX), int(camZ)) + 5.0f, camZ));
+	}
 	// Attach spotlight
 	m_spotlight->posRange = glm::vec4(camX, camY, camZ, m_spotlight->posRange.w);
 
@@ -1126,8 +1128,6 @@ void StateGameplay::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
 			m_shipPrompt->Render(glm::ortho(0.0f, (float)width, (float)height, 0.0f), glm::mat4(1.0f));
 		}
 	}
-
-	m_shipIcon->Render(camera->GetProjMatrix(screenSize.x, screenSize.y), camera->GetViewMatrix());
 
 	// for (Model *model : m_models)
 	// {

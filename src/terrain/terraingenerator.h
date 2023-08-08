@@ -15,7 +15,7 @@
 #endif
 
 #ifndef NUM_VERTICES
-#define NUM_VERTICES 128
+#define NUM_VERTICES 64
 #endif
 
 #ifndef OCTAVES
