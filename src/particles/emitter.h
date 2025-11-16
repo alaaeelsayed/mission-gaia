@@ -171,5 +171,6 @@ private:
     wolf::VertexBuffer *m_pVertexBuffer = nullptr;
     wolf::VertexDeclaration *m_pDeclaration = nullptr;
     std::vector<Vertex> m_vVerts;
+    size_t m_lastVertexCount = 0;
     std::mutex m_mutex;
 };

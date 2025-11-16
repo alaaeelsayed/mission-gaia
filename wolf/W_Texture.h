@@ -77,7 +77,8 @@ namespace wolf
 		Texture(void *pData, unsigned int width, unsigned int height, Format internalFmt, Format fmt = FMT_INVALID);
 		virtual ~Texture();
 
-		void LoadFromDDS(const std::string &path);
+		void LoadFromDDS(const std::string& path);
+		void LoadEXRImage(const std::string& path);
 		void LoadImage(const std::string &path);
 		//-------------------------------------------------------------------------
 

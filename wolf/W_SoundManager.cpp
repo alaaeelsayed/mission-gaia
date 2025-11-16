@@ -177,4 +177,11 @@ namespace wolf
         return pSound;
     }
 
+    void SoundManager::SetVolume(float volume)
+    {
+        if (!m_pSoundEngine)
+            return;
+        m_pSoundEngine->setSoundVolume(volume);
+    }
+
 }

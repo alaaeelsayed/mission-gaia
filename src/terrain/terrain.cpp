@@ -1,123 +1,176 @@
 #include "terrain.h"
 
-Terrain::Terrain(int x, int z, TerrainGenerator *terrainGenerator) : Node(BoundingBox())
+Terrain::Terrain(int x, int z, TerrainGenerator* terrainGenerator) : Node(BoundingBox())
 {
 
-    m_x = x * terrainGenerator->GetSize();
-    m_z = z * terrainGenerator->GetSize();
+	m_x = x * terrainGenerator->GetSize();
+	m_z = z * terrainGenerator->GetSize();
 
-    SetPos(glm::vec3(m_x, 0.0f, m_z));
+	SetPos(glm::vec3(m_x, 0.0f, m_z));
 
-    m_texture = wolf::TextureManager::CreateTexture("data/textures/ground/ground.png");
+	m_program = wolf::ProgramManager::CreateProgram("data/shaders/terrain/terrain.vsh", "data/shaders/terrain/terrain.fsh");
+	m_program->addShader("data/shaders/terrain/terrain.tesc", GL_TESS_CONTROL_SHADER);
+	m_program->addShader("data/shaders/terrain/terrain.tese", GL_TESS_EVALUATION_SHADER);
+	//m_program->addShader("data/shaders/terrain.gsh", GL_GEOMETRY_SHADER);
 
-    m_texture->SetWrapMode(wolf::Texture::WM_Repeat);
+	glPatchParameteri(GL_PATCH_VERTICES, 4);
 
-    m_program = wolf::ProgramManager::CreateProgram("data/shaders/terrain.vsh", "data/shaders/terrain.fsh");
+	m_decl = terrainGenerator->GenerateVertices(x, z);
 
-    m_decl = terrainGenerator->GenerateVertices(x, z);
-    // float *data = &terrainGenerator->getHeights()[0];
-    // int length = terrainGenerator->getHeights().size();
-    // m_rigidBody = new RigidBody(terrainGenerator->GetVertexCount(), terrainGenerator->GetVertexCount(), data, 1, -3, 3, 1, PHY_FLOAT, false);
-    m_terrainGenerator = terrainGenerator;
+	m_heightMap = new Heightmap(terrainGenerator->getVertices(), terrainGenerator->GetVertexCount(), terrainGenerator->GetSize(), PxVec3(m_x, 0.0f, m_z));
 
-    BoundingBox bounds = terrainGenerator->GetBounds(x, z);
+	m_terrainGenerator = terrainGenerator;
 
-    GetBoundingBox().SetMin(bounds.GetMin());
-    GetBoundingBox().SetMax(bounds.GetMax());
+	BoundingBox bounds = terrainGenerator->GetBounds(x, z);
+
+	GetBoundingBox().SetMin(bounds.GetMin());
+	GetBoundingBox().SetMax(bounds.GetMax());
 }
 
 Terrain::~Terrain()
 {
-    wolf::ProgramManager::DestroyProgram(m_program);
-    m_decl->Clean();
-    delete m_decl;
-    // delete m_rigidBody;
+	wolf::ProgramManager::DestroyProgram(m_program);
+	m_decl->Clean();
+	delete m_decl;
+	delete m_heightMap;
 }
 
 void Terrain::Update(float dt)
 {
-    // m_rigidBody->Update(dt, glm::vec3(m_x, 0.0f, m_z));
 }
 
 Terrain::Biome Terrain::getBiome()
 {
-    return m_biome;
+	return m_biome;
 }
 
 void Terrain::setBiome(Terrain::Biome pBiome)
 {
-    m_biome = pBiome;
+	m_biome = pBiome;
 }
 
-void Terrain::Render(const glm::mat4 &mProj, const glm::mat4 &mView)
+void Terrain::Render(const glm::mat4& mProj, const glm::mat4& mView)
 {
-    glm::mat4 mWorld = glm::mat4(1.0f);
-    mWorld = glm::translate(mWorld, glm::vec3(m_x, 0.0f, m_z));
+	glm::mat4 mWorld = glm::mat4(1.0f);
+	mWorld = glm::translate(mWorld, glm::vec3(m_x, 0.0f, m_z));
 
-    m_program->SetUniform("projection", mProj);
-    m_program->SetUniform("view", mView);
-    m_program->SetUniform("world", mWorld);
-    m_program->SetUniform("worldIT", glm::transpose(glm::inverse(mWorld)));
+	m_program->SetUniform("projection", mProj);
+	m_program->SetUniform("view", mView);
+	m_program->SetUniform("world", mWorld);
+	m_program->SetUniform("worldIT", glm::transpose(glm::inverse(mWorld)));
 
-    wolf::Texture *dirtTexture = wolf::TextureManager::CreateTexture("data/textures/ground/dirt1.png");
-    wolf::Texture *grassTexture = wolf::TextureManager::CreateTexture("data/textures/ground/grass4.png");
-    wolf::Texture *rockTexture = wolf::TextureManager::CreateTexture("data/textures/ground/rock.png");
-    wolf::Texture *snowTexture = wolf::TextureManager::CreateTexture("data/textures/ground/snow.png");
+	wolf::Texture* regularTexture1 = wolf::TextureManager::CreateTexture("data/textures/ground/sand/diff.jpg");
+	wolf::Texture* regularTexture2 = wolf::TextureManager::CreateTexture("data/textures/ground/grass/diff.jpg");
+	wolf::Texture* regularTexture3 = wolf::TextureManager::CreateTexture("data/textures/ground/rocks/diff.jpg");
+	wolf::Texture* regularTexture4 = wolf::TextureManager::CreateTexture("data/textures/ground/snow/diff.jpg");
 
-    wolf::Texture *desertTexture = wolf::TextureManager::CreateTexture("data/textures/ground/desert.png");
-    wolf::Texture *barrenDirtTexture = wolf::TextureManager::CreateTexture("data/textures/ground/dirt4.png");
-    wolf::Texture *lavaTexture = wolf::TextureManager::CreateTexture("data/textures/ground/lava.png");
-    wolf::Texture *sandTexture = wolf::TextureManager::CreateTexture("data/textures/ground/sand.png");
+	wolf::Texture* regularTexture1Normal = wolf::TextureManager::CreateTexture("data/textures/ground/sand/nor.exr");
+	wolf::Texture* regularTexture2Normal = wolf::TextureManager::CreateTexture("data/textures/ground/grass/nor.jpg");
+	wolf::Texture* regularTexture3Normal = wolf::TextureManager::CreateTexture("data/textures/ground/rocks/nor.jpg");
+	wolf::Texture* regularTexture4Normal = wolf::TextureManager::CreateTexture("data/textures/ground/snow/nor.exr");
 
-    if (m_biome == Desert)
-    {
-        m_program->SetTexture("region1ColorMap", desertTexture);
-        m_program->SetTexture("region2ColorMap", desertTexture);
-        m_program->SetTexture("region3ColorMap", desertTexture);
-        m_program->SetTexture("region4ColorMap", desertTexture);
-    }
-    else if (m_biome == Water)
-    {
-        m_program->SetTexture("region1ColorMap", sandTexture);
-        m_program->SetTexture("region2ColorMap", sandTexture);
-        m_program->SetTexture("region3ColorMap", sandTexture);
-        m_program->SetTexture("region4ColorMap", sandTexture);
-    }
+	wolf::Texture* regularTexture1Disp = wolf::TextureManager::CreateTexture("data/textures/ground/sand/disp.png");
+	wolf::Texture* regularTexture2Disp = wolf::TextureManager::CreateTexture("data/textures/ground/grass/disp.jpg");
+	wolf::Texture* regularTexture3Disp = wolf::TextureManager::CreateTexture("data/textures/ground/rocks/disp.jpg");
+	wolf::Texture* regularTexture4Disp = wolf::TextureManager::CreateTexture("data/textures/ground/snow/disp.png");
 
-    else if (m_biome == Lava)
-    {
-        m_program->SetTexture("region1ColorMap", lavaTexture);
-        m_program->SetTexture("region2ColorMap", lavaTexture);
-        m_program->SetTexture("region3ColorMap", lavaTexture);
-        m_program->SetTexture("region4ColorMap", lavaTexture);
-    }
-    else if (m_biome == Regular)
-    {
-        m_program->SetTexture("region1ColorMap", dirtTexture);
-        m_program->SetTexture("region2ColorMap", grassTexture);
-        m_program->SetTexture("region3ColorMap", rockTexture);
-        m_program->SetTexture("region4ColorMap", snowTexture);
-    }
+	regularTexture1->SetWrapMode(wolf::Texture::WrapMode::WM_Repeat, wolf::Texture::WrapMode::WM_Repeat);
+	regularTexture2->SetWrapMode(wolf::Texture::WrapMode::WM_Repeat, wolf::Texture::WrapMode::WM_Repeat);
+	regularTexture3->SetWrapMode(wolf::Texture::WrapMode::WM_Repeat, wolf::Texture::WrapMode::WM_Repeat);
+	regularTexture4->SetWrapMode(wolf::Texture::WrapMode::WM_Repeat, wolf::Texture::WrapMode::WM_Repeat);
 
-    m_program->SetUniform("region1.min", 2 * -140.0f);
-    m_program->SetUniform("region1.max", 2 * -80.0f);
-    m_program->SetUniform("region2.min", 2 * -79.0f);
-    m_program->SetUniform("region2.max", 2 * -29.0f);
-    m_program->SetUniform("region3.min", 2 * -28.0f);
-    m_program->SetUniform("region3.max", 2 * 22.0f);
-    m_program->SetUniform("region4.min", 2 * 23.0f);
-    m_program->SetUniform("region4.max", 2 * 73.0f);
+	regularTexture1->SetFilterMode(wolf::Texture::FilterMode::FM_TrilinearMipmap, wolf::Texture::FilterMode::FM_TrilinearMipmap);
+	regularTexture2->SetFilterMode(wolf::Texture::FilterMode::FM_TrilinearMipmap, wolf::Texture::FilterMode::FM_TrilinearMipmap);
+	regularTexture3->SetFilterMode(wolf::Texture::FilterMode::FM_TrilinearMipmap, wolf::Texture::FilterMode::FM_TrilinearMipmap);
+	regularTexture4->SetFilterMode(wolf::Texture::FilterMode::FM_TrilinearMipmap, wolf::Texture::FilterMode::FM_TrilinearMipmap);
 
-    m_program->SetUniform("u_lightPos", Scene::Instance()->GetLightDirection());
-    m_program->SetUniform("u_viewPos", glm::vec3(0.0f, 0.0f, 0.0f));
-    // 158, 108, 56
-    m_program->SetUniform("u_ambientLight", glm::vec3(0.3f, 0.21f, 0.11f));
-    m_program->SetTexture("u_texture", m_texture);
+	regularTexture1Normal->SetWrapMode(wolf::Texture::WrapMode::WM_Repeat, wolf::Texture::WrapMode::WM_Repeat);
+	regularTexture2Normal->SetWrapMode(wolf::Texture::WrapMode::WM_Repeat, wolf::Texture::WrapMode::WM_Repeat);
+	regularTexture3Normal->SetWrapMode(wolf::Texture::WrapMode::WM_Repeat, wolf::Texture::WrapMode::WM_Repeat);
+	regularTexture4Normal->SetWrapMode(wolf::Texture::WrapMode::WM_Repeat, wolf::Texture::WrapMode::WM_Repeat);
 
-    m_program->Bind();
-    m_decl->Bind();
+	regularTexture1Disp->SetWrapMode(wolf::Texture::WrapMode::WM_Repeat, wolf::Texture::WrapMode::WM_Repeat);
+	regularTexture2Disp->SetWrapMode(wolf::Texture::WrapMode::WM_Repeat, wolf::Texture::WrapMode::WM_Repeat);
+	regularTexture3Disp->SetWrapMode(wolf::Texture::WrapMode::WM_Repeat, wolf::Texture::WrapMode::WM_Repeat);
+	regularTexture4Disp->SetWrapMode(wolf::Texture::WrapMode::WM_Repeat, wolf::Texture::WrapMode::WM_Repeat);
 
-    glDrawElements(GL_TRIANGLES,
-                   6 * ((m_terrainGenerator->GetVertexCount() - 1) * (m_terrainGenerator->GetVertexCount() - 1)),
-                   GL_UNSIGNED_INT, 0);
+	wolf::Texture* desertTexture = wolf::TextureManager::CreateTexture("data/textures/ground/desert.png");
+	wolf::Texture* lavaTexture = wolf::TextureManager::CreateTexture("data/textures/ground/lava.png");
+	wolf::Texture* sandTexture = wolf::TextureManager::CreateTexture("data/textures/ground/sand.png");
+
+	if (m_biome == Desert)
+	{
+		m_program->SetTexture("terrainRegions[0].colorMap", desertTexture);
+		m_program->SetTexture("terrainRegions[1].colorMap", desertTexture);
+		m_program->SetTexture("terrainRegions[2].colorMap", desertTexture);
+		m_program->SetTexture("terrainRegions[3].colorMap", desertTexture);
+	}
+	else if (m_biome == Water)
+	{
+		m_program->SetTexture("terrainRegions[0].colorMap", sandTexture);
+		m_program->SetTexture("terrainRegions[1].colorMap", sandTexture);
+		m_program->SetTexture("terrainRegions[2].colorMap", sandTexture);
+		m_program->SetTexture("terrainRegions[3].colorMap", sandTexture);
+	}
+
+	else if (m_biome == Lava)
+	{
+		m_program->SetTexture("terrainRegions[0].colorMap", lavaTexture);
+		m_program->SetTexture("terrainRegions[1].colorMap", lavaTexture);
+		m_program->SetTexture("terrainRegions[2].colorMap", lavaTexture);
+		m_program->SetTexture("terrainRegions[3].colorMap", lavaTexture);
+	}
+	else if (m_biome == Regular)
+	{
+		m_program->SetTexture("terrainRegions[0].colorMap", regularTexture1);
+		m_program->SetTexture("terrainRegions[1].colorMap", regularTexture2);
+		m_program->SetTexture("terrainRegions[2].colorMap", regularTexture3);
+		m_program->SetTexture("terrainRegions[3].colorMap", regularTexture4);
+
+		m_program->SetTexture("terrainRegions[0].normalMap", regularTexture1Normal);
+		m_program->SetTexture("terrainRegions[1].normalMap", regularTexture2Normal);
+		m_program->SetTexture("terrainRegions[2].normalMap", regularTexture3Normal);
+		m_program->SetTexture("terrainRegions[3].normalMap", regularTexture4Normal);
+
+		m_program->SetTexture("terrainRegions[0].dispMap", regularTexture1Disp);
+		m_program->SetTexture("terrainRegions[1].dispMap", regularTexture2Disp);
+		m_program->SetTexture("terrainRegions[2].dispMap", regularTexture3Disp);
+		m_program->SetTexture("terrainRegions[3].dispMap", regularTexture4Disp);
+
+		m_program->SetUniform("terrainRegions[0].tileFactor", 1.0f);
+		m_program->SetUniform("terrainRegions[1].tileFactor", 1.0f);
+		m_program->SetUniform("terrainRegions[2].tileFactor", 1.0f);
+		m_program->SetUniform("terrainRegions[3].tileFactor", 1.0f);
+
+		for (int i = 0; i < 4; i++)
+		{
+			m_program->SetUniform("terrainRegions[" + std::to_string(i) + "].dispMult", m_dispMult[i]);
+		}
+	}
+
+	m_program->SetUniform("terrainRegions[0].min", -403.564362f);
+	m_program->SetUniform("terrainRegions[0].max", -10.0f);
+
+	m_program->SetUniform("terrainRegions[1].min", -10.0f);
+	m_program->SetUniform("terrainRegions[1].max", 127.587504f);
+
+	m_program->SetUniform("terrainRegions[2].min", 127.587504f);
+	m_program->SetUniform("terrainRegions[2].max", 255.175008f);
+
+	m_program->SetUniform("terrainRegions[3].min", 255.175008f);
+	m_program->SetUniform("terrainRegions[3].max", 382.762512f);
+
+	m_program->SetUniform("u_lightPos", Scene::Instance()->GetLightDirection());
+	m_program->SetUniform("u_viewPos", glm::vec3(0.0f, 0.0f, 0.0f));
+	// 158, 108, 56
+	m_program->SetUniform("u_ambientLight", glm::vec3(0.3f, 0.4f, 0.5f));
+
+	m_program->Bind();
+	m_decl->Bind();
+
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glDrawElements(GL_PATCHES,
+		4 * ((m_terrainGenerator->GetVertexCount() - 1) * (m_terrainGenerator->GetVertexCount() - 1)),
+		GL_UNSIGNED_INT, 0);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }

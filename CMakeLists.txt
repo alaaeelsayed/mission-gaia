@@ -1,60 +1,30 @@
-cmake_minimum_required(VERSION 3.0.0)
-project(sample VERSION 0.1.0)
+cmake_minimum_required(VERSION 3.15)
+project(gaia VERSION 0.1.0)
 
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+# -------------------------------------------------------
+# Global static build
+# -------------------------------------------------------
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+
+# -------------------------------------------------------
+# OpenGL
+# -------------------------------------------------------
 set(OpenGL_GL_PREFERENCE "GLVND")
 find_package(OpenGL REQUIRED)
 
-set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "If the test suite for Assimp is built in addition to the library." FORCE)
-set(ASSIMP_NO_EXPORT ON CACHE BOOL "Disable Assimp's export functionality." FORCE)
-set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "If the supplementary tools for Assimp are built in addition to the library." FORCE)
+# -------------------------------------------------------
+# Assimp configuration
+# -------------------------------------------------------
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_NO_EXPORT ON CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
-add_definitions(-DASSIMP_BUILD_NO_X_IMPORTER 
-                -DASSIMP_BUILD_NO_AMF_IMPORTER 
-                -DASSIMP_BUILD_NO_3DS_IMPORTER
-                -DASSIMP_BUILD_NO_MD3_IMPORTER
-                -DASSIMP_BUILD_NO_MDL_IMPORTER
-                -DASSIMP_BUILD_NO_MD2_IMPORTER
-                -DASSIMP_BUILD_NO_PLY_IMPORTER
-                -DASSIMP_BUILD_NO_ASE_IMPORTER
-                -DASSIMP_BUILD_NO_HMP_IMPORTER
-                -DASSIMP_BUILD_NO_SMD_IMPORTER
-                -DASSIMP_BUILD_NO_MDC_IMPORTER
-                -DASSIMP_BUILD_NO_MD5_IMPORTER
-                -DASSIMP_BUILD_NO_STL_IMPORTER
-                -DASSIMP_BUILD_NO_LWO_IMPORTER
-                -DASSIMP_BUILD_NO_DXF_IMPORTER
-                -DASSIMP_BUILD_NO_NFF_IMPORTER
-                -DASSIMP_BUILD_NO_RAW_IMPORTER
-                -DASSIMP_BUILD_NO_SIB_IMPORTER
-                -DASSIMP_BUILD_NO_OFF_IMPORTER
-                -DASSIMP_BUILD_NO_AC_IMPORTER
-                -DASSIMP_BUILD_NO_BVH_IMPORTER
-                -DASSIMP_BUILD_NO_IRRMESH_IMPORTER
-                -DASSIMP_BUILD_NO_IRR_IMPORTER
-                -DASSIMP_BUILD_NO_Q3D_IMPORTER
-                -DASSIMP_BUILD_NO_B3D_IMPORTER
-                -DASSIMP_BUILD_NO_COLLADA_IMPORTER
-                -DASSIMP_BUILD_NO_TERRAGEN_IMPORTER
-                -DASSIMP_BUILD_NO_CSM_IMPORTER
-                -DASSIMP_BUILD_NO_3D_IMPORTER
-                -DASSIMP_BUILD_NO_LWS_IMPORTER
-                -DASSIMP_BUILD_NO_OGRE_IMPORTER
-                -DASSIMP_BUILD_NO_OPENGEX_IMPORTER
-                -DASSIMP_BUILD_NO_MS3D_IMPORTER
-                -DASSIMP_BUILD_NO_COB_IMPORTER
-                -DASSIMP_BUILD_NO_Q3BSP_IMPORTER
-                -DASSIMP_BUILD_NO_NDO_IMPORTER
-                -DASSIMP_BUILD_NO_IFC_IMPORTER
-                -DASSIMP_BUILD_NO_XGL_IMPORTER
-                -DASSIMP_BUILD_NO_ASSBIN_IMPORTER
-                -DASSIMP_BUILD_NO_C4D_IMPORTER
-                -DASSIMP_BUILD_NO_3MF_IMPORTER
-                -DASSIMP_BUILD_NO_X3D_IMPORTER
-                -DASSIMP_BUILD_NO_MMD_IMPORTER
-                -DASSIMP_BUILD_NO_M3D_IMPORTER
-                -DASSIMP_BUILD_NO_STEP_IMPORTER
-                -DASSIMP_BUILD_NO_BLEND_IMPORTER)
-
+# -------------------------------------------------------
+# Dependencies
+# -------------------------------------------------------
 add_subdirectory(thirdparty/glfw)
 add_subdirectory(thirdparty/glm)
 add_subdirectory(thirdparty/assimp)
@@ -64,75 +34,133 @@ include_directories(
     thirdparty/glfw/include 
     thirdparty/glm 
     thirdparty/glew/include 
-    thirdparty/assimp/include 
-    thirdparty/bullet/src
+    thirdparty/assimp/include
+    thirdparty/physx/include
+    thirdparty/openexr/include/Imath
+    thirdparty/openexr/include/OpenEXR
     irrklang/include
-    ${OPENGL_INCLUDE_DIRS})
+    ${OPENGL_INCLUDE_DIRS}
+)
 
-file(GLOB_RECURSE SAMPLEFW_SOURCE_FILES 
-	${CMAKE_SOURCE_DIR}/samplefw/*.c
-    ${CMAKE_SOURCE_DIR}/samplefw/*.cpp)
+# -------------------------------------------------------
+# Source files
+# -------------------------------------------------------
+file(GLOB_RECURSE WOLF_SOURCE wolf/*.cpp wolf/*.c)
+file(GLOB_RECURSE WOLF_HEADER wolf/*.hpp wolf/*.h)
+file(GLOB_RECURSE TINYXML_SOURCE tinyxml2/*.cpp tinyxml2/*.c)
+file(GLOB_RECURSE TINYXML_HEADER tinyxml2/*.hpp tinyxml2/*.h)
+file(GLOB_RECURSE GAIA_SOURCE src/*.cpp src/*.c)
+file(GLOB_RECURSE GAIA_HEADER src/*.hpp src/*.h)
 
-file(GLOB_RECURSE SAMPLEFW_HEADER_FILES 
-	${CMAKE_SOURCE_DIR}/samplefw/*.h
-    ${CMAKE_SOURCE_DIR}/samplefw/*.hpp)
+# -------------------------------------------------------
+# Executable
+# -------------------------------------------------------
+add_executable(gaia
+    ${WOLF_SOURCE} ${WOLF_HEADER}
+    ${TINYXML_SOURCE} ${TINYXML_HEADER}
+    ${GAIA_SOURCE} ${GAIA_HEADER}
+)
 
-file(GLOB_RECURSE WOLF_SOURCE_FILES 
-	${CMAKE_SOURCE_DIR}/wolf/*.c
-    ${CMAKE_SOURCE_DIR}/wolf/*.cpp)
+target_sources(gaia PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/gaia.rc)
 
-file(GLOB_RECURSE WOLF_HEADER_FILES 
-	${CMAKE_SOURCE_DIR}/wolf/*.h
-    ${CMAKE_SOURCE_DIR}/wolf/*.hpp)
+# -------------------------------------------------------
+# PhysX
+# -------------------------------------------------------
+set(PHYSX_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/physx/bin/win.x86_64.vc143.mt")
 
-file(GLOB_RECURSE TINYXML_SOURCE_FILES 
-	${CMAKE_SOURCE_DIR}/tinyxml2/*.c
-    ${CMAKE_SOURCE_DIR}/tinyxml2/*.cpp)
+target_link_libraries(gaia PRIVATE
+    optimized ${PHYSX_ROOT}/release/PhysX_64.lib
+    optimized ${PHYSX_ROOT}/release/PhysXCommon_64.lib
+    optimized ${PHYSX_ROOT}/release/PhysXFoundation_64.lib
+    optimized ${PHYSX_ROOT}/release/PhysXCooking_64.lib
+    optimized ${PHYSX_ROOT}/release/PhysXCharacterKinematic_static_64.lib
+    optimized ${PHYSX_ROOT}/release/PhysXExtensions_static_64.lib
+    optimized ${PHYSX_ROOT}/release/PhysXPvdSDK_static_64.lib
+    optimized ${PHYSX_ROOT}/release/PVDRuntime_64.lib
 
-file(GLOB_RECURSE TINYXML_HEADER_FILES 
-	${CMAKE_SOURCE_DIR}/tinyxml2/*.h
-    ${CMAKE_SOURCE_DIR}/tinyxml2/*.hpp)
-    
-file(GLOB_RECURSE SOURCE_FILES 
-	${CMAKE_SOURCE_DIR}/src/*.c
-	${CMAKE_SOURCE_DIR}/src/*.cpp)
-	
-file(GLOB_RECURSE HEADER_FILES 
-	${CMAKE_SOURCE_DIR}/src/*.h
-    ${CMAKE_SOURCE_DIR}/src/*.hpp)
+    debug ${PHYSX_ROOT}/debug/PhysX_64.lib
+    debug ${PHYSX_ROOT}/debug/PhysXCommon_64.lib
+    debug ${PHYSX_ROOT}/debug/PhysXFoundation_64.lib
+    debug ${PHYSX_ROOT}/debug/PhysXCooking_64.lib
+    debug ${PHYSX_ROOT}/debug/PhysXCharacterKinematic_static_64.lib
+    debug ${PHYSX_ROOT}/debug/PhysXExtensions_static_64.lib
+    debug ${PHYSX_ROOT}/debug/PhysXPvdSDK_static_64.lib
+    debug ${PHYSX_ROOT}/debug/PVDRuntime_64.lib
+)
 
-add_executable(gaia 
-    ${SAMPLEFW_SOURCE_FILES}
-    ${SAMPLEFW_HEADER_FILES}
-    ${WOLF_SOURCE_FILES}
-    ${WOLF_HEADER_FILES}
-    ${TINYXML_SOURCE_FILES}
-    ${TINYXML_HEADER_FILES}
-    ${SOURCE_FILES}
-    ${HEADER_FILES}
-    )
+# -------------------------------------------------------
+# OpenEXR
+# -------------------------------------------------------
+set(OPENEXR_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/openexr")
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_link_libraries(gaia ${CMAKE_SOURCE_DIR}/thirdparty/bullet/lib/BulletCollision_Debug.lib)
-    target_link_libraries(gaia ${CMAKE_SOURCE_DIR}/thirdparty/bullet/lib/LinearMath_Debug.lib)
-    target_link_libraries(gaia ${CMAKE_SOURCE_DIR}/thirdparty/bullet/lib/BulletDynamics_Debug.lib)
-else ()
-    target_link_libraries(gaia ${CMAKE_SOURCE_DIR}/thirdparty/bullet/lib/BulletCollision.lib)
-    target_link_libraries(gaia ${CMAKE_SOURCE_DIR}/thirdparty/bullet/lib/LinearMath.lib)
-    target_link_libraries(gaia ${CMAKE_SOURCE_DIR}/thirdparty/bullet/lib/BulletDynamics.lib)
-endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
+target_link_libraries(gaia PRIVATE
+    optimized ${OPENEXR_ROOT}/lib/OpenEXR-3_4.lib
+    optimized ${OPENEXR_ROOT}/lib/OpenEXRCore-3_4.lib
+    optimized ${OPENEXR_ROOT}/lib/OpenEXRUtil-3_4.lib
+    optimized ${OPENEXR_ROOT}/lib/Imath-3_2.lib
+    optimized ${OPENEXR_ROOT}/lib/Iex-3_4.lib
+    optimized ${OPENEXR_ROOT}/lib/IlmThread-3_4.lib
+    optimized ${OPENEXR_ROOT}/lib/openjph.0.24.lib
 
-target_link_libraries(gaia ${CMAKE_SOURCE_DIR}/irrklang/lib/Winx64-visualStudio/irrKlang.lib)
-target_link_libraries(gaia assimp glfw glew ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES})
-set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
-set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-include(CPack)
+    debug ${OPENEXR_ROOT}/lib/OpenEXR-3_4_d.lib
+    debug ${OPENEXR_ROOT}/lib/OpenEXRCore-3_4_d.lib
+    debug ${OPENEXR_ROOT}/lib/OpenEXRUtil-3_4_d.lib
+    debug ${OPENEXR_ROOT}/lib/Imath-3_2_d.lib
+    debug ${OPENEXR_ROOT}/lib/Iex-3_4_d.lib
+    debug ${OPENEXR_ROOT}/lib/IlmThread-3_4_d.lib
+    debug ${OPENEXR_ROOT}/lib/openjph.0.24_d.lib
+)
 
-ADD_CUSTOM_COMMAND(
-            TARGET gaia POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${CMAKE_SOURCE_DIR}/irrklang/bin/winx64-visualStudio/irrKlang.dll"
-                "$<TARGET_FILE_DIR:gaia>"
+# -------------------------------------------------------
+# Core linking
+# -------------------------------------------------------
+target_link_libraries(gaia PRIVATE
+    assimp
+    glfw
+    glew
+    ${OPENGL_LIBRARIES}
+    ${CMAKE_SOURCE_DIR}/irrklang/lib/Winx64-visualStudio/irrKlang.lib
+)
+
+# -------------------------------------------------------
+# Output
+# -------------------------------------------------------
+set_target_properties(gaia PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+)
+
+# -------------------------------------------------------
+# DLL copying
+# -------------------------------------------------------
+add_custom_command(TARGET gaia POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/thirdparty/glew/build/bin/$<IF:$<CONFIG:Debug>,Debug,Release>/glew32$<IF:$<CONFIG:Debug>,d,>.dll"
+        "$<TARGET_FILE_DIR:gaia>"
+)
+
+add_custom_command(TARGET gaia POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/irrklang/bin/winx64-visualStudio/irrKlang.dll"
+        "$<TARGET_FILE_DIR:gaia>"
+)
+
+add_custom_command(TARGET gaia POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${PHYSX_ROOT}/$<CONFIG>"
+        "$<TARGET_FILE_DIR:gaia>"
+)
+
+add_custom_command(TARGET gaia POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${OPENEXR_ROOT}/bin"
+        "$<TARGET_FILE_DIR:gaia>"
+)
+
+# -------------------------------------------------------
+# Move data folder
+# -------------------------------------------------------
+add_custom_command(TARGET gaia POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/data"
+        "$<TARGET_FILE_DIR:gaia>/data"
 )

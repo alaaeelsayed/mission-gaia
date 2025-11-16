@@ -5,7 +5,6 @@ Model::~Model()
     delete m_pModel;
     delete m_pLight;
     wolf::MaterialManager::DestroyMaterial(m_pMat);
-    delete m_pRigidBody;
 }
 
 Model::Model(const std::string &modelPath, const std::string &matName, bool skinned) : Node(BoundingBox())
@@ -34,11 +33,6 @@ Model::Model(const std::string &modelPath, const std::string &matName, bool skin
         m_pModel = new wolf::SkinnedModel(modelPath, matProvider);
     else
         m_pModel = new wolf::Model(modelPath, matProvider);
-}
-
-void Model::attachRigidBody(const std::string &p_sConfiguration)
-{
-    m_pRigidBody = new RigidBody(p_sConfiguration);
 }
 
 void Model::attachLight(StateGameplay::Light *pLight)
@@ -70,10 +64,6 @@ void Model::setNormal(const char *texPath)
 void Model::setPosition(const glm::vec3 &vPosition)
 {
     m_vPosition = vPosition;
-    if (m_pRigidBody)
-    {
-        m_pRigidBody->setPosition(vPosition);
-    }
 }
 
 glm::vec3 Model::getPosition()
@@ -122,19 +112,9 @@ void Model::Update(float fDelta)
     GetBoundingBox().SetMin(m_pModel->getAABBMin() * m_vScale);
     GetBoundingBox().SetMax(m_pModel->getAABBMax() * m_vScale);
 
-    if (m_pRigidBody)
-    {
-        glm::vec3 newPos = m_pRigidBody->Update(fDelta, m_vPosition);
-
-        if (!m_pRigidBody->isKinematic() && !m_isChasing)
-        {
-            m_vPosition = newPos;
-        }
-    }
-
     if (m_pLight)
     {
-        m_pLight->posRange = glm::vec4(m_vPosition.x, m_vPosition.y, m_vPosition.z, m_pLight->posRange.w);
+        m_pLight->pos = glm::vec3(m_vPosition.x, m_vPosition.y, m_vPosition.z);
     }
 
     m_pModel->Update(fDelta);

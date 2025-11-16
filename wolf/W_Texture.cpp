@@ -8,6 +8,11 @@
 #include "W_Common.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#define IMATH_DLL
+#include <ImfRgbaFile.h>
+#include <ImfArray.h>
+#include <ImathBox.h>
+#include <vector>
 
 namespace wolf
 {
@@ -49,12 +54,16 @@ namespace wolf
 	{
 		if (path.find(".dds") != std::string::npos)
 			LoadFromDDS(path);
-		else if (path.find(".tga") != std::string::npos || path.find(".png") != std::string::npos)
+		else if (path.find(".tga") != std::string::npos || path.find(".png") != std::string::npos || path.find(".jpg") != std::string::npos)
 			LoadImage(path);
+		else if (path.find(".exr") != std::string::npos)
+			LoadEXRImage(path);
 		else
 		{
 			printf("ERROR: No idea how to load this file - %s!", path.c_str());
 		}
+		
+		Imf::setGlobalThreadCount(4);
 
 		SetWrapMode(WM_Clamp);
 	}
@@ -122,6 +131,43 @@ namespace wolf
 		m_magFilter = FM_Linear;
 	}
 
+	void Texture::LoadEXRImage(const std::string& path)
+	{
+		Imf::RgbaInputFile file(path.c_str());
+		Imath::Box2i dw = file.dataWindow();
+
+		int width = dw.max.x - dw.min.x + 1;
+		int height = dw.max.y - dw.min.y + 1;
+
+		Imf::Array2D<Imf::Rgba> pixels(height, width);
+		file.setFrameBuffer(&pixels[0][0] - dw.min.x - dw.min.y * width, 1, width);
+		file.readPixels(dw.min.y, dw.max.y);
+
+		std::vector<float> img(3 * width * height);
+
+		for (int i = 0; i < height; i++)
+		{
+			for (int j = 0; j < width; j++)
+			{
+				int idx = 3 * (i * width + j);
+				img[idx] = pixels[i][j].r;
+				img[idx + 1] = pixels[i][j].g;
+				img[idx + 2] = pixels[i][j].b;
+			}
+		}
+
+		glGenTextures(1, &m_glTex);
+		glBindTexture(GL_TEXTURE_2D, m_glTex);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, &img[0]);
+
+		m_width = width;
+		m_height = height;
+
+		glGenerateMipmap(GL_TEXTURE_2D);
+		SetFilterMode(FM_TrilinearMipmap, FM_Linear);
+
+	}
+
 	//----------------------------------------------------------
 	// Builds the texture from the given TGA file. Mipmap levels
 	// are automatically generated
@@ -134,10 +180,16 @@ namespace wolf
 		int w, h, n;
 		unsigned char *pData = stbi_load(path.c_str(), &w, &h, &n, 0);
 		int format = -1;
+		printf("For %s, %d\n", path.c_str(), n);
 		switch (n)
 		{
 		case 1:
-			format = GL_R;
+			format = GL_RED;
+			printf("Width: %d, Height: %d\n", w, h);
+			for (int i = 0; i < 10; i++)
+			{
+				printf("%d\n", pData[i]);
+			}
 			break;
 		case 2:
 			format = GL_RG;
@@ -149,9 +201,11 @@ namespace wolf
 			format = GL_RGBA;
 			break;
 		default:
+			printf("Erorr in: %s\n", path.c_str());
 			printf("Error: unknown image format %d\n", n);
 			return;
 		}
+
 
 		glTexImage2D(GL_TEXTURE_2D, 0, format, w, h, 0, format, GL_UNSIGNED_BYTE, pData);
 

@@ -5,7 +5,7 @@ using namespace std;
 
 Effect::Effect(string p_sFilePath)
 {
-    XMLDocument doc = new XMLDocument();
+    XMLDocument doc;
 
     if (doc.LoadFile(p_sFilePath.c_str()) != XML_SUCCESS)
         throw XML_ERROR_FILE_COULD_NOT_BE_OPENED;

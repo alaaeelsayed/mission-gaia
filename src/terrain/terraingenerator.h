@@ -5,79 +5,123 @@
 #include "../misc/util.h"
 #include <random>
 #include <cmath>
+#include <array>   // Include for using std::array
+#include <unordered_map>
 
-#ifndef AMPLITUDE
-#define AMPLITUDE 60.0f
-#endif
+// Use constexpr for values that don't change
+constexpr float AMPLITUDE = 300.0f;
+constexpr int SIZE = 400;
+constexpr int NUM_VERTICES = 128;
+constexpr int OCTAVES = 7;
+constexpr float ROUGHNESS = 0.5f;
+constexpr int GRID_OFFSET = 0;
+constexpr float SCALE = 120.0f;
 
-#ifndef SIZE
-#define SIZE 800
-#endif
+struct TerrainVertex
+{
+	GLfloat x, y, z;    // Position
+	GLfloat u, v;       // Texture Coordinates
+	GLfloat nX, nY, nZ; // Normals
+	GLfloat tX, tY, tZ;
+	GLfloat btX, btY, btZ;
+};
 
-#ifndef NUM_VERTICES
-#define NUM_VERTICES 64
-#endif
-
-#ifndef OCTAVES
-#define OCTAVES 7
-#endif
-
-#ifndef ROUGHNESS
-#define ROUGHNESS 0.3f
-#endif
-
-#ifndef GRID_OFFSET
-#define GRID_OFFSET 10000
-#endif
+constexpr size_t hashCombine(size_t t, size_t u)
+{
+	return t ^ (0x517cc1b727220a95 + ((t << 2) ^ (u >> 3)));
+}
+namespace std
+{
+	template <>
+	struct hash<std::pair<int, int>>
+	{
+		size_t operator()(const std::pair<int, int>& object) const
+		{
+			return hashCombine(std::hash<int>()(object.first), std::hash<int>()(object.second));
+		}
+	};
+}
 
 class TerrainGenerator
 {
 public:
-    TerrainGenerator();
-    ~TerrainGenerator();
+	TerrainGenerator();
+	~TerrainGenerator() = default;
 
-    float GetHeight(int x, int z);
-    wolf::VertexDeclaration *GenerateVertices(int gridX, int gridZ);
+	wolf::VertexDeclaration* GenerateVertices(int gridX, int gridZ);
 
-    void SetSize(int size);
-    void SetVertexCount(int count);
-    void SetAmplitude(float amplitude);
-    void SetOctaves(int octaves);
-    void SetRoughness(float roughness);
+	// Setters
+	void SetSize(int size);
+	void SetVertexCount(int count);
+	void SetAmplitude(float amplitude);
+	void SetOctaves(int octaves);
+	void SetRoughness(float roughness);
 
-    int GetSize() const;
-    int GetVertexCount() const;
-    float GetAmplitude() const;
-    int GetOctaves() const;
-    float GetRoughness() const;
-    std::vector<Vertex> getVertices();
-    std::vector<float> getRawVertices();
-    std::vector<float> getHeights();
-    BoundingBox GetBounds(int gridX, int gridZ);
+	void SetBaseMult(float val) { m_baseMult = val; }
+	void SetValleyMult(float val) { m_valleyMult = val; }
+	void SetLowAreaSmoothFactor(float val) { m_lowAreaSmoothFactor = val; }
+	void SetLowAreaThreshold(float val) { m_lowAreaThreshold = val; }
+	void SetValleyThreshold(float val) { m_valleyThreshold = val; }
+	void SetValleyDepth(float val) { m_valleyDepth = val; }
+
+	void SetSmoothEdge0(float val) { m_smoothEdge0 = val; }
+	void SetSmoothEdge1(float val) { m_smoothEdge1 = val; }
+
+	void ClearHeightCache() { m_heightCache.clear(); }
+
+	// Getters
+	float GetHeight(int x, int z) const { return m_heightCache[std::pair<int, int>(x, z)]; }
+	int GetSize() const;
+	int GetVertexCount() const;
+	float GetAmplitude() const;
+	int GetOctaves() const;
+	float GetRoughness() const;
+	const std::vector<TerrainVertex>& getVertices() const;
+	const std::vector<float>& getRawVertices() const;
+	BoundingBox GetBounds(int gridX, int gridZ) const;
+	float _fBM(float x, float z) const;
+	float _generateHeight(float x, float z, int xOff, int zOff) const;
 
 private:
-    float _generateHeight(int x, int z, int xOff, int zOff);
-    glm::vec3 _calculateNormal(int x, int z, int xOff, int zOff);
+	glm::vec3 _calculateNormal(float x, float z, int xOff, int zOff) const;
+	double _getNoise(double x, double z) const;
 
-    float _interpolate(float a, float b, float blend);
+	// Move utility functions to header for inlining
+	inline double _fade(double t) const
+	{
+		return t * t * t * (t * (t * 6 - 15) + 10);
+	}
 
-    float _getInterpolatedNoise(float x, float z);
-    float _getSmoothNoise(float x, float z);
-    float _getNormalNoise(float x, float z);
-    float _getNoise(float x, float z);
-    float _fade(float t);
-    float _lerp(float t, float a, float b);
-    float _grad(int xCorner, int zCorner, float xDist, float zDist);
-    int _hash(int x, int z);
+	inline double _lerp(double t, double a, double b) const
+	{
+		return a + t * (b - a);
+	}
 
-    int m_size = SIZE, m_countVerts = NUM_VERTICES;
-    int m_octaves = OCTAVES;
-    float m_amplitude = AMPLITUDE, m_roughness = ROUGHNESS;
-    int m_seed;
+	inline double _grad(int hash, double x, double z) const;
 
-    // For rigid body
-    btConvexHullShape *m_convexHull;
-    std::vector<Vertex> m_vertices;
-    std::vector<float> m_rawVertices;
-    std::vector<float> m_heights;
+	inline float _smootherstep(float edge0, float edge1, float x) const
+	{
+		// Scale, bias and saturate x to 0..1 range
+		x = wolf::max(0.0f, wolf::min((x - edge0) / (edge1 - edge0), 1.0f));
+		// Evaluate polynomial
+		return x * x * (3 - 2 * x);
+	}
+
+	int m_size = SIZE, m_countVerts = NUM_VERTICES;
+	int m_octaves = OCTAVES;
+	float m_amplitude = AMPLITUDE, m_roughness = ROUGHNESS;
+
+	float m_baseMult = 2.7f;
+	float m_valleyMult = 3.5f, m_valleyThreshold = -0.325f, m_valleyDepth = 0.445f;
+	float m_lowAreaSmoothFactor = 0.098f, m_lowAreaThreshold = 0.0f;
+
+	float m_smoothEdge0 = 0.4f, m_smoothEdge1 = 0.6f;
+
+	int m_seed;
+	float m_seedOffset;
+
+	std::vector<TerrainVertex> m_vertices;
+	std::vector<float> m_rawVertices;
+
+	mutable std::unordered_map<std::pair<int, int>, float> m_heightCache;
 };

@@ -23,6 +23,7 @@ namespace wolf
 		//-------------------------------------------------------------------------
 		virtual void Bind();
 		virtual void Write(const void *p_pData, int p_iLength = -1);
+		virtual void WriteDynamic(const void *p_pData, int p_iLength = -1);
 		GLuint getBuffer() { return m_uiBuffer; }
 		//-------------------------------------------------------------------------
 

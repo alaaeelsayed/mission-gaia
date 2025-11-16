@@ -66,8 +66,11 @@ Skybox::Skybox(const std::string &texturePath) : Node(BoundingBox(glm::vec3(-100
 
     // Material should be unique to a texture
     m_material = wolf::MaterialManager::CreateMaterial(texturePath);
-    m_material->SetProgram("data/shaders/skybox.vsh", "data/shaders/skybox.fsh");
-    m_material->SetTexture("tex", m_texture);
+    if(!m_material->GetProgram())
+    {
+        m_material->SetProgram("data/shaders/skybox.vsh", "data/shaders/skybox.fsh");
+        m_material->SetTexture("tex", m_texture);
+    }
 
     m_decl = new wolf::VertexDeclaration();
     m_decl->Begin();
@@ -80,7 +83,7 @@ Skybox::Skybox(const std::string &texturePath) : Node(BoundingBox(glm::vec3(-100
 
 void Skybox::Update(float dt)
 {
-    Rotate(glm::vec3(dt * 3.0f, 0.0f, 0.0f));
+    Rotate(glm::vec3(dt * 0.34f, 0.0f, 0.0f));
 }
 
 void Skybox::Render(const glm::mat4 &mProj, const glm::mat4 &mView)

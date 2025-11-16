@@ -43,6 +43,15 @@ namespace wolf
 	}
 
 	//----------------------------------------------------------
+	// Fills this vertex buffer with the given data (dynamic)
+	//----------------------------------------------------------
+	void VertexBuffer::WriteDynamic(const void *p_pData, int p_iLength)
+	{
+		Bind();
+		glBufferData(GL_ARRAY_BUFFER, p_iLength == -1 ? m_uiLength : p_iLength, p_pData, GL_DYNAMIC_DRAW);
+	}
+
+	//----------------------------------------------------------
 	// Binds this buffer
 	//----------------------------------------------------------
 	void VertexBuffer::Bind()

@@ -4,53 +4,18 @@ TerrainGenerator::TerrainGenerator()
 {
 	std::random_device rd;
 	std::mt19937 mt(rd());
-	std::uniform_int_distribution<int> dist(0, 1000000000);
+	std::uniform_int_distribution<int> dist(std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
 	m_seed = dist(mt);
+	float hashed = sin(m_seed + 1.0f) * 10000.0f;
+	m_seedOffset = (hashed - floor(hashed)) * 2.0f - 1.0f;
+
+	m_vertices.reserve(m_countVerts * m_countVerts);
+	m_rawVertices.reserve((m_countVerts * m_countVerts) * 3);
 }
 
-TerrainGenerator::~TerrainGenerator()
-{
-}
-
-float TerrainGenerator::GetHeight(int x, int z)
-{
-	int terrainX = x % m_size;
-	int terrainZ = z % m_size;
-
-	float gridSize = m_size / ((float)m_countVerts - 1);
-
-	int gridX = floor(terrainX / gridSize);
-	int gridZ = floor(terrainZ / gridSize);
-
-	float accX = (fmod(terrainX, gridSize)) / gridSize;
-	float accZ = (fmod(terrainZ, gridSize)) / gridSize;
-
-	int xOff = x / m_size;
-	int zOff = z / m_size;
-
-	xOff *= (m_countVerts - 1);
-	zOff *= (m_countVerts - 1);
-
-	xOff += GRID_OFFSET;
-	zOff += GRID_OFFSET;
-
-	float height;
-	if (accX <= (1 - accZ))
-	{
-		height = Util::barryCentric(glm::vec3(0, _generateHeight(gridX, gridZ, xOff, zOff), 0),
-									glm::vec3(1, _generateHeight(gridX + 1, gridZ, xOff, zOff), 0),
-									glm::vec3(0, _generateHeight(gridX, gridZ + 1, xOff, zOff), 1),
-									glm::vec2(accX, accZ));
-	}
-	else
-	{
-		height = Util::barryCentric(glm::vec3(1, _generateHeight(gridX + 1, gridZ, xOff, zOff), 0),
-									glm::vec3(1, _generateHeight(gridX + 1, gridZ + 1, xOff, zOff), 1),
-									glm::vec3(0, _generateHeight(gridX, gridZ + 1, xOff, zOff), 1),
-									glm::vec2(accX, accZ));
-	}
-	return height;
-}
+//TerrainGenerator::~TerrainGenerator()
+//{
+//}
 
 void TerrainGenerator::SetSize(int size)
 {
@@ -60,6 +25,8 @@ void TerrainGenerator::SetSize(int size)
 void TerrainGenerator::SetVertexCount(int count)
 {
 	m_countVerts = count;
+	m_vertices.reserve(m_countVerts * m_countVerts);
+	m_rawVertices.reserve((m_countVerts * m_countVerts) * 3);
 }
 
 void TerrainGenerator::SetAmplitude(float amplitude)
@@ -82,19 +49,14 @@ int TerrainGenerator::GetSize() const
 	return m_size;
 }
 
-std::vector<Vertex> TerrainGenerator::getVertices()
+const std::vector<TerrainVertex>& TerrainGenerator::getVertices() const
 {
 	return m_vertices;
 }
 
-std::vector<float> TerrainGenerator::getRawVertices()
+const std::vector<float>& TerrainGenerator::getRawVertices() const
 {
 	return m_rawVertices;
-}
-
-std::vector<float> TerrainGenerator::getHeights()
-{
-	return m_heights;
 }
 
 int TerrainGenerator::GetVertexCount() const
@@ -117,7 +79,7 @@ float TerrainGenerator::GetRoughness() const
 	return m_roughness;
 }
 
-BoundingBox TerrainGenerator::GetBounds(int gridX, int gridZ)
+BoundingBox TerrainGenerator::GetBounds(int gridX, int gridZ) const
 {
 	float min = 100000.0f;
 	float max = -100000.0f;
@@ -129,7 +91,7 @@ BoundingBox TerrainGenerator::GetBounds(int gridX, int gridZ)
 	{
 		for (int j = 0; j < m_countVerts; j++)
 		{
-			float height = _generateHeight(j, i, xOffset, zOffset);
+			float height = _generateHeight(j - 0.5f, i - 0.5f, xOffset, zOffset);
 			if (height < min)
 				min = height;
 			if (height > max)
@@ -139,14 +101,14 @@ BoundingBox TerrainGenerator::GetBounds(int gridX, int gridZ)
 	return BoundingBox(glm::vec3(gridX * m_size, min, gridZ * m_size), glm::vec3(gridX * m_size + m_size, max, gridZ * m_size + m_size));
 }
 
-wolf::VertexDeclaration *TerrainGenerator::GenerateVertices(int gridX, int gridZ)
+wolf::VertexDeclaration* TerrainGenerator::GenerateVertices(int gridX, int gridZ)
 {
 	int xOffset = GRID_OFFSET + gridX * (m_countVerts - 1);
 	int zOffset = GRID_OFFSET + gridZ * (m_countVerts - 1);
 
 	int count = m_countVerts * m_countVerts;
 
-	std::vector<Vertex> vertices(count);
+	std::vector<TerrainVertex> vertices(count);
 	m_rawVertices.reserve(count * 3);
 
 	int vertexOffset = 0;
@@ -154,57 +116,71 @@ wolf::VertexDeclaration *TerrainGenerator::GenerateVertices(int gridX, int gridZ
 	{
 		for (int j = 0; j < m_countVerts; j++)
 		{
-			float height = _generateHeight(j, i, xOffset, zOffset);
-			glm::vec3 normal = _calculateNormal(j, i, xOffset, zOffset);
+			float height = _generateHeight(j - 0.5f, i - 0.5f, xOffset, zOffset);
+			glm::vec3 normal = _calculateNormal(j - 0.5f, i - 0.5f, xOffset, zOffset);
+
+			glm::vec3 right = glm::vec3(1.0f, _generateHeight(j + 0.5f, i - 0.5f, xOffset, zOffset) - height, 0.0f);
+			glm::vec3 back = glm::vec3(0.0f, _generateHeight(j - 0.5f, i + 0.5f, xOffset, zOffset) - height, 1.0f);
+			glm::vec3 tangent = glm::normalize(right);
+			glm::vec3 bitangent = glm::normalize(back);
+
 			vertices[vertexOffset] = {
 				(float)j / ((float)m_countVerts - 1) * m_size,
 				height,
 				(float)i / ((float)m_countVerts - 1) * m_size,
-				(float)j / ((float)m_countVerts - 1),
-				(float)i / ((float)m_countVerts - 1),
+				((float)j / ((float)m_countVerts - 1)), // U texcoord
+				((float)i / ((float)m_countVerts - 1)), // V texcoord
 				normal.x,
 				normal.y,
-				normal.z};
+				normal.z,
+				tangent.x,
+				tangent.y,
+				tangent.z,
+				bitangent.x,
+				bitangent.y,
+				bitangent.z,
+			};
 
 			m_rawVertices.push_back((float)j / ((float)m_countVerts - 1) * m_size);
 			m_rawVertices.push_back(height);
 			m_rawVertices.push_back((float)i / ((float)m_countVerts - 1) * m_size);
 			vertexOffset++;
-			m_heights.push_back(height);
 		}
 	}
 
-	std::vector<GLuint> indices(6 * (m_countVerts - 1) * (m_countVerts - 1));
+	// 4 for quad shape
+	std::vector<GLuint> indices(4 * (m_countVerts - 1) * (m_countVerts - 1));
 
 	int counter = 0;
 	for (int i = 0; i < m_countVerts - 1; i++)
 	{
 		for (int j = 0; j < m_countVerts - 1; j++)
 		{
+			// Use quad shape for GL_PATCHES
 			int topLeft = (i * m_countVerts) + j;
 			int topRight = topLeft + 1;
 			int bottomLeft = ((i + 1) * m_countVerts) + j;
 			int bottomRight = bottomLeft + 1;
 			indices[counter++] = topLeft;
 			indices[counter++] = bottomLeft;
-			indices[counter++] = topRight;
-			indices[counter++] = topRight;
-			indices[counter++] = bottomLeft;
 			indices[counter++] = bottomRight;
+			indices[counter++] = topRight;
 		}
 	}
 
-	wolf::VertexBuffer *vertexBuffer = wolf::BufferManager::CreateVertexBuffer(&vertices[0], sizeof(Vertex) * vertices.size());
-	wolf::IndexBuffer *indexBuffer = wolf::BufferManager::CreateIndexBuffer(&indices[0], sizeof(GLuint) * counter);
+	wolf::VertexBuffer* vertexBuffer = wolf::BufferManager::CreateVertexBuffer(&vertices[0], sizeof(TerrainVertex) * vertices.size());
+	wolf::IndexBuffer* indexBuffer = wolf::BufferManager::CreateIndexBuffer(&indices[0], sizeof(GLuint) * counter);
 
 	int length = m_rawVertices.size();
 
-	wolf::VertexDeclaration *vertexDeclaration = new wolf::VertexDeclaration();
+	wolf::VertexDeclaration* vertexDeclaration = new wolf::VertexDeclaration();
 
 	vertexDeclaration->Begin();
 	vertexDeclaration->AppendAttribute(wolf::AT_Position, 3, wolf::CT_Float);
 	vertexDeclaration->AppendAttribute(wolf::AT_TexCoord1, 2, wolf::CT_Float);
 	vertexDeclaration->AppendAttribute(wolf::AT_Normal, 3, wolf::CT_Float);
+	vertexDeclaration->AppendAttribute(wolf::AT_Tangent, 3, wolf::CT_Float);
+	vertexDeclaration->AppendAttribute(wolf::AT_BiTangent, 3, wolf::CT_Float);
 	vertexDeclaration->SetVertexBuffer(vertexBuffer);
 	vertexDeclaration->SetIndexBuffer(indexBuffer);
 	vertexDeclaration->End();
@@ -213,7 +189,7 @@ wolf::VertexDeclaration *TerrainGenerator::GenerateVertices(int gridX, int gridZ
 	return vertexDeclaration;
 }
 
-glm::vec3 TerrainGenerator::_calculateNormal(int x, int z, int xOff, int zOff)
+glm::vec3 TerrainGenerator::_calculateNormal(float x, float z, int xOff, int zOff) const
 {
 	float heightLeft = _generateHeight(x - 1, z, xOff, zOff);
 	float heightRight = _generateHeight(x + 1, z, xOff, zOff);
@@ -223,139 +199,127 @@ glm::vec3 TerrainGenerator::_calculateNormal(int x, int z, int xOff, int zOff)
 	return glm::normalize(normal);
 }
 
-float TerrainGenerator::_generateHeight(int x, int z, int xOff, int zOff)
+float TerrainGenerator::_generateHeight(float x, float z, int xOff, int zOff) const
 {
+	x += xOff + m_seedOffset;
+	z += zOff + m_seedOffset;
+
+	std::pair<int, int> key = std::pair<int, int>((int)(x + 0.5f) - m_seedOffset, (int)(z + 0.5f) - m_seedOffset);
+
+	auto it = m_heightCache.find(key);
+	if (it != m_heightCache.end())
+	{
+		return it->second;
+	}
+
+	float height = _fBM(x / (SCALE * m_baseMult), z / (SCALE * m_baseMult));
+
+	/*if (height < m_lowAreaThreshold) {
+		height *= m_lowAreaSmoothFactor;
+	}*/
+
+	m_heightCache[key] = height * m_amplitude;
+
+	return height * m_amplitude;
+}
+
+
+float TerrainGenerator::_fBM(float x, float z) const
+{
+	float lacunarity = 2;
+
+	float freq = 1;
+	float amp = 1;
+
 	float total = 0;
-	float d = (float)pow(2, m_octaves - 1);
 	for (int i = 0; i < m_octaves; i++)
 	{
-		float freq = (float)(pow(2, i) / d);
-		float amp = (float)pow(m_roughness, i) * m_amplitude;
-		total += _getNormalNoise((x + xOff) * freq, (z + zOff) * freq) * amp;
+		total += (_getNoise(x * freq, z * freq) * 2 - 1) * amp;
+
+		freq *= lacunarity;
+		amp *= m_roughness;
 	}
 	return total;
 }
 
-// float TerrainGenerator::_getInterpolatedNoise(float x, float z)
-// {
-// 	int intX = (int)x;
-// 	int intZ = (int)z;
-// 	float fracX = x - intX;
-// 	float fracZ = z - intZ;
+int perm[512] = {
+		151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233,
+		7, 225, 140, 36, 103, 30, 69, 142, 8, 99, 37, 240, 21, 10, 23,
+		190, 6, 148, 247, 120, 234, 75, 0, 26, 197, 62, 94, 252, 219,
+		203, 117, 35, 11, 32, 57, 177, 33, 88, 237, 149, 56, 87, 174,
+		20, 125, 136, 171, 168, 68, 175, 74, 165, 71, 134, 139, 48, 27,
+		166, 77, 146, 158, 231, 83, 111, 229, 122, 60, 211, 133, 230,
+		220, 105, 92, 41, 55, 46, 245, 40, 244, 102, 143, 54, 65, 25,
+		63, 161, 1, 216, 80, 73, 209, 76, 132, 187, 208, 89, 18, 169,
+		200, 196, 135, 130, 116, 188, 159, 86, 164, 100, 109, 198, 173,
+		186, 3, 64, 52, 217, 226, 250, 124, 123, 5, 202, 38, 147, 118,
+		126, 255, 82, 85, 212, 207, 206, 59, 227, 47, 16, 58, 17, 182,
+		189, 28, 42, 223, 183, 170, 213, 119, 248, 152, 2, 44, 154, 163,
+		70, 221, 153, 101, 155, 167, 43, 172, 9, 129, 22, 39, 253, 19,
+		98, 108, 110, 79, 113, 224, 232, 178, 185, 112, 104, 218, 246,
+		97, 228, 251, 34, 242, 193, 238, 210, 144, 12, 191, 179, 162,
+		241, 81, 51, 145, 235, 249, 14, 239, 107, 49, 192, 214, 31, 181,
+		199, 106, 157, 184, 84, 204, 176, 115, 121, 50, 45, 127, 4, 150,
+		254, 138, 236, 205, 93, 222, 114, 67, 29, 24, 72, 243, 141, 128,
+		195, 78, 66, 215, 61, 156, 180, 151, 160, 137, 91, 90, 15, 131,
+		13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69,
+		142, 8, 99, 37, 240, 21, 10, 23, 190, 6, 148, 247, 120, 234, 75,
+		0, 26, 197, 62, 94, 252, 219, 203, 117, 35, 11, 32, 57, 177, 33,
+		88, 237, 149, 56, 87, 174, 20, 125, 136, 171, 168, 68, 175, 74,
+		165, 71, 134, 139, 48, 27, 166, 77, 146, 158, 231, 83, 111, 229,
+		122, 60, 211, 133, 230, 220, 105, 92, 41, 55, 46, 245, 40, 244,
+		102, 143, 54, 65, 25, 63, 161, 1, 216, 80, 73, 209, 76, 132,
+		187, 208, 89, 18, 169, 200, 196, 135, 130, 116, 188, 159, 86,
+		164, 100, 109, 198, 173, 186, 3, 64, 52, 217, 226, 250, 124,
+		123, 5, 202, 38, 147, 118, 126, 255, 82, 85, 212, 207, 206, 59,
+		227, 47, 16, 58, 17, 182, 189, 28, 42, 223, 183, 170, 213, 119,
+		248, 152, 2, 44, 154, 163, 70, 221, 153, 101, 155, 167, 43, 172,
+		9, 129, 22, 39, 253, 19, 98, 108, 110, 79, 113, 224, 232, 178,
+		185, 112, 104, 218, 246, 97, 228, 251, 34, 242, 193, 238, 210,
+		144, 12, 191, 179, 162, 241, 81, 51, 145, 235, 249, 14, 239,
+		107, 49, 192, 214, 31, 181, 199, 106, 157, 184, 84, 204, 176,
+		115, 121, 50, 45, 127, 4, 150, 254, 138, 236, 205, 93, 222, 114,
+		67, 29, 24, 72, 243, 141, 128, 195, 78, 66, 215, 61, 156, 180
+};
 
-// 	float v1 = _getSmoothNoise(intX, intZ);
-// 	float v2 = _getSmoothNoise(intX + 1, intZ);
-// 	float v3 = _getSmoothNoise(intX, intZ + 1);
-// 	float v4 = _getSmoothNoise(intX + 1, intZ + 1);
-// 	float i1 = _interpolate(v1, v2, fracX);
-// 	float i2 = _interpolate(v3, v4, fracX);
-// 	return _interpolate(i1, i2, fracZ);
-// }
-
-// Cosine interpolation
-// float TerrainGenerator::_interpolate(float a, float b, float blend)
-// {
-// 	double theta = blend * PI;
-// 	float f = (float)(1.0f - cos(theta)) * 0.5f;
-// 	return a * (1.0f - f) + b * f;
-// }
-
-// float TerrainGenerator::_getSmoothNoise(int x, int z)
-// {
-// 	float corners = (_getNoise(x - 1, z - 1) + _getNoise(x + 1, z - 1) + _getNoise(x - 1, z + 1) + _getNoise(x + 1, z + 1)) / 16.0f;
-// 	float sides = (_getNoise(x - 1, z) + _getNoise(x + 1, z) + _getNoise(x, z - 1) + _getNoise(x, z + 1)) / 8.0f;
-// 	float center = _getNoise(x, z) / 4.0f;
-// 	return corners + sides + center;
-// }
-
-float TerrainGenerator::_getNormalNoise(float x, float z)
+double TerrainGenerator::_getNoise(double x, double z) const
 {
-	return _getNoise(x, z) * M_SQRT2;
+	int X = (int)floor(x) & 255;
+	int Z = (int)floor(z) & 255;
+
+	x -= floor(x);
+	z -= floor(z);
+
+	int A = perm[X] + Z;
+	int B = perm[X + 1] + Z;
+
+	int AA = perm[perm[A]];
+	int AB = perm[perm[A + 1]];
+	int BA = perm[perm[B]];
+	int BB = perm[perm[B + 1]];
+
+	float u = _fade(x);
+	float v = _fade(z);
+
+	auto gradAA = _grad(AA, x, z);
+	auto gradBA = _grad(BA, x - 1, z);
+	auto gradAB = _grad(AB, x, z - 1);
+	auto gradBB = _grad(BB, x - 1, z - 1);
+
+	float res = _lerp(v,
+		_lerp(u, gradAA, gradBA),
+		_lerp(u, gradAB, gradBB));
+
+	res += 0.69f;
+	res /= 1.483f;
+
+	return res;
 }
 
-float TerrainGenerator::_getNoise(float x, float z)
+double TerrainGenerator::_grad(int hash, double x, double z) const
 {
-	int xFloor = static_cast<int>(x);
-	int zFloor = static_cast<int>(z);
-
-	float xFrac = x - xFloor;
-	float zFrac = z - zFloor;
-
-	float grad1 = _grad(xFloor, zFloor, xFrac, zFrac);
-	float grad2 = _grad(xFloor + 1, zFloor, xFrac - 1.0, zFrac);
-	float grad3 = _grad(xFloor, zFloor + 1, xFrac, zFrac - 1.0);
-	float grad4 = _grad(xFloor + 1, zFloor + 1, xFrac - 1.0, zFrac - 1.0);
-
-	float xFade = _fade(xFrac);
-	float zFade = _fade(zFrac);
-
-	return _lerp(_lerp(grad1, grad2, xFade),
-				 _lerp(grad3, grad4, xFade), zFade);
-}
-
-float TerrainGenerator::_fade(float t)
-{
-	return t * t * t * (t * (t * 6.0f - 15.0f) + 10.0f);
-}
-
-float TerrainGenerator::_lerp(float a, float b, float t)
-{
-	return (1.0 - t) * a + t * b;
-}
-
-float TerrainGenerator::_grad(int xCorner, int zCorner, float xDist, float zDist)
-{
-	double cosPi4 = std::cos(M_PI / 4.0);
-	double cosPi8 = std::cos(M_PI / 8.0);
-	double sinPi8 = std::sin(M_PI / 8.0);
-
-	switch (_hash(xCorner, zCorner) & 0xf)
-	{
-	case 0x0:
-		return +xDist;
-	case 0x1:
-		return +zDist;
-	case 0x2:
-		return -xDist;
-	case 0x3:
-		return -zDist;
-	case 0x4:
-		return +xDist * cosPi4 + zDist * cosPi4;
-	case 0x5:
-		return -xDist * cosPi4 + zDist * cosPi4;
-	case 0x6:
-		return -xDist * cosPi4 - zDist * cosPi4;
-	case 0x7:
-		return +xDist * cosPi4 - zDist * cosPi4;
-	case 0x8:
-		return +xDist * cosPi8 + zDist * sinPi8;
-	case 0x9:
-		return +xDist * sinPi8 + zDist * cosPi8;
-	case 0xa:
-		return -xDist * sinPi8 + zDist * cosPi8;
-	case 0xb:
-		return -xDist * cosPi8 + zDist * sinPi8;
-	case 0xc:
-		return -xDist * cosPi8 - zDist * sinPi8;
-	case 0xd:
-		return -xDist * sinPi8 - zDist * cosPi8;
-	case 0xe:
-		return +xDist * sinPi8 - zDist * cosPi8;
-	case 0xf:
-		return +xDist * cosPi8 - zDist * sinPi8;
-	default:
-		return 0.0;
-	}
-}
-
-int TerrainGenerator::_hash(int x, int z)
-{
-	x = (x << 16) | (z & 0xffff);
-
-	x ^= x >> 16;
-	x *= m_seed;
-	x ^= x >> 16;
-	x *= m_seed;
-	x ^= x >> 16;
-	return x;
+	int h = hash & 15;
+	float u = h < 8 ? x : z;
+	float v = h < 4 ? z : (h == 12 || h == 14 ? x : 0);
+	return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
 }

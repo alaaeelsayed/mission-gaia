@@ -562,19 +562,21 @@ namespace wolf
         aiString name;
         pAssimpMat->Get(AI_MATKEY_NAME, name);
         wolf::Material *pMat = wolf::MaterialManager::CreateMaterial(m_path + "/" + name.C_Str());
-        pMat->SetProgram("data/uber.vsh", "data/uber.fsh");
-        pMat->SetDepthTest(true);
-        pMat->SetDepthWrite(true);
+        if(!pMat) {
+            pMat->SetProgram("data/uber.vsh", "data/uber.fsh");
+            pMat->SetDepthTest(true);
+            pMat->SetDepthWrite(true);
 
-        wolf::Texture *pAlbedo = _getTexture(pAssimpMat, aiTextureType_DIFFUSE);
-        if (pAlbedo)
-        {
-            pMat->EnableKeyword("ALBEDO_TEX");
-            pMat->SetTexture("u_albedoTex", pAlbedo);
-        }
-        else
-        {
-            pMat->SetUniform("u_albedo", _getColorRGBA(pAssimpMat, AI_MATKEY_COLOR_DIFFUSE));
+            wolf::Texture *pAlbedo = _getTexture(pAssimpMat, aiTextureType_DIFFUSE);
+            if (pAlbedo)
+            {
+                pMat->EnableKeyword("ALBEDO_TEX");
+                pMat->SetTexture("u_albedoTex", pAlbedo);
+            }
+            else
+            {
+                pMat->SetUniform("u_albedo", _getColorRGBA(pAssimpMat, AI_MATKEY_COLOR_DIFFUSE));
+            }
         }
 
         // TODO

@@ -4,46 +4,48 @@
 #include "terraingenerator.h"
 #include "../text/textbox.h"
 #include "../scene/scene.h"
-#include "../physics/rigidBody.h"
+#include "../physics/heightmap.h"
 
 class Terrain : public Node
 {
 public:
-    enum Biome
-    {
-        Regular = 0,
-        Desert,
-        Water,
-        Lava
-    };
+	enum Biome
+	{
+		Regular = 0,
+		Desert,
+		Water,
+		Lava
+	};
 
-    Terrain(int x, int z, TerrainGenerator *terrainGenerator);
-    ~Terrain();
+	Terrain(int x, int z, TerrainGenerator* terrainGenerator);
+	~Terrain();
 
-    void Update(float dt) override;
-    void Render(const glm::mat4 &mProj, const glm::mat4 &mView) override;
+	void Update(float dt) override;
+	void Render(const glm::mat4& mProj, const glm::mat4& mView) override;
 
-    wolf::Program *getProgram() const
-    {
-        return m_program;
-    }
+	wolf::Program* getProgram() const
+	{
+		return m_program;
+	}
 
-    Biome getBiome();
-    void setBiome(Biome pBiome);
+	Biome getBiome();
+	void setBiome(Biome pBiome);
+	void setDispMult(int i, float val) { m_dispMult[i] = val; };
 
 private:
-    int m_x, m_z;
+	int m_x, m_z;
 
-    TerrainGenerator *m_terrainGenerator = nullptr;
+	TerrainGenerator* m_terrainGenerator = nullptr;
 
-    wolf::Texture *m_texture = nullptr;
-    wolf::Program *m_program = nullptr;
-    wolf::VertexBuffer *m_vb;
-    wolf::VertexDeclaration *m_decl;
+	wolf::Texture* m_texture = nullptr;
+	wolf::Program* m_program = nullptr;
+	wolf::VertexBuffer* m_vb;
+	wolf::VertexDeclaration* m_decl;
 
-    // Rigid Body for collision
-    RigidBody *m_rigidBody = nullptr;
+	Heightmap* m_heightMap = nullptr;
 
-    // Biomes
-    Biome m_biome = Regular;
+	float m_dispMult[4] = { 0.5f, 0.125f, 1.0f, 1.0f };
+
+	// Biomes
+	Biome m_biome = Regular;
 };

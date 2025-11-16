@@ -28,6 +28,7 @@ namespace Common
 		virtual void Render(const glm::mat4 &mProj, const glm::mat4 &mView) = 0;
 		virtual void Exit() = 0;
 		void RegisterApp(wolf::App *app) { m_app = app; };
+		void SetDebugMode(bool debugMode) { m_debug = debugMode; };
 
 	private:
 		void SetStateMachineMembership(StateMachine *stateMachine)
@@ -37,7 +38,8 @@ namespace Common
 
 	protected:
 		StateMachine *m_stateMachine;
-		wolf::App *m_app;
+		wolf::App* m_app;
+		bool m_debug = false;
 	};
 }
 

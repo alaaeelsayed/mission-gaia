@@ -2,7 +2,6 @@
 #include "../../wolf/wolf.h"
 #include "../camera/camera.h"
 #include "../states/stategameplay.h"
-#include "../physics/rigidBody.h"
 #include "../scene/scene.h"
 
 class SingleMaterialProvider : public wolf::Model::MaterialProvider
@@ -56,13 +55,6 @@ public:
         return m_sTag;
     }
 
-    RigidBody *getRigidBody() const
-    {
-        return m_pRigidBody;
-    }
-
-    void attachRigidBody(const std::string &p_sConfiguration);
-
     wolf::Material *getMaterial();
 
     glm::vec3 getPosition();
@@ -96,5 +88,4 @@ private:
     StateGameplay::Light *m_pLight = nullptr;
     std::string m_sTag = "";
 
-    RigidBody *m_pRigidBody = nullptr;
 };

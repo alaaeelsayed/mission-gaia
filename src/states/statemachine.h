@@ -22,6 +22,7 @@ namespace Common
 		void Render(const glm::mat4 &mProj, const glm::mat4 &mView);
 
 		int GetCurrentState() { return m_currentState; }
+		StateBase *GetCurrentStateBase() { return m_currentStateBase; }
 		float GetCurrentStateTime() { return m_currentStateTime; }
 
 		void SetStateMachineOwner(void *owner) { m_owner = owner; }

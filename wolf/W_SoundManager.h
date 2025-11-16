@@ -40,6 +40,7 @@ namespace wolf
         static void PauseAllSounds();
         static void DestroySoundSystem();
         static ISound *GetSound(std::string sName);
+        static void SetVolume(float volume);
 
     private:
         //-------------------------------------------------------------------------

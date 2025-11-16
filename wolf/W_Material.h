@@ -50,6 +50,7 @@ namespace wolf
 		void SetBlendEquation(BlendEquation equation) { m_blendEquation = equation; }
 
 		const std::string &GetName() const { return m_name; }
+		Program* GetProgram();
 		void SetProgram(const std::string &vsFile, const std::string &fsFile);
 
 		void EnableKeyword(const std::string &keyword);

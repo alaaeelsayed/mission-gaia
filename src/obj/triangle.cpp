@@ -23,8 +23,11 @@ Triangle::Triangle(const std::string &texturePath)
 
     // Material should be unique to a texture
     m_material = wolf::MaterialManager::CreateMaterial(texturePath);
-    m_material->SetProgram("data/shaders/2d_screen.vsh", "data/shaders/2d_screen.fsh");
-    m_material->SetTexture("u_texture", m_texture);
+    if(!m_material->GetProgram())
+    {
+        m_material->SetProgram("data/shaders/2d_screen.vsh", "data/shaders/2d_screen.fsh");
+        m_material->SetTexture("u_texture", m_texture);
+    }
 
     m_decl = new wolf::VertexDeclaration();
     m_decl->Begin();

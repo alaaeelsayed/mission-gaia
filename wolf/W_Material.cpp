@@ -154,6 +154,14 @@ namespace wolf
 	}
 
 	//----------------------------------------------------------
+	// Returns the program this material uses
+	//----------------------------------------------------------
+	Program* Material::GetProgram()
+	{
+		return m_pProgram;
+	}
+
+	//----------------------------------------------------------
 	// Set uniform version for mat4 uniforms
 	//----------------------------------------------------------
 	void Material::SetUniform(const std::string &name, const glm::mat4 &m)

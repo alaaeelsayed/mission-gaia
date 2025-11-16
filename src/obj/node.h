@@ -24,7 +24,7 @@ public:
     ~Node();
 
     void SetScale(const glm::vec3 &scale);
-    void SetPos(const glm::vec3 &position);
+    virtual void SetPos(const glm::vec3 &position);
     void SetRotation(const glm::vec3 &rotation);
     void Scale(const glm::vec3 &scale);
     void Rotate(const glm::vec3 &rotation);
